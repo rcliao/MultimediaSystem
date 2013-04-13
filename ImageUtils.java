@@ -11,14 +11,18 @@ import java.awt.*;
 import java.awt.image.*;
 import javax.swing.*;
 
-public class Image
+public class ImageUtils
 {
   private int width;				// number of columns
   private int height;				// number of rows
   private int pixelDepth=3;			// pixel depth in byte
   BufferedImage img;				// image array to store rgb values, 8 bits per channel
 
-  public Image(int w, int h)
+  public ImageUtils() {
+
+  }
+
+  public ImageUtils(int w, int h)
   // create an empty image with width and height
   {
 	width = w;
@@ -28,7 +32,7 @@ public class Image
 	System.out.println("Created an empty image with size " + width + "x" + height);
   }
 
-  public Image(String fileName)
+  public ImageUtils(String fileName)
   // Create an image and read the data from the file
   {
 	  readPPM(fileName);
@@ -172,6 +176,71 @@ public class Image
 	}
   }
 
+  public void readPPM(File file)
+  // read a data from a PPM file
+  {
+	FileInputStream fis = null;
+	DataInputStream dis = null;
+
+	try{
+		fis = new FileInputStream(file);
+		dis = new DataInputStream(fis);
+
+		System.out.println("Reading "+file.getName()+"...");
+
+		// read Identifier
+		if(!dis.readLine().equals("P6"))
+		{
+			System.err.println("This is NOT P6 PPM. Wrong Format.");
+			System.exit(0);
+		}
+
+		// read Comment line
+		String commentString = dis.readLine();
+
+		// read width & height
+		String[] WidthHeight = dis.readLine().split(" ");
+		width = Integer.parseInt(WidthHeight[0]);
+		height = Integer.parseInt(WidthHeight[1]);
+
+		// read maximum value
+		int maxVal = Integer.parseInt(dis.readLine());
+
+		if(maxVal != 255)
+		{
+			System.err.println("Max val is not 255");
+			System.exit(0);
+		}
+
+		// read binary data byte by byte
+		int x,y;
+		//fBuffer = new Pixel[height][width];
+		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		byte[] rgb = new byte[3];
+		int pix;
+
+		for(y=0;y<height;y++)
+		{
+	  		for(x=0;x<width;x++)
+			{
+				rgb[0] = dis.readByte();
+				rgb[1] = dis.readByte();
+				rgb[2] = dis.readByte();
+				setPixel(x, y, rgb);
+			}
+		}
+		dis.close();
+		fis.close();
+
+		System.out.println("Read "+file.getName()+" Successfully.");
+
+	} // try
+	catch(Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+  }
+
   public void write2PPM(String fileName)
   // wrrite the image data in img to a PPM file
   {
@@ -181,8 +250,6 @@ public class Image
 	try{
 		fos = new FileOutputStream(fileName);
 		dos = new PrintWriter(fos);
-
-		System.out.println("Writing the Image buffer into "+fileName+"...");
 
 		// write header
 		dos.print("P6"+"\n");
@@ -208,8 +275,6 @@ public class Image
 		}
 		dos.close();
 		fos.close();
-
-		System.out.println("Wrote into "+fileName+" Successfully.");
 
 	} // try
 	catch(Exception e)
