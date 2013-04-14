@@ -11,22 +11,43 @@ import java.awt.image.*;
 import javax.swing.*;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
-
-/* ImageGUI.java requires images/middle.gif. */
  
 /*
  * This class exists solely to show you what menus look like.
  * It has no menu-related event handling.
  */
-public class ImageGUI extends JPanel implements ActionListener {
+public class ImageView extends JPanel implements ActionListener {
     static private String newline = "\n";
 
+    // initiated all gui variables
     JTextArea output;
     JScrollPane scrollPane;
     JFileChooser fc;
-    JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGrey, menuItemBiDirectly,
-                menuItemBiErrorDiff, menuItemQuadDirectly, menuItemQuadErrorDiff, menuItemUCQ, menuItemMCQ;
+    JFileChooser fcs = new JFileChooser();
+    JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGrey,
+    			menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadDirectly,
+    			menuItemQuadErrorDiff, menuItemUCQ, menuItemMCQ;
     JMenu fileMenu, imageMenu, submenuBiScale, submenuQuadScale, submenu8Bits;
+    JLabel imageLabel;
+
+    // init the java frame
+    static JFrame frame;
+
+    // image function and image file
+    ImageModel ImageModel = new ImageModel();
+    File inputImage;
+
+    // constructor
+    public ImageView() {
+
+    }
+
+    public ImageView(ImageModel model) {
+        ImageModel = model;
+
+        // set up gui
+        createAndShowGUI();
+    }
  
     public JMenuBar createMenuBar() {
         JMenuBar menuBar;
@@ -48,7 +69,6 @@ public class ImageGUI extends JPanel implements ActionListener {
                 KeyEvent.VK_L, ActionEvent.ALT_MASK));
         menuItemLoad.getAccessibleContext().setAccessibleDescription(
                 "This will load the image file");
-        menuItemLoad.addActionListener(this);
         fileMenu.add(menuItemLoad);
 
         menuItemSave = new JMenuItem("Save File",
@@ -65,12 +85,10 @@ public class ImageGUI extends JPanel implements ActionListener {
                 KeyEvent.VK_Q, ActionEvent.ALT_MASK));
         menuItemQuit.getAccessibleContext().setAccessibleDescription(
                 "This should quit the program");
-        menuItemQuit.addActionListener(this);
         fileMenu.add(menuItemQuit);
  
         // Build second menu in the menu bar. -> Image Functions
         imageMenu = new JMenu("Image");
-        imageMenu.setMnemonic(KeyEvent.VK_I);
         imageMenu.getAccessibleContext().setAccessibleDescription(
                 "This imageMenu contains all the image functions");
         menuBar.add(imageMenu);
@@ -78,8 +96,6 @@ public class ImageGUI extends JPanel implements ActionListener {
         // a group of JMenuItems for Images
         menuItemGrey = new JMenuItem("Grey Scale",
                                  KeyEvent.VK_G);
-        menuItemGrey.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_G, ActionEvent.ALT_MASK));
         menuItemGrey.getAccessibleContext().setAccessibleDescription(
                 "This doesn't really do anything");
         imageMenu.add(menuItemGrey);
@@ -89,13 +105,9 @@ public class ImageGUI extends JPanel implements ActionListener {
         submenuBiScale.setMnemonic(KeyEvent.VK_B);
  
         menuItemBiDirectly = new JMenuItem("Directly");
-        menuItemBiDirectly.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_D, ActionEvent.ALT_MASK));
         submenuBiScale.add(menuItemBiDirectly);
  
         menuItemBiErrorDiff = new JMenuItem("Error-Diffusion");
-        menuItemBiErrorDiff.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_E, ActionEvent.ALT_MASK));
         submenuBiScale.add(menuItemBiErrorDiff);
         imageMenu.add(submenuBiScale);
 
@@ -104,13 +116,9 @@ public class ImageGUI extends JPanel implements ActionListener {
         submenuQuadScale.setMnemonic(KeyEvent.VK_B);
  
         menuItemQuadDirectly = new JMenuItem("Directly");
-        menuItemQuadDirectly.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_D, ActionEvent.ALT_MASK));
         submenuQuadScale.add(menuItemQuadDirectly);
  
         menuItemQuadErrorDiff = new JMenuItem("Error-Diffusion");
-        menuItemQuadErrorDiff.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_E, ActionEvent.ALT_MASK));
         submenuQuadScale.add(menuItemQuadErrorDiff);
         imageMenu.add(submenuQuadScale);
 
@@ -122,55 +130,35 @@ public class ImageGUI extends JPanel implements ActionListener {
         submenu8Bits.setMnemonic(KeyEvent.VK_B);
  
         menuItemUCQ = new JMenuItem("Uniform Color Quantization");
-        menuItemUCQ.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_U, ActionEvent.ALT_MASK));
         submenu8Bits.add(menuItemUCQ);
  
         menuItemMCQ = new JMenuItem("Median Color Quantization");
-        menuItemUCQ.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_M, ActionEvent.ALT_MASK));
         submenu8Bits.add(menuItemMCQ);
         imageMenu.add(submenu8Bits);
 
         return menuBar;
     }
 
-    public void actionPerformed(ActionEvent e) {
+    public void addSaveListener(ActionListener action) {
+        menuItemSave.addActionListener(action);
+    }
 
-        //Handle open button action.
-        if (e.getSource() == menuItemQuit) {
-            System.exit(0);
-        //Handle save button action.
-        } else if (e.getSource() == menuItemLoad) {
-            //Set up the file chooser.
-            if (fc == null) {
-                fc = new JFileChooser();
-     
-            	//Add a custom file filter and disable the default
-            	//(Accept All) file filter.
-                fc.addChoosableFileFilter(new ImageFilter());
-                fc.setAcceptAllFileFilterUsed(false);
-     
-            	//Add the preview pane.
-                fc.setAccessory(new ImagePreview(fc));
-            }
-     
-            //Show it.
-            int returnVal = fc.showDialog(ImageGUI.this,
-                                          "Attach");
-     
-            //Process the results.
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                System.out.println("Attaching file: " + file.getName()
-                           + "." + newline);
-            } else {
-                System.out.println("Attachment cancelled by user." + newline);
-            }
-     
-            //Reset the file chooser for the next time it's shown.
-            fc.setSelectedFile(null);
-        }
+    public void addLoadListener(ActionListener action) {
+        menuItemLoad.addActionListener(action);
+    }
+
+    public void addQuitListener(ActionListener action) {
+        menuItemQuit.addActionListener(action);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        // refresh the panel everytime a button is clicked
+		updatePanel();
+    }
+
+    public void updatePanel() {
+        revalidate();
+        repaint();
     }
  
     public Container createContentPane() {
@@ -178,13 +166,11 @@ public class ImageGUI extends JPanel implements ActionListener {
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.setOpaque(true);
  
-        //Create a scrolled text area.
-        output = new JTextArea(5, 30);
-        output.setEditable(false);
-        scrollPane = new JScrollPane(output);
+      	imageLabel = new JLabel();
+      	imageLabel.setVisible(true);
  
         //Add the text area to the content pane.
-        contentPane.add(scrollPane, BorderLayout.CENTER);
+        contentPane.add(imageLabel, BorderLayout.CENTER);
  
         return contentPane;
     }
@@ -194,29 +180,17 @@ public class ImageGUI extends JPanel implements ActionListener {
      * this method should be invoked from the
      * event-dispatching thread.
      */
-    private static void createAndShowGUI() {
+    private void createAndShowGUI() {
         //Create and set up the window.
-        JFrame frame = new JFrame("ImageGUI");
+        frame = new JFrame("CS 451 Multi-Media System - Homework1");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
         //Create and set up the content pane.
-        ImageGUI demo = new ImageGUI();
-        frame.setJMenuBar(demo.createMenuBar());
-        frame.setContentPane(demo.createContentPane());
+        frame.setJMenuBar(this.createMenuBar());
+        frame.setContentPane(this.createContentPane());
  
         //Display the window.
         frame.setSize(450, 260);
         frame.setVisible(true);
-    }
- 
-    // testing purpose to display the menu
-    public static void main(String[] args) {
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI();
-            }
-        });
     }
 }

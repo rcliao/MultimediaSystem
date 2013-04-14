@@ -39,7 +39,7 @@ public class ImagePreview extends JComponent
                           implements PropertyChangeListener {
     ImageIcon thumbnail = null;
     File file = null;
-    ImageUtils imageutils = new ImageUtils();
+    ImageModel ImageModel = new ImageModel();
 
     public ImagePreview(JFileChooser fc) {
         setPreferredSize(new Dimension(100, 50));
@@ -54,11 +54,11 @@ public class ImagePreview extends JComponent
 
         String extension = Utils.getExtension(file);
         if (extension.equals(Utils.ppm)) {
-            imageutils.readPPM(file);
+            ImageModel.readPPM(file);
             //Don't use createImageIcon (which is a wrapper for getResource)
             //because the image we're trying to load is probably not one
             //of this program's own resources.
-            ImageIcon tmpIcon = new ImageIcon(imageutils.img);
+            ImageIcon tmpIcon = new ImageIcon(ImageModel.img);
             if (tmpIcon != null) {
                 if (tmpIcon.getIconWidth() > 90) {
                     thumbnail = new ImageIcon(tmpIcon.getImage().

@@ -4,25 +4,25 @@
 
  This image class is for a 24bit RGB image only.
  *******************************************************/
-
+ 
 import java.io.*;
 import java.util.*;
 import java.awt.*;
 import java.awt.image.*;
 import javax.swing.*;
 
-public class ImageUtils
+public class ImageModel
 {
   private int width;				// number of columns
   private int height;				// number of rows
   private int pixelDepth=3;			// pixel depth in byte
   BufferedImage img;				// image array to store rgb values, 8 bits per channel
 
-  public ImageUtils() {
+  public ImageModel() {
 
   }
 
-  public ImageUtils(int w, int h)
+  public ImageModel(int w, int h)
   // create an empty image with width and height
   {
 	width = w;
@@ -32,7 +32,7 @@ public class ImageUtils
 	System.out.println("Created an empty image with size " + width + "x" + height);
   }
 
-  public ImageUtils(String fileName)
+  public ImageModel(String fileName)
   // Create an image and read the data from the file
   {
 	  readPPM(fileName);
@@ -249,6 +249,48 @@ public class ImageUtils
 
 	try{
 		fos = new FileOutputStream(fileName);
+		dos = new PrintWriter(fos);
+
+		// write header
+		dos.print("P6"+"\n");
+		dos.print("#CS451"+"\n");
+		dos.print(width + " "+height +"\n");
+		dos.print(255+"\n");
+		dos.flush();
+
+		// write data
+		int x, y;
+		byte[] rgb = new byte[3];
+		for(y=0;y<height;y++)
+		{
+			for(x=0;x<width;x++)
+			{
+				getPixel(x, y, rgb);
+				fos.write(rgb[0]);
+				fos.write(rgb[1]);
+				fos.write(rgb[2]);
+
+			}
+			fos.flush();
+		}
+		dos.close();
+		fos.close();
+
+	} // try
+	catch(Exception e)
+	{
+		System.err.println(e.getMessage());
+	}
+  }
+
+  public void write2PPM(File file)
+  // wrrite the image data in img to a PPM file
+  {
+	FileOutputStream fos = null;
+	PrintWriter dos = null;
+
+	try{
+		fos = new FileOutputStream(file);
 		dos = new PrintWriter(fos);
 
 		// write header
