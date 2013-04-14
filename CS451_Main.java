@@ -3,7 +3,7 @@
  @ Author: Elaine Kang
  *******************************************************/
 
-// Template Code
+import ImageSystem.*;
 
 public class CS451_Main
 {

@@ -29,17 +29,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
+package ImageUtils;
+
 import javax.swing.*;
 import java.beans.*;
 import java.awt.*;
 import java.io.File;
 
-/* ImagePreview.java by FileChooserDemo2.java. */
+import ImageSystem.*;
+
 public class ImagePreview extends JComponent
                           implements PropertyChangeListener {
     ImageIcon thumbnail = null;
     File file = null;
-    ImageModel ImageModel = new ImageModel();
+    ImageModel imageModel = new ImageModel();
 
     public ImagePreview(JFileChooser fc) {
         setPreferredSize(new Dimension(100, 50));
@@ -54,11 +57,11 @@ public class ImagePreview extends JComponent
 
         String extension = Utils.getExtension(file);
         if (extension.equals(Utils.ppm)) {
-            ImageModel.readPPM(file);
+            imageModel.readPPM(file);
             //Don't use createImageIcon (which is a wrapper for getResource)
             //because the image we're trying to load is probably not one
             //of this program's own resources.
-            ImageIcon tmpIcon = new ImageIcon(ImageModel.img);
+            ImageIcon tmpIcon = new ImageIcon(imageModel.getImg());
             if (tmpIcon != null) {
                 if (tmpIcon.getIconWidth() > 90) {
                     thumbnail = new ImageIcon(tmpIcon.getImage().

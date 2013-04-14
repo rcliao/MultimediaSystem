@@ -2,14 +2,17 @@
  * Image Controller class
  */
 
+package ImageSystem;
+
 import java.io.*;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.*;
 import javax.swing.*;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
+
+import ImageUtils.*;
 
 public class ImageCtrl {
     //... The Controller needs to interact with both the Model and View.
@@ -70,12 +73,14 @@ public class ImageCtrl {
 
     class SaveListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            int returnVal = m_view.fcs.showSaveDialog(m_view);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = m_view.fcs.getSelectedFile();
-                m_model.write2PPM(file);
-            } else {
-                // cancel case
+            if (m_model.img != null) {
+                int returnVal = m_view.fcs.showSaveDialog(m_view);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = m_view.fcs.getSelectedFile();
+                    m_model.write2PPM(file);
+                } else {
+                    // cancel case
+                }
             }
         }
     }
