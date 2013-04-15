@@ -29,6 +29,8 @@ public class ImageCtrl {
         m_view.addQuitListener(new QuitListener());
         m_view.addLoadListener(new LoadListener());
         m_view.addSaveListener(new SaveListener());
+        m_view.addGrayListener(new GrayListener());
+        m_view.addBiDirectlyListener(new BiDirectlyListener());
     }
     
     class QuitListener implements ActionListener {
@@ -82,6 +84,20 @@ public class ImageCtrl {
                     // cancel case
                 }
             }
+        }
+    }
+
+    class GrayListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            m_model.convertToGray();
+            m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+        }
+    }
+
+    class BiDirectlyListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            m_model.convertToBiDirectly();
+            m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
         }
     }
 }

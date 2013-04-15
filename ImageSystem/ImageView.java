@@ -26,7 +26,7 @@ public class ImageView extends JPanel implements ActionListener {
     JScrollPane scrollPane;
     JFileChooser fc;
     JFileChooser fcs = new JFileChooser();
-    JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGrey,
+    JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
     			menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadDirectly,
     			menuItemQuadErrorDiff, menuItemUCQ, menuItemMCQ;
     JMenu fileMenu, imageMenu, submenuBiScale, submenuQuadScale, submenu8Bits;
@@ -96,11 +96,11 @@ public class ImageView extends JPanel implements ActionListener {
         menuBar.add(imageMenu);
 
         // a group of JMenuItems for Images
-        menuItemGrey = new JMenuItem("Grey Scale",
+        menuItemGray = new JMenuItem("Gray Scale",
                                  KeyEvent.VK_G);
-        menuItemGrey.getAccessibleContext().setAccessibleDescription(
+        menuItemGray.getAccessibleContext().setAccessibleDescription(
                 "This doesn't really do anything");
-        imageMenu.add(menuItemGrey);
+        imageMenu.add(menuItemGray);
 
         // a submenu for bi-scale
         submenuBiScale = new JMenu("Bi-Scale(Black & White)");
@@ -151,6 +151,14 @@ public class ImageView extends JPanel implements ActionListener {
 
     public void addQuitListener(ActionListener action) {
         menuItemQuit.addActionListener(action);
+    }
+
+    public void addGrayListener(ActionListener action) {
+        menuItemGray.addActionListener(action);
+    }
+
+    public void addBiDirectlyListener(ActionListener action) {
+        menuItemBiDirectly.addActionListener(action);
     }
 
     public void actionPerformed(ActionEvent e) {
