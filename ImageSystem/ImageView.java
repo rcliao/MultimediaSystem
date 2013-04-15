@@ -27,9 +27,9 @@ public class ImageView extends JPanel implements ActionListener {
     JFileChooser fc;
     JFileChooser fcs = new JFileChooser();
     JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
-    			menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadDirectly,
-    			menuItemQuadErrorDiff, menuItemUCQ, menuItemMCQ;
-    JMenu fileMenu, imageMenu, submenuBiScale, submenuQuadScale, submenu8Bits;
+    			menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
+                menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell;
+    JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
     JLabel imageLabel;
 
     // init the java frame
@@ -109,20 +109,19 @@ public class ImageView extends JPanel implements ActionListener {
         menuItemBiDirectly = new JMenuItem("Directly");
         submenuBiScale.add(menuItemBiDirectly);
  
-        menuItemBiErrorDiff = new JMenuItem("Error-Diffusion");
+        menuItemBiErrorDiff = new JMenuItem("Error-Diffusion(Floyd)");
         submenuBiScale.add(menuItemBiErrorDiff);
+
+        menuItemBiErrorDiffBell = new JMenuItem("Error-Diffusion(Bell)");
+        submenuBiScale.add(menuItemBiErrorDiffBell);
         imageMenu.add(submenuBiScale);
 
-        // a submenu for quad-scale
-        submenuQuadScale = new JMenu("Quad-Scale(Black & White)");
-        submenuQuadScale.setMnemonic(KeyEvent.VK_B);
- 
-        menuItemQuadDirectly = new JMenuItem("Directly");
-        submenuQuadScale.add(menuItemQuadDirectly);
- 
-        menuItemQuadErrorDiff = new JMenuItem("Error-Diffusion");
-        submenuQuadScale.add(menuItemQuadErrorDiff);
-        imageMenu.add(submenuQuadScale);
+        // a group of JMenuItems for Images
+        menuItemQuadErrorDiff = new JMenuItem("Quad-level",
+                                 KeyEvent.VK_G);
+        menuItemQuadErrorDiff.getAccessibleContext().setAccessibleDescription(
+                "This doesn't really do anything");
+        imageMenu.add(menuItemQuadErrorDiff);
 
         // seperate from black white to colored
         imageMenu.addSeparator();
@@ -159,6 +158,18 @@ public class ImageView extends JPanel implements ActionListener {
 
     public void addBiDirectlyListener(ActionListener action) {
         menuItemBiDirectly.addActionListener(action);
+    }
+
+    public void addBiErrorListener(ActionListener action) {
+        menuItemBiErrorDiff.addActionListener(action);
+    }
+
+    public void addBiErrorBellListener(ActionListener action) {
+        menuItemBiErrorDiffBell.addActionListener(action);
+    }
+
+    public void addQuadListener(ActionListener action) {
+        menuItemQuadErrorDiff.addActionListener(action);
     }
 
     public void actionPerformed(ActionEvent e) {

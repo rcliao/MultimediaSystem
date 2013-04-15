@@ -31,6 +31,9 @@ public class ImageCtrl {
         m_view.addSaveListener(new SaveListener());
         m_view.addGrayListener(new GrayListener());
         m_view.addBiDirectlyListener(new BiDirectlyListener());
+        m_view.addBiErrorListener(new BiErrorListener());
+        m_view.addBiErrorBellListener(new BiErrorBellListener());
+        m_view.addQuadListener(new QuadErrorListener());
     }
     
     class QuitListener implements ActionListener {
@@ -97,6 +100,27 @@ public class ImageCtrl {
     class BiDirectlyListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             m_model.convertToBiDirectly();
+            m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+        }
+    }
+
+    class BiErrorListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            m_model.convertToBiError();
+            m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+        }
+    }
+
+    class BiErrorBellListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            m_model.convertToBiErrorBell();
+            m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+        }
+    }
+
+    class QuadErrorListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            m_model.convertToQuadError();
             m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
         }
     }

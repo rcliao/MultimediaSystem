@@ -250,6 +250,7 @@ public class ImageModel
 	}
   }
 
+  // Homework 1 part 2: Bi-Scale (Directly)
   public void convertToBiDirectly() {
 	// ga = average of all pixel
 
@@ -258,7 +259,7 @@ public class ImageModel
 
 	// calculate sum of all pixel
 	int sum = 0;
-	// Formula: Gr(ay) = round(0.299 * R + 0.587 * G + 0.114 * B)
+
 	for (int y = 0; y < height; y ++) {
 	  for (int x = 0; x < width; x ++) {
 		int[] rgb = new int[3];
@@ -272,7 +273,6 @@ public class ImageModel
 
 	int ga = (int) sum / pixels;
 
-	// Formula: Gr(ay) = round(0.299 * R + 0.587 * G + 0.114 * B)
 	for (int y = 0; y < height; y ++) {
 	  for (int x = 0; x < width; x ++) {
 		int[] rgb = new int[3];
@@ -300,6 +300,330 @@ public class ImageModel
 		setPixel(x, y, rgb);
 	  }
 	}
+  }
+
+  // homework 1 part 2: Bi-Scale (Error diffusion)
+  public void convertToBiError() {
+  	/* Error Diffusion
+
+  		For each pixel A[i,j],
+		– Pick up the palette value that is nearest to the original pixel’s value. 
+		– Store this palette value in the destination B[i,j]. (Quantization)
+		– Calculate the quantization error e=A[i,j]-B[i,j] for the pixel A[i,j]. 
+		Error e can be negative.
+		– Distribute this error e to four of A[i,j]’s nearest neighbors that haven’t 
+		been scanned yet (the one on the right and the three ones centered 
+		below) according to a filter weight. Eg –Floyd-Steinberg
+
+		A[i+1,j] = A[i+1,j] + 7*e/16
+  	 */
+
+	// step 1 convert to Gray Scale
+	convertToGray();
+
+	boolean[][] checked = new boolean[width][height];
+	double[][] original = new double[width][height];
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+		checked[x][y] = false;
+	  }
+	}
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+	  	int[] rgb = new int[3];
+
+	  	getPixel(x, y, rgb);
+
+		original[x][y] = (double) rgb[0];
+	  }
+	}
+
+	// calculate sum of all pixel
+	int sum = 0;
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+		int[] rgb = new int[3];
+		getPixel(x, y, rgb);
+		
+		sum += rgb[0];
+	  }
+	}
+
+	int pixels = height * width;
+
+	int ga = (int) sum / pixels;
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+	  	int[] rgb = new int[3];
+
+	  	boolean isBlack;
+
+		double grayValue = original[x][y];
+
+		if (grayValue > ga) {
+			isBlack = false;
+		} else {
+			isBlack = true;
+		}
+
+		checked[x][y] = true;
+		
+		if (isBlack) {
+			double error = grayValue - 0;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "floyd", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 0;
+			}
+		} else {
+			double error = grayValue - 255;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "floyd", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 255;
+			}
+		}
+
+		// write it to img (BufferedImage)
+		setPixel(x, y, rgb);
+	  }
+	}
+  }
+
+  // convert to quad-level by Error Diffusion
+  public void convertToQuadError() {
+  	/* Error Diffusion
+
+  		For each pixel A[i,j],
+		– Pick up the palette value that is nearest to the original pixel’s value. 
+		– Store this palette value in the destination B[i,j]. (Quantization)
+		– Calculate the quantization error e=A[i,j]-B[i,j] for the pixel A[i,j]. 
+		Error e can be negative.
+		– Distribute this error e to four of A[i,j]’s nearest neighbors that haven’t 
+		been scanned yet (the one on the right and the three ones centered 
+		below) according to a filter weight. Eg –Floyd-Steinberg
+
+		A[i+1,j] = A[i+1,j] + 7*e/16
+  	 */
+
+	// step 1 convert to Gray Scale
+	convertToGray();
+
+	boolean[][] checked = new boolean[width][height];
+	double[][] original = new double[width][height];
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+		checked[x][y] = false;
+	  }
+	}
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+	  	int[] rgb = new int[3];
+
+	  	getPixel(x, y, rgb);
+
+		original[x][y] = (double) rgb[0];
+	  }
+	}
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+	  	int[] rgb = new int[3];
+
+		double grayValue = original[x][y];
+
+		checked[x][y] = true;
+		
+		if (grayValue <= 42.5) {
+			double error = grayValue - 0;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "floyd", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 0;
+			}
+		} else if (grayValue > 42.5 && grayValue <= 127.5) {
+			double error = grayValue - 85;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "floyd", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 85;
+			}
+		} else if (grayValue > 127.5 && grayValue <= 212.5) {
+			double error = grayValue - 170;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "floyd", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 170;
+			}
+		} else {
+			double error = grayValue - 255;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "floyd", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 255;
+			}
+		}
+
+		// write it to img (BufferedImage)
+		setPixel(x, y, rgb);
+	  }
+	}
+  }
+
+  // homework 1 part 2: Bi-Scale (Error diffusion(Bell))
+  public void convertToBiErrorBell() {
+  	/* Error Diffusion
+
+  		For each pixel A[i,j],
+		– Pick up the palette value that is nearest to the original pixel’s value. 
+		– Store this palette value in the destination B[i,j]. (Quantization)
+		– Calculate the quantization error e=A[i,j]-B[i,j] for the pixel A[i,j]. 
+		Error e can be negative.
+		– Distribute this error e to four of A[i,j]’s nearest neighbors that haven’t 
+		been scanned yet (the one on the right and the three ones centered 
+		below) according to a filter weight. Eg –Floyd-Steinberg
+
+		A[i+1,j] = A[i+1,j] + 7*e/16
+  	 */
+
+	// step 1 convert to Gray Scale
+	convertToGray();
+
+	boolean[][] checked = new boolean[width][height];
+	double[][] original = new double[width][height];
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+		checked[x][y] = false;
+	  }
+	}
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+	  	int[] rgb = new int[3];
+
+	  	getPixel(x, y, rgb);
+
+		original[x][y] = (double) rgb[0];
+	  }
+	}
+
+	// calculate sum of all pixel
+	int sum = 0;
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+		int[] rgb = new int[3];
+		getPixel(x, y, rgb);
+		
+		sum += rgb[0];
+	  }
+	}
+
+	int pixels = height * width;
+
+	int ga = (int) sum / pixels;
+
+	for (int y = 0; y < height; y ++) {
+	  for (int x = 0; x < width; x ++) {
+	  	int[] rgb = new int[3];
+
+	  	boolean isBlack;
+
+		double grayValue = original[x][y];
+
+		if (grayValue > ga) {
+			isBlack = false;
+		} else {
+			isBlack = true;
+		}
+
+		checked[x][y] = true;
+		
+		if (isBlack) {
+			double error = grayValue - 0;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "bell", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 0;
+			}
+		} else {
+			double error = grayValue - 255;
+
+			// pass the value to the adacent pixel that haven't been done
+			errorDiffusionFormula(x, y, "bell", original, error);
+
+			for(int i=0;i<3;i++) {
+			  rgb[i] = 255;
+			}
+		}
+
+		// write it to img (BufferedImage)
+		setPixel(x, y, rgb);
+	  }
+	}
+  }
+
+  public void errorDiffusionFormula(int x, int y, String method, double[][] original, double error) {
+  	if (method.equals("floyd")) {
+  		if (x+1 < width)
+  			original[x+1][y] += 7*error/16;
+  		if (x+1 < width && y+1 < height)
+  			original[x+1][y+1] += error/16;
+  		if (x-1 >= 0 && y+1 < height)
+  			original[x-1][y+1] += 3*error/16;
+  		if (y+1 < height)
+  			original[x][y+1] += 5*error/16;
+  	} else if (method.equals("bell")) {
+  		if (x+1 < width)
+  			original[x+1][y] += 7*error/48;
+  		if (x+2 < width)
+  			original[x+2][y] += 5*error/48;
+  		if (y+1 < height) {
+  			if (x-2 >= 0)
+  				original[x-2][y+1] += 3*error/48;
+  			if (x-1 >= 0)
+  				original[x-1][y+1] += 5*error/48;
+  			original[x][y+1] += 7*error/48;
+  			if (x+1 < width)
+  				original[x+1][y+1] += 5*error/48;
+  			if (x+2 < width)
+  				original[x+2][y+1] += 3*error/48;
+  		}
+  		if (y+2 < height) {
+  			if (x-2 >= 0)
+  				original[x-2][y+2] += 1*error/48;
+  			if (x-1 >= 0)
+  				original[x-1][y+2] += 3*error/48;
+  			original[x][y+2] += 5*error/48;
+  			if (x+1 < width)
+  				original[x+1][y+2] += 3*error/48;
+  			if (x+2 < width)
+  				original[x+2][y+2] += 1*error/48;
+  		}
+
+
+  	}
   }
 
   public void display(String title)
