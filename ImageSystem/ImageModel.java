@@ -23,7 +23,8 @@ public class ImageModel {
 
 	BufferedImage indexImg;
 
-	Map<Integer, int[]> lookUpTable = new HashMap<Integer, int[]>();
+	Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();
+	Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();
 
 	public ImageModel() {
 
@@ -281,7 +282,7 @@ public class ImageModel {
 	}
 
 	// homework 1 part 2: Bi-Scale (Error diffusion)
-	public void convertToBiError() {
+	public void convertToBiError(String method) {
 		/* Error Diffusion
 
 			For each pixel A[i,j],
@@ -354,7 +355,7 @@ public class ImageModel {
 					double error = grayValue - 0;
 
 					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "floyd", original, error);
+					errorDiffusionFormula(x, y, method, original, error);
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 0;
@@ -363,7 +364,7 @@ public class ImageModel {
 					double error = grayValue - 255;
 
 					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "floyd", original, error);
+					errorDiffusionFormula(x, y, method, original, error);
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 255;
@@ -376,7 +377,7 @@ public class ImageModel {
 		}
 	}
 
-	// convert to quad-level by Error Diffusion
+	// homweork 1 part 3: convert to quad-level by Error Diffusion
 	public void convertToQuadError() {
 		/* Error Diffusion
 
@@ -457,7 +458,7 @@ public class ImageModel {
 		}
 	}
 
-	// convert to 8bit using Uniform Color Quantization
+	// homework 1 part 4: convert to 8bit using Uniform Color Quantization
 	public void convertTo8BitUCQ() {
 		// building Look up table
 		uniformColorTable();
@@ -511,95 +512,94 @@ public class ImageModel {
 		}
 	}
 
-	// homework 1 part 2: Bi-Scale (Error diffusion(Bell))
-	public void convertToBiErrorBell() {
-		/* Error Diffusion
+	// homework 1 extra credit: convert to 8bit using Median Cut Algorithm
+	public void convertTo8BitMCQ() {
+		ArrayList<Integer> redValues = new ArrayList<Integer>();
+		ArrayList<Integer> greenValues = new ArrayList<Integer>();
+		ArrayList<Integer> blueValues = new ArrayList<Integer>();
+		ArrayList<int[]> pixelValues = new ArrayList<int[]>();
 
-			For each pixel A[i,j],
-			– Pick up the palette value that is nearest to the original pixel’s value. 
-			– Store this palette value in the destination B[i,j]. (Quantization)
-			– Calculate the quantization error e=A[i,j]-B[i,j] for the pixel A[i,j]. 
-			Error e can be negative.
-			– Distribute this error e to four of A[i,j]’s nearest neighbors that haven’t 
-			been scanned yet (the one on the right and the three ones centered 
-			below) according to a filter weight. Eg –Floyd-Steinberg
+		ColorCube entireCube = new ColorCube();
 
-			A[i+1,j] = A[i+1,j] + 7*e/16
+		// separate all the values into three axis (rgb)
+		for (int y = 0; y < height; y ++) {
+			for (int x = 0; x < width; x ++) {
+				int[] rgb = new int[3];
+				getPixel(x, y, rgb);
+				
+				redValues.add(rgb[0]);
+				greenValues.add(rgb[1]);
+				blueValues.add(rgb[2]);
+
+				if (!entireCube.histogram.containsKey(rgb))
+					entireCube.histogram.put(rgb, 1);
+				else {
+					Integer count = entireCube.histogram.get(rgb);
+					entireCube.histogram.put(rgb, count + 1);
+				}
+			}
+		}
+
+		/* 
+		 *	step 1 find the smallest box containing all the color
 		 */
+		// * Sort the list from small to big
+		Collections.sort(redValues);
+		Collections.sort(greenValues);
+		Collections.sort(blueValues);
 
-		// step 1 convert to Gray Scale
-		convertToGray();
+		entireCube.rmin = (Collections.min(redValues));
+		entireCube.gmin = (Collections.min(greenValues));
+		entireCube.bmin = (Collections.min(blueValues));
 
-		boolean[][] checked = new boolean[width][height];
-		double[][] original = new double[width][height];
+		entireCube.rmax = (Collections.max(redValues));
+		entireCube.gmax = (Collections.max(greenValues));
+		entireCube.bmax = (Collections.max(blueValues));
 
-		for (int y = 0; y < height; y ++) {
-			for (int x = 0; x < width; x ++) {
-				checked[x][y] = false;
-			}
-		}
+		entireCube.size = 256;
 
-		for (int y = 0; y < height; y ++) {
-			for (int x = 0; x < width; x ++) {
-				int[] rgb = new int[3];
+		createColorTableMCQ(entireCube);
 
-				getPixel(x, y, rgb);
-
-				original[x][y] = (double) rgb[0];
-			}
-		}
-
-		// calculate sum of all pixel
-		int sum = 0;
-
+		// generating index file
 		for (int y = 0; y < height; y ++) {
 			for (int x = 0; x < width; x ++) {
 				int[] rgb = new int[3];
 				getPixel(x, y, rgb);
 				
-				sum += rgb[0];
+				Iterator<Integer> iter = lookUpTableMedian.keySet().iterator();
+				int indexValue = 0;
+
+				while (iter.hasNext()) {
+					Integer index = iter.next();
+
+					if (rgb[0] <= lookUpTableMedian.get(index).rmax && rgb[0] >= lookUpTableMedian.get(index).rmin &&
+						rgb[1] <= lookUpTableMedian.get(index).gmax && rgb[1] >= lookUpTableMedian.get(index).gmin &&
+						rgb[2] <= lookUpTableMedian.get(index).bmax && rgb[2] >= lookUpTableMedian.get(index).bmin) {
+						indexValue = index;
+					}
+				}
+
+				for (int i = 0 ; i < 3; i ++) {
+					rgb[i] = indexValue;
+				}
+
+				// write it to img (BufferedImage)
+				setPixel(x, y, rgb);
 			}
 		}
+		indexImg = deepCopy(img);
 
-		int pixels = height * width;
-
-		int ga = (int) sum / pixels;
-
+		// generating 8-bit file
 		for (int y = 0; y < height; y ++) {
 			for (int x = 0; x < width; x ++) {
 				int[] rgb = new int[3];
-
-				boolean isBlack;
-
-				double grayValue = original[x][y];
-
-				if (grayValue > ga) {
-					isBlack = false;
-				} else {
-					isBlack = true;
-				}
-
-				checked[x][y] = true;
+				getPixel(x, y, rgb);
 				
-				if (isBlack) {
-					double error = grayValue - 0;
+				ColorCube indexValue = lookUpTableMedian.get(rgb[0]);
 
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "bell", original, error);
-
-					for(int i=0;i<3;i++) {
-						rgb[i] = 0;
-					}
-				} else {
-					double error = grayValue - 255;
-
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "bell", original, error);
-
-					for(int i=0;i<3;i++) {
-						rgb[i] = 255;
-					}
-				}
+		    	rgb[0] = indexValue.rmean;
+		    	rgb[1] = indexValue.gmean;
+		    	rgb[2] = indexValue.bmean;
 
 				// write it to img (BufferedImage)
 				setPixel(x, y, rgb);
@@ -607,7 +607,7 @@ public class ImageModel {
 		}
 	}
 
-	// creating Look Up Table
+	// creating Look Up Table for uniform color quantization
 	public void uniformColorTable() {
 
 		for (int index = 0; index <= 255; index ++) {
@@ -642,6 +642,259 @@ public class ImageModel {
 			values[2] = blueValue;
 
 			lookUpTable.put(index, values);
+		}
+	}
+
+	// creating look up table for median cut algorithm
+	public void createColorTableMCQ(ColorCube cube) {
+		ArrayList<ColorCube> values = new ArrayList<ColorCube>();
+
+		buildValues(cube, 0, 8, values);
+
+		for (Integer index = 0; index < values.size(); index ++) {
+			ColorCube c = values.get(index);
+
+			c.rmean = 0;
+			c.gmean = 0;
+			c.bmean = 0;
+
+			if (c.histogram.size() != 0) {
+				c.size = c.histogram.size();
+
+				for (Map.Entry<int[], Integer> entry : c.histogram.entrySet()) {
+					c.rmean += entry.getKey()[0] * entry.getValue();
+					c.gmean += entry.getKey()[1] * entry.getValue();
+					c.bmean += entry.getKey()[2] * entry.getValue();
+				}
+
+				c.rmean /= c.size;
+				c.gmean /= c.size;
+				c.bmean /= c.size;
+			}
+		}
+
+		Collections.sort(values);
+
+		// putting table value as color cube
+		for (Integer index = 0; index < values.size(); index ++) {
+			lookUpTableMedian.put(index, values.get(index));
+		}
+
+	}
+
+	public void buildValues(ColorCube cube, int count, int n, ArrayList<ColorCube> result) {
+		if (count >= n)
+			// base case
+			result.add(cube);
+		else {
+
+			/*
+			 *  step 2 sort the axix (r, g, b)
+			 */
+			Integer redDiff = cube.rmax - cube.rmin;
+			Integer greenDiff = cube.gmax - cube.gmin;
+			Integer blueDiff = cube.bmax - cube.bmin;
+
+			String largestAxis = "red";
+			Integer largestDiff = redDiff;
+
+			if (greenDiff.compareTo(largestDiff) > 0) {
+				largestAxis = "green";
+				largestDiff = greenDiff;
+			}
+
+			if (blueDiff.compareTo(largestDiff) > 0) {
+				largestAxis = "blue";
+				largestDiff = blueDiff;
+			}
+
+			if (cube.histogram.size() == 0) {
+				return;
+			} else if (largestDiff.equals(0)) {
+				buildValues(cube, count + 1, n, result);
+			} else {
+
+				/* 
+				 *  step 3 split the longest axis into 2 part, this also ends up spliting the box into two sub-boxes
+		         */
+				ColorCube cube1 = new ColorCube();
+				cube1.size = 0;
+				ColorCube cube2 = new ColorCube();
+				cube2.size = 0;
+
+				boolean isSame = false;
+
+				if (largestAxis.equals("red")) {
+					// copy old axis data
+					cube1.gmin = cube.gmin;
+					cube1.gmax = cube.gmax;
+					cube1.bmin = cube.bmin;
+					cube1.bmax = cube.bmax;
+					cube2.gmin = cube.gmin;
+					cube2.gmax = cube.gmax;
+					cube2.bmin = cube.bmin;
+					cube2.bmax = cube.bmax;
+
+					if (cube.size > 1) {
+						cube.rmean = 0;
+						
+						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
+							cube.rmean += entry.getKey()[0] * entry.getValue();
+						}
+
+						cube.rmean /= cube.size;
+
+						Map.Entry<int[], Integer> firstEntry = cube.histogram.entrySet().iterator().next();
+						cube1.rmin = firstEntry.getKey()[0];
+						cube1.rmax = firstEntry.getKey()[0];
+						cube2.rmin = firstEntry.getKey()[0];
+						cube2.rmax = firstEntry.getKey()[0];
+
+						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
+							if (new Integer(entry.getKey()[0]).compareTo(cube.rmean) <= 0) {
+								cube1.histogram.put(entry.getKey(), entry.getValue());
+								cube1.size ++;
+								if (entry.getKey()[0] < cube1.rmin) {
+									cube1.rmin = entry.getKey()[0];
+								}
+								if (entry.getKey()[0] > cube1.rmax) {
+									cube1.rmax = entry.getKey()[0];
+								}
+							} else {
+								cube2.histogram.put(entry.getKey(), entry.getValue());
+								cube2.size ++;
+								if (entry.getKey()[0] < cube2.rmin) {
+									cube2.rmin = entry.getKey()[0];
+								}
+								if (entry.getKey()[0] > cube2.rmax) {
+									cube2.rmax = entry.getKey()[0];
+								}
+							}
+						}
+						if (cube2.size == 0) {
+							isSame = true;
+						}
+					} else {
+						isSame = true;
+					}
+				} else if (largestAxis.equals("green")) {
+					// copy old axis data
+					cube1.rmin = cube.rmin;
+					cube1.rmax = cube.rmax;
+					cube1.bmin = cube.bmin;
+					cube1.bmax = cube.bmax;
+					cube2.rmin = cube.rmin;
+					cube2.rmax = cube.rmax;
+					cube2.bmin = cube.bmin;
+					cube2.bmax = cube.bmax;
+
+					if (cube.size > 1) {
+						cube.gmean = 0;
+						
+						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
+							cube.gmean += entry.getKey()[1] * entry.getValue();
+						}
+
+						cube.gmean /= cube.size;
+
+						Map.Entry<int[], Integer> firstEntry = cube.histogram.entrySet().iterator().next();
+						cube1.gmin = firstEntry.getKey()[1];
+						cube1.gmax = firstEntry.getKey()[1];
+						cube2.gmin = firstEntry.getKey()[1];
+						cube2.gmax = firstEntry.getKey()[1];
+
+						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
+							if (new Integer(entry.getKey()[1]).compareTo(cube.gmean) <= 0) {
+								cube1.histogram.put(entry.getKey(), entry.getValue());
+								cube1.size ++;
+								if (entry.getKey()[1] < cube1.gmin) {
+									cube1.gmin = entry.getKey()[1];
+								}
+								if (entry.getKey()[1] > cube1.gmax) {
+									cube1.gmax = entry.getKey()[1];
+								}
+							} else {
+								cube2.histogram.put(entry.getKey(), entry.getValue());
+								cube2.size ++;
+								if (entry.getKey()[1] < cube2.gmin) {
+									cube2.gmin = entry.getKey()[1];
+								}
+								if (entry.getKey()[1] > cube2.gmax) {
+									cube2.gmax = entry.getKey()[1];
+								}
+							}
+						}
+						if (cube2.size == 0) {
+							isSame = true;
+						}
+					} else {
+						isSame = true;
+					}
+				} else if (largestAxis.equals("blue")) {
+					// copy old axis data
+					cube1.rmin = cube.rmin;
+					cube1.rmax = cube.rmax;
+					cube1.gmin = cube.gmin;
+					cube1.gmax = cube.gmax;
+					cube2.rmin = cube.rmin;
+					cube2.rmax = cube.rmax;
+					cube2.gmin = cube.gmin;
+					cube2.gmax = cube.gmax;
+
+					if (cube.size > 1) {
+						cube.bmean = 0;
+						
+						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
+							cube.bmean += entry.getKey()[2] * entry.getValue();
+						}
+
+						cube.bmean /= cube.size;
+
+						Map.Entry<int[], Integer> firstEntry = cube.histogram.entrySet().iterator().next();
+						cube1.bmin = firstEntry.getKey()[2];
+						cube1.bmax = firstEntry.getKey()[2];
+						cube2.bmin = firstEntry.getKey()[2];
+						cube2.bmax = firstEntry.getKey()[2];
+
+						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
+							if (new Integer(entry.getKey()[2]).compareTo(cube.bmean) <= 0) {
+								cube1.histogram.put(entry.getKey(), entry.getValue());
+								cube1.size ++;
+								if (entry.getKey()[2] < cube1.bmin) {
+									cube1.bmin = entry.getKey()[2];
+								}
+								if (entry.getKey()[2] > cube1.bmax) {
+									cube1.bmax = entry.getKey()[2];
+								}
+							} else {
+								cube2.histogram.put(entry.getKey(), entry.getValue());
+								cube2.size ++;
+								if (entry.getKey()[2] < cube2.bmin) {
+									cube2.bmin = entry.getKey()[2];
+								}
+								if (entry.getKey()[2] > cube2.bmax) {
+									cube2.bmax = entry.getKey()[2];
+								}
+							}
+						}
+						if (cube2.size == 0) {
+							isSame = true;
+						}
+					} else {
+						isSame = true;
+					}
+				}
+			/*
+			 *  step 4 check the box has been separated into 256 boxes
+			 */
+				// recurence step
+				if (isSame) {
+					buildValues(cube1, count + 1, n, result);
+				} else {
+					buildValues(cube1, count + 1, n, result);
+					buildValues(cube2, count + 1, n, result);
+				}
+			}
 		}
 	}
 
@@ -682,6 +935,33 @@ public class ImageModel {
 				if (x+2 < width)
 					original[x+2][y+2] += 1*error/48;
 			}
+		} else if (method.equals("stucki")) {
+			if (x+1 < width)
+				original[x+1][y] += 7*error/42;
+			if (x+2 < width)
+				original[x+2][y] += 5*error/42;
+			if (y+1 < height) {
+				if (x-2 >= 0)
+					original[x-2][y+1] += 2*error/42;
+				if (x-1 >= 0)
+					original[x-1][y+1] += 4*error/42;
+				original[x][y+1] += 8*error/42;
+				if (x+1 < width)
+					original[x+1][y+1] += 4*error/42;
+				if (x+2 < width)
+					original[x+2][y+1] += 2*error/42;
+			}
+			if (y+2 < height) {
+				if (x-2 >= 0)
+					original[x-2][y+2] += 1*error/42;
+				if (x-1 >= 0)
+					original[x-1][y+2] += 2*error/42;
+				original[x][y+2] += 4*error/42;
+				if (x+1 < width)
+					original[x+1][y+2] += 2*error/42;
+				if (x+2 < width)
+					original[x+2][y+2] += 1*error/42;
+			}
 		}
 	}
 
@@ -701,6 +981,37 @@ public class ImageModel {
 		frame.setTitle(title);
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	class ColorCube implements Comparable<ColorCube> {
+		Map<int[], Integer> histogram = new HashMap<int[], Integer>();
+
+		int rmin, rmax;
+		int gmin, gmax;
+		int bmin, bmax;
+		int size;
+
+		Integer rmean;
+		Integer gmean;
+		Integer bmean;
+
+		public ColorCube() {
+		}
+
+		@Override
+	    public int compareTo(ColorCube o2) {
+	    	int output;
+
+	    	output = rmean.compareTo(o2.rmean);
+
+	    	if (output == 0) {
+	    		output = gmean.compareTo(o2.gmean);
+	    	}
+	    	if (output == 0) {
+	    		output = bmean.compareTo(o2.bmean);
+	    	}
+	    	return output;
+	    }
 	}
 
 } // Image class 

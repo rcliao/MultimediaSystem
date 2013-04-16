@@ -28,7 +28,7 @@ public class ImageView extends JPanel implements ActionListener {
 	JFileChooser fcs = new JFileChooser();
 	JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
 				menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
-				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell;
+				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell, menuItemBiErrorDiffStucki;
 	JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
 	JLabel imageLabel;
 	JPanel contentPane;
@@ -115,6 +115,9 @@ public class ImageView extends JPanel implements ActionListener {
 
 		menuItemBiErrorDiffBell = new JMenuItem("Error-Diffusion(Bell)");
 		submenuBiScale.add(menuItemBiErrorDiffBell);
+
+		menuItemBiErrorDiffStucki = new JMenuItem("Error-Diffusion(Stucki)");
+		submenuBiScale.add(menuItemBiErrorDiffStucki);
 		imageMenu.add(submenuBiScale);
 
 		// a group of JMenuItems for Images
@@ -169,12 +172,20 @@ public class ImageView extends JPanel implements ActionListener {
 		menuItemBiErrorDiffBell.addActionListener(action);
 	}
 
+	public void addBiErrorStuckiListener(ActionListener action) {
+		menuItemBiErrorDiffStucki.addActionListener(action);
+	}
+
 	public void addQuadListener(ActionListener action) {
 		menuItemQuadErrorDiff.addActionListener(action);
 	}
 
 	public void add8BitUCQListener(ActionListener action) {
 		menuItemUCQ.addActionListener(action);
+	}
+
+	public void add8BitMCQListener(ActionListener action) {
+		menuItemMCQ.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {
