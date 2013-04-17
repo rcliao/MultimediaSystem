@@ -37,13 +37,15 @@ public class ImageCtrl {
 		m_view.addQuadListener(new QuadErrorListener());
 		m_view.add8BitUCQListener(new UCQListener());
 		m_view.add8BitMCQListener(new MCQListener());
+		m_view.add8BitMCQErrorListener(new MCQErrorListener());
 	}
 	
+	//====================== Action Listeners
 	class QuitListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			System.exit(0);
 		}
-	}//end inner class QuitListener
+	}
 
 	class LoadListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
@@ -221,6 +223,58 @@ public class ImageCtrl {
 			frame2.setVisible(true);
 
 			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+
+			// write to file
+			m_model.writeToFile("LUT.txt");
+		}
+	}
+
+	class MCQErrorListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			m_model.convertTo8BitMCQError();
+
+			// Use a textarea to display the table
+			JFrame frame = new JFrame();
+			JTextArea tableArea = new JTextArea(30,40);
+
+			// print the table to the textarea
+			Iterator<Integer> iter = m_model.lookUpTableMedian.keySet().iterator();
+
+			tableArea.append("Look Up Table\n");
+			tableArea.append("index\tR\tG\tB\tFrequency\n");
+			tableArea.append("--------------------------------------------------------------------------\n");
+
+			while (iter.hasNext()) {
+				Integer index = iter.next();
+				tableArea.append(index + "\t");
+
+				tableArea.append(m_model.lookUpTableMedian.get(index).rmean + "\t");
+				tableArea.append(m_model.lookUpTableMedian.get(index).gmean + "\t");
+				tableArea.append(m_model.lookUpTableMedian.get(index).bmean + "\t");
+
+				tableArea.append("" + m_model.lookUpTableMedian.get(index).histogram.size());
+
+				tableArea.append("\n");
+			}
+
+			JScrollPane logScrollPane = new JScrollPane(tableArea);
+			frame.add(logScrollPane, BorderLayout.CENTER);
+			frame.setTitle("Look Up Table");
+			frame.pack();
+			frame.setVisible(true);
+
+			// display index image
+			JFrame frame2 = new JFrame();
+			JLabel label2 = new JLabel(new ImageIcon(m_model.indexImg));
+			frame2.add(label2, BorderLayout.CENTER);
+			frame2.setTitle("Index Image");
+			frame2.pack();
+			frame2.setVisible(true);
+
+			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+
+			// write to file
+			m_model.writeToFile("LUT.txt");
 		}
 	}
 }

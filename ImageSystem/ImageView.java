@@ -28,7 +28,8 @@ public class ImageView extends JPanel implements ActionListener {
 	JFileChooser fcs = new JFileChooser();
 	JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
 				menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
-				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell, menuItemBiErrorDiffStucki;
+				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
+				menuItemBiErrorDiffStucki, menuItemMCQError;
 	JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
 	JLabel imageLabel;
 	JPanel contentPane;
@@ -139,6 +140,9 @@ public class ImageView extends JPanel implements ActionListener {
  
 		menuItemMCQ = new JMenuItem("Median Color Quantization");
 		submenu8Bits.add(menuItemMCQ);
+
+		menuItemMCQError = new JMenuItem("Median Color Quantization(Error-Diffusion)");
+		submenu8Bits.add(menuItemMCQError);
 		imageMenu.add(submenu8Bits);
 
 		return menuBar;
@@ -186,6 +190,10 @@ public class ImageView extends JPanel implements ActionListener {
 
 	public void add8BitMCQListener(ActionListener action) {
 		menuItemMCQ.addActionListener(action);
+	}
+
+	public void add8BitMCQErrorListener(ActionListener action) {
+		menuItemMCQError.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {

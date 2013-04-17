@@ -607,9 +607,120 @@ public class ImageModel {
 		}
 	}
 
+	public void convertTo8BitMCQError() {
+		ArrayList<Integer> redValues = new ArrayList<Integer>();
+		ArrayList<Integer> greenValues = new ArrayList<Integer>();
+		ArrayList<Integer> blueValues = new ArrayList<Integer>();
+		ArrayList<int[]> pixelValues = new ArrayList<int[]>();
+
+		ColorCube entireCube = new ColorCube();
+
+		Map<xyAxis, int[]> original = new HashMap<xyAxis, int[]>();
+
+		// separate all the values into three axis (rgb)
+		for (int y = 0; y < height; y ++) {
+			for (int x = 0; x < width; x ++) {
+				int[] rgb = new int[3];
+				getPixel(x, y, rgb);
+				
+				redValues.add(rgb[0]);
+				greenValues.add(rgb[1]);
+				blueValues.add(rgb[2]);
+
+				if (!entireCube.histogram.containsKey(rgb))
+					entireCube.histogram.put(rgb, 1);
+				else {
+					Integer count = entireCube.histogram.get(rgb);
+					entireCube.histogram.put(rgb, count + 1);
+				}
+
+				xyAxis xy = new xyAxis(x, y);
+
+				original.put(xy, rgb);
+			}
+		}
+
+		/* 
+		 *	step 1 find the smallest box containing all the color
+		 */
+		// * Sort the list from small to big
+		Collections.sort(redValues);
+		Collections.sort(greenValues);
+		Collections.sort(blueValues);
+
+		entireCube.rmin = (Collections.min(redValues));
+		entireCube.gmin = (Collections.min(greenValues));
+		entireCube.bmin = (Collections.min(blueValues));
+
+		entireCube.rmax = (Collections.max(redValues));
+		entireCube.gmax = (Collections.max(greenValues));
+		entireCube.bmax = (Collections.max(blueValues));
+
+		entireCube.size = 256;
+
+		createColorTableMCQ(entireCube);
+
+		// generating index file
+		for (int y = 0; y < height; y ++) {
+			for (int x = 0; x < width; x ++) {
+				int[] rgb = new int[3];
+				getPixel(x, y, rgb);
+				
+				Iterator<Integer> iter = lookUpTableMedian.keySet().iterator();
+				int indexValue = 0;
+
+				while (iter.hasNext()) {
+					Integer index = iter.next();
+
+					if (rgb[0] <= lookUpTableMedian.get(index).rmax && rgb[0] >= lookUpTableMedian.get(index).rmin &&
+						rgb[1] <= lookUpTableMedian.get(index).gmax && rgb[1] >= lookUpTableMedian.get(index).gmin &&
+						rgb[2] <= lookUpTableMedian.get(index).bmax && rgb[2] >= lookUpTableMedian.get(index).bmin) {
+						indexValue = index;
+					}
+				}
+
+				for (int i = 0 ; i < 3; i ++) {
+					rgb[i] = indexValue;
+				}
+
+				// write it to img (BufferedImage)
+				setPixel(x, y, rgb);
+			}
+		}
+		indexImg = deepCopy(img);
+
+		// generating 8-bit file
+		for (int y = 0; y < height; y ++) {
+			for (int x = 0; x < width; x ++) {
+				int[] rgb = new int[3];
+				getPixel(x, y, rgb);
+				
+				ColorCube indexValue = lookUpTableMedian.get(rgb[0]);
+
+		    	rgb[0] = indexValue.rmean;
+		    	rgb[1] = indexValue.gmean;
+		    	rgb[2] = indexValue.bmean;
+
+		    	// calculate the error
+		    	int[] originalRGB = original.get(new xyAxis(x,y));
+
+		    	int[] error = new int[3];
+
+		    	error[0] = originalRGB[0] - rgb[0];
+		    	error[1] = originalRGB[1] - rgb[1];
+		    	error[2] = originalRGB[2] - rgb[2];
+
+		    	// assign error to nearby tile
+		    	errorDiffusionFormula(x, y, "floyd", original, error);
+
+				// write it to img (BufferedImage)
+				setPixel(x, y, rgb);
+			}
+		}
+	}
+
 	// creating Look Up Table for uniform color quantization
 	public void uniformColorTable() {
-
 		for (int index = 0; index <= 255; index ++) {
 			String binaryString = Integer.toBinaryString(index);
 			while (binaryString.length() < 8) {
@@ -745,10 +856,10 @@ public class ImageModel {
 						cube.rmean /= cube.size;
 
 						Map.Entry<int[], Integer> firstEntry = cube.histogram.entrySet().iterator().next();
-						cube1.rmin = firstEntry.getKey()[0];
-						cube1.rmax = firstEntry.getKey()[0];
-						cube2.rmin = firstEntry.getKey()[0];
-						cube2.rmax = firstEntry.getKey()[0];
+						cube1.rmin = 255;
+						cube1.rmax = 0;
+						cube2.rmin = 255;
+						cube2.rmax = 0;
 
 						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
 							if (new Integer(entry.getKey()[0]).compareTo(cube.rmean) <= 0) {
@@ -798,10 +909,10 @@ public class ImageModel {
 						cube.gmean /= cube.size;
 
 						Map.Entry<int[], Integer> firstEntry = cube.histogram.entrySet().iterator().next();
-						cube1.gmin = firstEntry.getKey()[1];
-						cube1.gmax = firstEntry.getKey()[1];
-						cube2.gmin = firstEntry.getKey()[1];
-						cube2.gmax = firstEntry.getKey()[1];
+						cube1.gmin = 255;
+						cube1.gmax = 0;
+						cube2.gmin = 255;
+						cube2.gmax = 0;
 
 						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
 							if (new Integer(entry.getKey()[1]).compareTo(cube.gmean) <= 0) {
@@ -851,10 +962,10 @@ public class ImageModel {
 						cube.bmean /= cube.size;
 
 						Map.Entry<int[], Integer> firstEntry = cube.histogram.entrySet().iterator().next();
-						cube1.bmin = firstEntry.getKey()[2];
-						cube1.bmax = firstEntry.getKey()[2];
-						cube2.bmin = firstEntry.getKey()[2];
-						cube2.bmax = firstEntry.getKey()[2];
+						cube1.bmin = 255;
+						cube1.bmax = 0;
+						cube2.bmin = 255;
+						cube2.bmax = 0;
 
 						for (Map.Entry<int[], Integer> entry : cube.histogram.entrySet()) {
 							if (new Integer(entry.getKey()[2]).compareTo(cube.bmean) <= 0) {
@@ -965,11 +1076,68 @@ public class ImageModel {
 		}
 	}
 
+	public void errorDiffusionFormula(int x, int y, String method, Map<xyAxis, int[]> original, int[] error) {
+		if (method.equals("floyd")) {
+			if (x+1 < width) {
+				original.get(new xyAxis(x+1, y))[0] += 7*error[0]/16;
+				original.get(new xyAxis(x+1, y))[1] += 7*error[1]/16;
+				original.get(new xyAxis(x+1, y))[2] += 7*error[2]/16;
+			}
+			if (x+1 < width && y+1 < height) {
+				original.get(new xyAxis(x+1, y+1))[0] += error[0]/16;
+				original.get(new xyAxis(x+1, y+1))[1] += error[1]/16;
+				original.get(new xyAxis(x+1, y+1))[2] += error[2]/16;
+			}
+			if (x-1 >= 0 && y+1 < height) {
+				original.get(new xyAxis(x-1, y+1))[0] += 3*error[0]/16;
+				original.get(new xyAxis(x-1, y+1))[1] += 3*error[1]/16;
+				original.get(new xyAxis(x-1, y+1))[2] += 3*error[2]/16;
+			}
+			if (y+1 < height) {
+				original.get(new xyAxis(x, y+1))[0] += 5*error[0]/16;
+				original.get(new xyAxis(x, y+1))[1] += 5*error[1]/16;
+				original.get(new xyAxis(x, y+1))[2] += 5*error[2]/16;
+			}
+		}
+	}
+
 	public BufferedImage deepCopy(BufferedImage bi) {
 		ColorModel cm = bi.getColorModel();
 		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
 		WritableRaster raster = bi.copyData(null);
 		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	}
+
+	public void writeToFile(String filename) {
+		try {
+        	BufferedWriter out = new BufferedWriter(new FileWriter(filename));
+        	out.write("Look Up Table");
+        	out.newLine();
+        	out.write("index\tR\tG\tB\tFrequency");
+        	out.newLine();
+        	out.write("--------------------------------------------------------------------------");
+        	out.newLine();
+
+        	// write the table to the textarea
+			Iterator<Integer> iter = lookUpTableMedian.keySet().iterator();
+
+            while (iter.hasNext()) {
+				Integer index = iter.next();
+				out.write(index + "\t");
+
+				out.write(lookUpTableMedian.get(index).rmean + "\t");
+				out.write(lookUpTableMedian.get(index).gmean + "\t");
+				out.write(lookUpTableMedian.get(index).bmean + "\t");
+
+				out.write("" + lookUpTableMedian.get(index).histogram.size());
+
+				out.newLine();
+			}
+
+            out.close();
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
 	}
 
 	public void display(String title) {
@@ -1010,6 +1178,45 @@ public class ImageModel {
 	    	if (output == 0) {
 	    		output = bmean.compareTo(o2.bmean);
 	    	}
+	    	return output;
+	    }
+	}
+
+	class xyAxis implements Comparable<xyAxis> {
+		Integer x;
+		Integer y;
+
+		public xyAxis(Integer x, Integer y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		public int hashCode() {
+		    return x.hashCode() * 3 + y.hashCode() * 5;
+		}
+
+	    public boolean equals(Object obj) {
+	        if (obj == null)
+	            return false;
+	        if (obj == this)
+	            return true;
+
+	        xyAxis o2 = (xyAxis) obj;
+
+	        if (x.equals(o2.x) && y.equals(o2.y))
+	        	return true;
+	        else
+	        	return false;
+	    }
+
+		@Override
+	    public int compareTo(xyAxis o2) {
+	    	int output = x.compareTo(o2.x);
+
+	    	if (output == 0) {
+		    	output = y.compareTo(o2.y);
+	    	}
+	    	
 	    	return output;
 	    }
 	}
