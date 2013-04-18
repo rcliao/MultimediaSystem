@@ -20,6 +20,7 @@ public class ImageModel {
 	private int height;       // number of rows
 	private int pixelDepth=3;     // pixel depth in byte
 	BufferedImage img;        // image array to store rgb values, 8 bits per channel
+	String filename;
 
 	BufferedImage indexImg;
 
@@ -122,6 +123,8 @@ public class ImageModel {
 			fis = new FileInputStream(file);
 			dis = new DataInputStream(fis);
 
+			this.filename = file.getName();
+
 			System.out.println("Reading "+file.getName()+"...");
 
 			// read Identifier
@@ -179,6 +182,103 @@ public class ImageModel {
 
 		try{
 			fos = new FileOutputStream(file);
+			dos = new PrintWriter(fos);
+
+			// write header
+			dos.print("P6"+"\n");
+			dos.print("#CS451"+"\n");
+			dos.print(width + " "+height +"\n");
+			dos.print(255+"\n");
+			dos.flush();
+
+			// write data
+			int x, y;
+			byte[] rgb = new byte[3];
+			for(y=0;y<height;y++)
+			{
+				for(x=0;x<width;x++) {
+					getPixel(x, y, rgb);
+					fos.write(rgb[0]);
+					fos.write(rgb[1]);
+					fos.write(rgb[2]);
+				}
+				fos.flush();
+			}
+			dos.close();
+			fos.close();
+		} catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public void readPPM(String filename) {
+		// read a data from a PPM file
+		FileInputStream fis = null;
+		DataInputStream dis = null;
+
+		try {
+			fis = new FileInputStream(filename);
+			dis = new DataInputStream(fis);
+
+			this.filename = filename;
+
+			System.out.println("Reading "+filename+"...");
+
+			// read Identifier
+			if(!dis.readLine().equals("P6")) {
+				System.err.println("This is NOT P6 PPM. Wrong Format.");
+				System.exit(0);
+			}
+
+			// read Comment line
+			String commentString = dis.readLine();
+
+			// read width & height
+			String[] WidthHeight = dis.readLine().split(" ");
+			width = Integer.parseInt(WidthHeight[0]);
+			height = Integer.parseInt(WidthHeight[1]);
+
+			// read maximum value
+			int maxVal = Integer.parseInt(dis.readLine());
+
+			if(maxVal != 255) {
+				System.err.println("Max val is not 255");
+				System.exit(0);
+			}
+
+			// read binary data byte by byte
+			int x,y;
+			//fBuffer = new Pixel[height][width];
+			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+			byte[] rgb = new byte[3];
+			int pix;
+
+			for(y=0;y<height;y++) {
+				for(x=0;x<width;x++) {
+					rgb[0] = dis.readByte();
+					rgb[1] = dis.readByte();
+					rgb[2] = dis.readByte();
+					setPixel(x, y, rgb);
+				}
+			}
+
+			dis.close();
+			fis.close();
+
+			System.out.println("Read "+filename+" Successfully.");
+			// try
+		} catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public void write2PPM(String filename) {
+		// wrrite the image data in img to a PPM file
+		FileOutputStream fos = null;
+		PrintWriter dos = null;
+
+		try{
+			fos = new FileOutputStream(filename);
 			dos = new PrintWriter(fos);
 
 			// write header
@@ -493,6 +593,7 @@ public class ImageModel {
 		}
 		indexImg = deepCopy(img);
 
+		write2PPM(filename + "-index.ppm");
 
 		// generating 8-bit file
 		for (int y = 0; y < height; y ++) {
@@ -588,6 +689,8 @@ public class ImageModel {
 			}
 		}
 		indexImg = deepCopy(img);
+
+		write2PPM(filename + "-index.ppm");
 
 		// generating 8-bit file
 		for (int y = 0; y < height; y ++) {
