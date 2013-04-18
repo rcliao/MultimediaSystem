@@ -29,7 +29,8 @@ public class ImageView extends JPanel implements ActionListener {
 	JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
 				menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
 				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
-				menuItemBiErrorDiffStucki, menuItemMCQError;
+				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
+				menuItemMCQStucki;
 	JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
 	JLabel imageLabel;
 	JPanel contentPane;
@@ -141,8 +142,15 @@ public class ImageView extends JPanel implements ActionListener {
 		menuItemMCQ = new JMenuItem("Median Color Quantization");
 		submenu8Bits.add(menuItemMCQ);
 
-		menuItemMCQError = new JMenuItem("Median Color Quantization(Error-Diffusion)");
+		menuItemMCQError = new JMenuItem("Median Color Quantization(Error-Diffusion(Floyd))");
 		submenu8Bits.add(menuItemMCQError);
+
+		menuItemMCQBell = new JMenuItem("Median Color Quantization(Error-Diffusion(Bell))");
+		submenu8Bits.add(menuItemMCQBell);
+
+		menuItemMCQStucki = new JMenuItem("Median Color Quantization(Error-Diffusion(Stucki))");
+		submenu8Bits.add(menuItemMCQStucki);
+
 		imageMenu.add(submenu8Bits);
 
 		return menuBar;
@@ -194,6 +202,14 @@ public class ImageView extends JPanel implements ActionListener {
 
 	public void add8BitMCQErrorListener(ActionListener action) {
 		menuItemMCQError.addActionListener(action);
+	}
+
+	public void add8BitMCQBellListener(ActionListener action) {
+		menuItemMCQBell.addActionListener(action);
+	}
+
+	public void add8BitMCQStuckiListener(ActionListener action) {
+		menuItemMCQStucki.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {

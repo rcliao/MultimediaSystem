@@ -607,7 +607,7 @@ public class ImageModel {
 		}
 	}
 
-	public void convertTo8BitMCQError() {
+	public void convertTo8BitMCQError(String method) {
 		ArrayList<Integer> redValues = new ArrayList<Integer>();
 		ArrayList<Integer> greenValues = new ArrayList<Integer>();
 		ArrayList<Integer> blueValues = new ArrayList<Integer>();
@@ -663,28 +663,45 @@ public class ImageModel {
 		// generating index file
 		for (int y = 0; y < height; y ++) {
 			for (int x = 0; x < width; x ++) {
-				int[] rgb = new int[3];
-				getPixel(x, y, rgb);
+				// store output
+				int[] output = new int[3];
+
+				// calculate the error
+		    	int[] originalRGB = original.get(new xyAxis(x,y));
+
+		    	int[] error = new int[3];
 				
 				Iterator<Integer> iter = lookUpTableMedian.keySet().iterator();
+
 				int indexValue = 0;
+				double distance = 255*255*255;
 
 				while (iter.hasNext()) {
 					Integer index = iter.next();
 
-					if (rgb[0] <= lookUpTableMedian.get(index).rmax && rgb[0] >= lookUpTableMedian.get(index).rmin &&
-						rgb[1] <= lookUpTableMedian.get(index).gmax && rgb[1] >= lookUpTableMedian.get(index).gmin &&
-						rgb[2] <= lookUpTableMedian.get(index).bmax && rgb[2] >= lookUpTableMedian.get(index).bmin) {
+					double diff = Math.sqrt((lookUpTableMedian.get(index).rmean - originalRGB[0]) * (lookUpTableMedian.get(index).rmean - originalRGB[0]) +
+						(lookUpTableMedian.get(index).gmean - originalRGB[1]) * (lookUpTableMedian.get(index).gmean - originalRGB[1]) +
+						(lookUpTableMedian.get(index).bmean - originalRGB[2]) * (lookUpTableMedian.get(index).bmean - originalRGB[2]));
+
+					if (diff < distance) {
+						distance = diff;
 						indexValue = index;
 					}
 				}
 
 				for (int i = 0 ; i < 3; i ++) {
-					rgb[i] = indexValue;
+					output[i] = indexValue;
 				}
 
+		    	error[0] = originalRGB[0] - lookUpTableMedian.get(output[0]).rmean;
+		    	error[1] = originalRGB[1] - lookUpTableMedian.get(output[0]).gmean;
+		    	error[2] = originalRGB[2] - lookUpTableMedian.get(output[0]).bmean;
+
+				// assign error to nearby tile
+		    	errorDiffusionFormula(x, y, method, original, error);
+
 				// write it to img (BufferedImage)
-				setPixel(x, y, rgb);
+				setPixel(x, y, output);
 			}
 		}
 		indexImg = deepCopy(img);
@@ -700,18 +717,6 @@ public class ImageModel {
 		    	rgb[0] = indexValue.rmean;
 		    	rgb[1] = indexValue.gmean;
 		    	rgb[2] = indexValue.bmean;
-
-		    	// calculate the error
-		    	int[] originalRGB = original.get(new xyAxis(x,y));
-
-		    	int[] error = new int[3];
-
-		    	error[0] = originalRGB[0] - rgb[0];
-		    	error[1] = originalRGB[1] - rgb[1];
-		    	error[2] = originalRGB[2] - rgb[2];
-
-		    	// assign error to nearby tile
-		    	errorDiffusionFormula(x, y, "floyd", original, error);
 
 				// write it to img (BufferedImage)
 				setPixel(x, y, rgb);
@@ -790,11 +795,10 @@ public class ImageModel {
 		for (Integer index = 0; index < values.size(); index ++) {
 			lookUpTableMedian.put(index, values.get(index));
 		}
-
 	}
 
 	public void buildValues(ColorCube cube, int count, int n, ArrayList<ColorCube> result) {
-		if (count >= n)
+		if (count > n)
 			// base case
 			result.add(cube);
 		else {
@@ -853,7 +857,7 @@ public class ImageModel {
 							cube.rmean += entry.getKey()[0] * entry.getValue();
 						}
 
-						cube.rmean /= cube.size;
+						cube.rmean = Math.round(cube.rmean / cube.size);
 
 						Map.Entry<int[], Integer> firstEntry = cube.histogram.entrySet().iterator().next();
 						cube1.rmin = 255;
@@ -1097,6 +1101,128 @@ public class ImageModel {
 				original.get(new xyAxis(x, y+1))[0] += 5*error[0]/16;
 				original.get(new xyAxis(x, y+1))[1] += 5*error[1]/16;
 				original.get(new xyAxis(x, y+1))[2] += 5*error[2]/16;
+			}
+		}  else if (method.equals("bell")) {
+			if (x+1 < width) {
+				original.get(new xyAxis(x+1, y))[0] += 7*error[0]/48;
+				original.get(new xyAxis(x+1, y))[1] += 7*error[1]/48;
+				original.get(new xyAxis(x+1, y))[2] += 7*error[2]/48;
+			}
+			if (x+2 < width) {
+				original.get(new xyAxis(x+2, y))[0] += 5*error[0]/48;
+				original.get(new xyAxis(x+2, y))[1] += 5*error[1]/48;
+				original.get(new xyAxis(x+2, y))[2] += 5*error[2]/48;
+			}
+			if (y+1 < height) {
+				if (x-2 >= 0) {
+					original.get(new xyAxis(x-2, y+1))[0] += 3*error[0]/48;
+					original.get(new xyAxis(x-2, y+1))[1] += 3*error[1]/48;
+					original.get(new xyAxis(x-2, y+1))[2] += 3*error[2]/48;
+				}
+				if (x-1 >= 0) {
+					original.get(new xyAxis(x-1, y+1))[0] += 5*error[0]/48;
+					original.get(new xyAxis(x-1, y+1))[1] += 5*error[1]/48;
+					original.get(new xyAxis(x-1, y+1))[2] += 5*error[2]/48;
+				}
+				original.get(new xyAxis(x, y+1))[0] += 7*error[0]/48;
+				original.get(new xyAxis(x, y+1))[1] += 7*error[1]/48;
+				original.get(new xyAxis(x, y+1))[2] += 7*error[2]/48;
+				if (x+1 < width) {
+					original.get(new xyAxis(x+1, y+1))[0] += 5*error[0]/48;
+					original.get(new xyAxis(x+1, y+1))[1] += 5*error[1]/48;
+					original.get(new xyAxis(x+1, y+1))[2] += 5*error[2]/48;
+				}
+				if (x+2 < width) {
+					original.get(new xyAxis(x+2, y+1))[0] += 3*error[0]/48;
+					original.get(new xyAxis(x+2, y+1))[1] += 3*error[1]/48;
+					original.get(new xyAxis(x+2, y+1))[2] += 3*error[2]/48;
+				}
+			}
+			if (y+2 < height) {
+				if (x-2 >= 0) {
+					original.get(new xyAxis(x-2, y+2))[0] += 1*error[0]/48;
+					original.get(new xyAxis(x-2, y+2))[1] += 1*error[1]/48;
+					original.get(new xyAxis(x-2, y+2))[2] += 1*error[2]/48;
+				}
+				if (x-1 >= 0) {
+					original.get(new xyAxis(x-1, y+2))[0] += 3*error[0]/48;
+					original.get(new xyAxis(x-1, y+2))[1] += 3*error[1]/48;
+					original.get(new xyAxis(x-1, y+2))[2] += 3*error[2]/48;
+				}
+				original.get(new xyAxis(x, y+2))[0] += 5*error[0]/48;
+				original.get(new xyAxis(x, y+2))[1] += 5*error[1]/48;
+				original.get(new xyAxis(x, y+2))[2] += 5*error[2]/48;
+				if (x+1 < width) {
+					original.get(new xyAxis(x+1, y+2))[0] += 3*error[0]/48;
+					original.get(new xyAxis(x+1, y+2))[1] += 3*error[1]/48;
+					original.get(new xyAxis(x+1, y+2))[2] += 3*error[2]/48;
+				}
+				if (x+2 < width) {
+					original.get(new xyAxis(x+2, y+2))[0] += 1*error[0]/48;
+					original.get(new xyAxis(x+2, y+2))[1] += 1*error[1]/48;
+					original.get(new xyAxis(x+2, y+2))[2] += 1*error[2]/48;
+				}
+			}
+		} else if (method.equals("stucki")) {
+			if (x+1 < width) {
+				original.get(new xyAxis(x+1, y))[0] += 7*error[0]/42;
+				original.get(new xyAxis(x+1, y))[1] += 7*error[1]/42;
+				original.get(new xyAxis(x+1, y))[2] += 7*error[2]/42;
+			}
+			if (x+2 < width) {
+				original.get(new xyAxis(x+2, y))[0] += 5*error[0]/42;
+				original.get(new xyAxis(x+2, y))[1] += 5*error[1]/42;
+				original.get(new xyAxis(x+2, y))[2] += 5*error[2]/42;
+			}
+			if (y+1 < height) {
+				if (x-2 >= 0) {
+					original.get(new xyAxis(x-2, y+1))[0] += 2*error[0]/42;
+					original.get(new xyAxis(x-2, y+1))[1] += 2*error[1]/42;
+					original.get(new xyAxis(x-2, y+1))[2] += 2*error[2]/42;
+				}
+				if (x-1 >= 0) {
+					original.get(new xyAxis(x-1, y+1))[0] += 4*error[0]/42;
+					original.get(new xyAxis(x-1, y+1))[1] += 4*error[1]/42;
+					original.get(new xyAxis(x-1, y+1))[2] += 4*error[2]/42;
+				}
+				original.get(new xyAxis(x, y+1))[0] += 8*error[0]/42;
+				original.get(new xyAxis(x, y+1))[1] += 8*error[1]/42;
+				original.get(new xyAxis(x, y+1))[2] += 8*error[2]/42;
+				if (x+1 < width) {
+					original.get(new xyAxis(x+1, y+1))[0] += 4*error[0]/42;
+					original.get(new xyAxis(x+1, y+1))[1] += 4*error[1]/42;
+					original.get(new xyAxis(x+1, y+1))[2] += 4*error[2]/42;
+				}
+				if (x+2 < width) {
+					original.get(new xyAxis(x+2, y+1))[0] += 2*error[0]/42;
+					original.get(new xyAxis(x+2, y+1))[1] += 2*error[1]/42;
+					original.get(new xyAxis(x+2, y+1))[2] += 2*error[2]/42;
+				}
+			}
+			if (y+2 < height) {
+				if (x-2 >= 0) {
+					original.get(new xyAxis(x-2, y+2))[0] += 1*error[0]/42;
+					original.get(new xyAxis(x-2, y+2))[1] += 1*error[1]/42;
+					original.get(new xyAxis(x-2, y+2))[2] += 1*error[2]/42;
+				}
+				if (x-1 >= 0) {
+					original.get(new xyAxis(x-1, y+2))[0] += 2*error[0]/42;
+					original.get(new xyAxis(x-1, y+2))[1] += 2*error[1]/42;
+					original.get(new xyAxis(x-1, y+2))[2] += 2*error[2]/42;
+				}
+				original.get(new xyAxis(x, y+2))[0] += 4*error[0]/42;
+				original.get(new xyAxis(x, y+2))[1] += 4*error[1]/42;
+				original.get(new xyAxis(x, y+2))[2] += 4*error[2]/42;
+				if (x+1 < width) {
+					original.get(new xyAxis(x+1, y+2))[0] += 2*error[0]/42;
+					original.get(new xyAxis(x+1, y+2))[1] += 2*error[1]/42;
+					original.get(new xyAxis(x+1, y+2))[2] += 2*error[2]/42;
+				}
+				if (x+2 < width) {
+					original.get(new xyAxis(x+2, y+2))[0] += 1*error[0]/42;
+					original.get(new xyAxis(x+2, y+2))[1] += 1*error[1]/42;
+					original.get(new xyAxis(x+2, y+2))[2] += 1*error[2]/42;
+				}
 			}
 		}
 	}
