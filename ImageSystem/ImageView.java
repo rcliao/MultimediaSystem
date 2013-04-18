@@ -32,7 +32,7 @@ public class ImageView extends JPanel implements ActionListener {
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
 				menuItemMCQStucki;
 	JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
-	JLabel imageLabel;
+	JLabel imageLabel, outputLabel;
 	JPanel contentPane;
 
 	// init the java frame
@@ -224,14 +224,30 @@ public class ImageView extends JPanel implements ActionListener {
  
 	public Container createContentPane() {
 		//Create the content-pane-to-be.
+		JPanel intrPane = new JPanel(new BorderLayout());
+		intrPane.setOpaque(true);
+
 		contentPane = new JPanel(new BorderLayout());
 		contentPane.setOpaque(true);
  
 		imageLabel = new JLabel();
 		imageLabel.setVisible(true);
+
+		outputLabel = new JLabel();
+		outputLabel.setVisible(true);
+
+		JLabel imageIntr = new JLabel("Input Image");
+		imageIntr.setVisible(true);
+
+		JLabel outputIntr = new JLabel("Output Image");
+		outputIntr.setVisible(true);
  
 		//Add the text area to the content pane.
-		contentPane.add(imageLabel, BorderLayout.CENTER);
+		intrPane.add(imageIntr, BorderLayout.LINE_START);
+		intrPane.add(outputIntr, BorderLayout.LINE_END);
+		contentPane.add(intrPane, BorderLayout.PAGE_START);
+		contentPane.add(imageLabel, BorderLayout.LINE_START);
+		contentPane.add(outputLabel, BorderLayout.LINE_END);
  
 		return contentPane;
 	}

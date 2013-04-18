@@ -18,12 +18,14 @@ public class ImageCtrl {
 	//... The Controller needs to interact with both the Model and View.
 	private ImageModel m_model;
 	private ImageView m_view;
+	private ImageModel output;
 	
 	//========================================================== constructor
 	/** Constructor */
 	public ImageCtrl(ImageModel model, ImageView view) {
 		m_model = model;
 		m_view  = view;
+		output = new ImageModel();
 		
 		//... Add listeners to the view.
 		m_view.addQuitListener(new QuitListener());
@@ -71,9 +73,11 @@ public class ImageCtrl {
 			//Process the results.
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				m_view.inputImage = m_view.fc.getSelectedFile();
+				output.readPPM(m_view.inputImage);
 				m_model.readPPM(m_view.inputImage);
 				m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
-				m_view.frame.setSize(m_model.getW(), m_model.getH()+70);
+				m_view.outputLabel.setIcon(new ImageIcon(output.img));
+				m_view.frame.setSize(m_model.getW()*2+20, m_model.getH()+110);
 			} else {
 				// cancel case
 			}
@@ -89,7 +93,7 @@ public class ImageCtrl {
 				int returnVal = m_view.fcs.showSaveDialog(m_view);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = m_view.fcs.getSelectedFile();
-					m_model.write2PPM(file);
+					output.write2PPM(file);
 				} else {
 					// cancel case
 				}
@@ -99,56 +103,56 @@ public class ImageCtrl {
 
 	class GrayListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertToGray();
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			output.convertToGray();
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 		}
 	}
 
 	class BiDirectlyListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertToBiDirectly();
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			output.convertToBiDirectly();
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 		}
 	}
 
 	class BiErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertToBiError("floyd");
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			output.convertToBiError("floyd");
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 		}
 	}
 
 	class BiErrorBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertToBiError("bell");
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			output.convertToBiError("bell");
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 		}
 	}
 
 	class BiErrorStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertToBiError("stucki");
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			output.convertToBiError("stucki");
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 		}
 	}
 
 	class QuadErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertToQuadError();
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			output.convertToQuadError();
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 		}
 	}
 
 	class UCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertTo8BitUCQ();
+			output.convertTo8BitUCQ();
 
 			// Use a textarea to display the table
 			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = m_model.lookUpTable.keySet().iterator();
+			Iterator<Integer> iter = output.lookUpTable.keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\n");
@@ -159,7 +163,7 @@ public class ImageCtrl {
 				tableArea.append(index + "\t");
 
 				for (int i = 0; i < 3; i ++)
-					tableArea.append(m_model.lookUpTable.get(index)[i] + "\t");
+					tableArea.append(output.lookUpTable.get(index)[i] + "\t");
 
 				tableArea.append("\n");
 			}
@@ -172,26 +176,26 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(m_model.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 		}
 	}
 
 	class MCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertTo8BitMCQ();
+			output.convertTo8BitMCQ();
 
 			// Use a textarea to display the table
 			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = m_model.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -201,11 +205,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(m_model.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
 
-				tableArea.append("" + m_model.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
 
 				tableArea.append("\n");
 			}
@@ -218,29 +222,29 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(m_model.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 
 			// write to file
-			m_model.writeToFile("LUT.txt");
+			output.writeToFile("LUT.txt");
 		}
 	}
 
 	class MCQErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertTo8BitMCQError("floyd");
+			output.convertTo8BitMCQError("floyd");
 
 			// Use a textarea to display the table
 			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = m_model.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -250,11 +254,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(m_model.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
 
-				tableArea.append("" + m_model.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
 
 				tableArea.append("\n");
 			}
@@ -267,29 +271,29 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(m_model.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 
 			// write to file
-			m_model.writeToFile("LUT.txt");
+			output.writeToFile("LUT.txt");
 		}
 	}
 
 	class MCQBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertTo8BitMCQError("bell");
+			output.convertTo8BitMCQError("bell");
 
 			// Use a textarea to display the table
 			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = m_model.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -299,11 +303,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(m_model.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
 
-				tableArea.append("" + m_model.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
 
 				tableArea.append("\n");
 			}
@@ -316,29 +320,29 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(m_model.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 
 			// write to file
-			m_model.writeToFile("LUT.txt");
+			output.writeToFile("LUT.txt");
 		}
 	}
 
 	class MCQStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			m_model.convertTo8BitMCQError("floyd");
+			output.convertTo8BitMCQError("floyd");
 
 			// Use a textarea to display the table
 			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = m_model.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -348,11 +352,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(m_model.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(m_model.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
+				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
 
-				tableArea.append("" + m_model.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
 
 				tableArea.append("\n");
 			}
@@ -365,16 +369,16 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(m_model.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
+			m_view.outputLabel.setIcon(new ImageIcon(output.img));
 
 			// write to file
-			m_model.writeToFile("LUT.txt");
+			output.writeToFile("LUT.txt");
 		}
 	}
 }

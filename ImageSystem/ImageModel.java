@@ -16,19 +16,22 @@ import javax.swing.*;
 import ImageUtils.*;
 
 public class ImageModel {
-	private int width;        // number of columns
-	private int height;       // number of rows
-	private int pixelDepth=3;     // pixel depth in byte
-	BufferedImage img;        // image array to store rgb values, 8 bits per channel
-	String filename;
+	private int width;  // number of columns
+	private int height;  // number of rows
+	private int pixelDepth=3;  // pixel depth in byte
+	BufferedImage img;  // image array to store rgb values, 8 bits per channel
+	String filename;  // store file name to save the index file
+	File file;
 
-	BufferedImage indexImg;
+	BufferedImage indexImg;  // store index image to display later on
 
-	Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();
-	Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();
+	Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();  // this is the look up talbe for the uniform color quantization
+	Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();  // look up table for the median cut algorithm
 
+	/*****************************
+		Constructors
+	 ****************************/
 	public ImageModel() {
-
 	}
 
 	public ImageModel(int w, int h) {
@@ -46,6 +49,9 @@ public class ImageModel {
 		System.out.println("Created an image from " + file.getName()+ " with size "+width+"x"+height);
 	}
 
+	/*****************************
+		Getters / Setters
+	 ****************************/
 	public BufferedImage getImg() {
 		return img;
 	}
@@ -104,6 +110,7 @@ public class ImageModel {
 		rgb[2]= (int) (0xFF & b);
 	}
 
+	// display pixel value for testing purpose
 	public void displayPixelValue(int x, int y) {
 		int pix = img.getRGB(x,y);
 
@@ -114,6 +121,9 @@ public class ImageModel {
 		System.out.println("RGB Pixel value at ("+x+","+y+"):"+(0xFF & r)+","+(0xFF & g)+","+(0xFF & b));
 	}
 
+	/************************************
+		Read/Write Methods
+	 ************************************/
 	public void readPPM(File file) {
 		// read a data from a PPM file
 		FileInputStream fis = null;
@@ -123,6 +133,7 @@ public class ImageModel {
 			fis = new FileInputStream(file);
 			dis = new DataInputStream(fis);
 
+			this.file = file;
 			this.filename = file.getName();
 
 			System.out.println("Reading "+file.getName()+"...");
@@ -308,6 +319,10 @@ public class ImageModel {
 		}
 	}
 
+	/************************************
+		Image Conversion Functions
+	 ***********************************/
+
 	// Homework Part 1:
 	public void convertToGray() {
 		// Formula: Gr(ay) = round(0.299 * R + 0.587 * G + 0.114 * B)
@@ -336,36 +351,14 @@ public class ImageModel {
 		// task 1 convert img to grey scale from part 1
 		convertToGray();
 
-		// calculate sum of all pixel
-		int sum = 0;
-
-		for (int y = 0; y < height; y ++) {
-			for (int x = 0; x < width; x ++) {
-			int[] rgb = new int[3];
-			getPixel(x, y, rgb);
-
-			sum += rgb[0];
-			}
-		}
-
-		int pixels = height * width;
-
-		int ga = (int) sum / pixels;
+		int ga = calculateGrayAverage();
 
 		for (int y = 0; y < height; y ++) {
 			for (int x = 0; x < width; x ++) {
 				int[] rgb = new int[3];
 				getPixel(x, y, rgb);
 
-				boolean isBlack;
-
 				if (rgb[0] > ga) {
-					isBlack = false;
-				} else {
-					isBlack = true;
-				}
-
-				if (isBlack) {
 					for(int i=0;i<3;i++) {
 						rgb[i] = 0;
 					}
@@ -400,15 +393,9 @@ public class ImageModel {
 		// step 1 convert to Gray Scale
 		convertToGray();
 
-		boolean[][] checked = new boolean[width][height];
 		double[][] original = new double[width][height];
 
-		for (int y = 0; y < height; y ++) {
-			for (int x = 0; x < width; x ++) {
-				checked[x][y] = false;
-			}
-		}
-
+		// read ans store the original pixel values
 		for (int y = 0; y < height; y ++) {
 			for (int x = 0; x < width; x ++) {
 				int[] rgb = new int[3];
@@ -419,57 +406,31 @@ public class ImageModel {
 			}
 		}
 
-		// calculate sum of all pixel
-		int sum = 0;
+		int ga = calculateGrayAverage();
 
 		for (int y = 0; y < height; y ++) {
 			for (int x = 0; x < width; x ++) {
 				int[] rgb = new int[3];
-				getPixel(x, y, rgb);
-				
-				sum += rgb[0];
-			}
-		}
-
-		int pixels = height * width;
-
-		int ga = (int) sum / pixels;
-
-		for (int y = 0; y < height; y ++) {
-			for (int x = 0; x < width; x ++) {
-				int[] rgb = new int[3];
-
-				boolean isBlack;
 
 				double grayValue = original[x][y];
-
-				if (grayValue > ga) {
-					isBlack = false;
-				} else {
-					isBlack = true;
-				}
-
-				checked[x][y] = true;
+				double error = 0;
 				
-				if (isBlack) {
-					double error = grayValue - 0;
-
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, method, original, error);
+				if (grayValue > ga) {
+					error = grayValue;
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 0;
 					}
 				} else {
-					double error = grayValue - 255;
-
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, method, original, error);
+					error = grayValue - 255;
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 255;
 					}
 				}
+
+				// pass the value to the adacent pixel that haven't been done
+				errorDiffusionFormula(x, y, method, original, error);
 
 				// write it to img (BufferedImage)
 				setPixel(x, y, rgb);
@@ -513,44 +474,36 @@ public class ImageModel {
 				int[] rgb = new int[3];
 
 				double grayValue = original[x][y];
+				double error = 0;
 				
 				if (grayValue <= 42.5) {
-					double error = grayValue - 0;
-
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "floyd", original, error);
+					error = grayValue - 0;
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 0;
 					}
 				} else if (grayValue > 42.5 && grayValue <= 127.5) {
-					double error = grayValue - 85;
-
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "floyd", original, error);
+					error = grayValue - 85;
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 85;
 					}
 				} else if (grayValue > 127.5 && grayValue <= 212.5) {
-					double error = grayValue - 170;
-
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "floyd", original, error);
+					error = grayValue - 170;
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 170;
 					}
 				} else {
-					double error = grayValue - 255;
-
-					// pass the value to the adacent pixel that haven't been done
-					errorDiffusionFormula(x, y, "floyd", original, error);
+					error = grayValue - 255;
 
 					for(int i=0;i<3;i++) {
 						rgb[i] = 255;
 					}
 				}
+
+				errorDiffusionFormula(x, y, "floyd", original, error);
+
 
 				// write it to img (BufferedImage)
 				setPixel(x, y, rgb);
@@ -575,9 +528,10 @@ public class ImageModel {
 				while (iter.hasNext()) {
 					Integer index = iter.next();
 
-					if (rgb[0] < lookUpTable.get(index)[0] + 16 && rgb[0] >= lookUpTable.get(index)[0] - 16 &&
-						rgb[1] < lookUpTable.get(index)[1] + 16 && rgb[1] >= lookUpTable.get(index)[1] - 16 &&
-						rgb[2] < lookUpTable.get(index)[2] + 32 && rgb[2] >= lookUpTable.get(index)[2] - 32) {
+					// finding the value to the correct cube and assign the index value to the image
+					if (rgb[0] <= lookUpTable.get(index)[0] + 16 && rgb[0] >= lookUpTable.get(index)[0] - 16 &&
+						rgb[1] <= lookUpTable.get(index)[1] + 16 && rgb[1] >= lookUpTable.get(index)[1] - 16 &&
+						rgb[2] <= lookUpTable.get(index)[2] + 32 && rgb[2] >= lookUpTable.get(index)[2] - 32) {
 						indexValue = index;
 						break;
 					}
@@ -591,8 +545,11 @@ public class ImageModel {
 				setPixel(x, y, rgb);
 			}
 		}
+
+		// store copy of the index image
 		indexImg = deepCopy(img);
 
+		// write to index.ppm
 		write2PPM(filename + "-index.ppm");
 
 		// generating 8-bit file
@@ -618,6 +575,7 @@ public class ImageModel {
 		ArrayList<Integer> redValues = new ArrayList<Integer>();
 		ArrayList<Integer> greenValues = new ArrayList<Integer>();
 		ArrayList<Integer> blueValues = new ArrayList<Integer>();
+
 		ArrayList<int[]> pixelValues = new ArrayList<int[]>();
 
 		ColorCube entireCube = new ColorCube();
@@ -632,6 +590,7 @@ public class ImageModel {
 				greenValues.add(rgb[1]);
 				blueValues.add(rgb[2]);
 
+				// building histogram with key = rgb value, and value is the frequency of the rgb
 				if (!entireCube.histogram.containsKey(rgb))
 					entireCube.histogram.put(rgb, 1);
 				else {
@@ -730,6 +689,7 @@ public class ImageModel {
 				greenValues.add(rgb[1]);
 				blueValues.add(rgb[2]);
 
+				// building the histogram
 				if (!entireCube.histogram.containsKey(rgb))
 					entireCube.histogram.put(rgb, 1);
 				else {
@@ -737,6 +697,7 @@ public class ImageModel {
 					entireCube.histogram.put(rgb, count + 1);
 				}
 
+				// store all the original pixel values to original Map
 				xyAxis xy = new xyAxis(x, y);
 
 				original.put(xy, rgb);
@@ -761,6 +722,7 @@ public class ImageModel {
 
 		entireCube.size = 256;
 
+		// building table using the color cube
 		createColorTableMCQ(entireCube);
 
 		// generating index file
@@ -777,25 +739,32 @@ public class ImageModel {
 				Iterator<Integer> iter = lookUpTableMedian.keySet().iterator();
 
 				int indexValue = 0;
+
+				// init the distance to be the max distance as max distane you can get
 				double distance = 255*255*255;
 
+				// find the closest point after the error diffusion
 				while (iter.hasNext()) {
 					Integer index = iter.next();
 
+					// calculate the current distance between table value to the corrent pixel value
 					double diff = Math.sqrt((lookUpTableMedian.get(index).rmean - originalRGB[0]) * (lookUpTableMedian.get(index).rmean - originalRGB[0]) +
 						(lookUpTableMedian.get(index).gmean - originalRGB[1]) * (lookUpTableMedian.get(index).gmean - originalRGB[1]) +
 						(lookUpTableMedian.get(index).bmean - originalRGB[2]) * (lookUpTableMedian.get(index).bmean - originalRGB[2]));
 
+					// if the distance is smaller than distance assign it!
 					if (diff < distance) {
 						distance = diff;
 						indexValue = index;
 					}
 				}
 
+				// change the output to be the index value
 				for (int i = 0 ; i < 3; i ++) {
 					output[i] = indexValue;
 				}
 
+				// calculage the error
 		    	error[0] = originalRGB[0] - lookUpTableMedian.get(output[0]).rmean;
 		    	error[1] = originalRGB[1] - lookUpTableMedian.get(output[0]).gmean;
 		    	error[2] = originalRGB[2] - lookUpTableMedian.get(output[0]).bmean;
@@ -825,6 +794,28 @@ public class ImageModel {
 				setPixel(x, y, rgb);
 			}
 		}
+	}
+
+	/*****************************************
+		Utility functions used to convert image
+	 *****************************************/
+
+	public int calculateGrayAverage() {
+		// calculate sum of all pixel
+		int sum = 0;
+
+		for (int y = 0; y < height; y ++) {
+			for (int x = 0; x < width; x ++) {
+			int[] rgb = new int[3];
+			getPixel(x, y, rgb);
+
+			sum += rgb[0];
+			}
+		}
+
+		int pixels = height * width;
+
+		return (int) sum / pixels;
 	}
 
 	// creating Look Up Table for uniform color quantization
@@ -1380,6 +1371,9 @@ public class ImageModel {
 		frame.setVisible(true);
 	}
 
+	/*************************************
+		Inner class as helpers
+	 ************************************/
 	class ColorCube implements Comparable<ColorCube> {
 		Map<int[], Integer> histogram = new HashMap<int[], Integer>();
 
