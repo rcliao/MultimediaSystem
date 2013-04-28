@@ -3,7 +3,7 @@
  
  *******************************************************/
 
-package ImageSystem;
+package views;
 
 import java.io.*;
 import java.util.*;
@@ -13,6 +13,8 @@ import java.awt.image.*;
 import javax.swing.*;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
+
+import models.*;
  
 /*
  * This class exists solely to show you what menus look like.
@@ -22,25 +24,25 @@ public class ImageView extends JPanel implements ActionListener {
 	static private String newline = "\n";
 
 	// initiated all gui variables
-	JTextArea output;
-	JScrollPane scrollPane;
-	JFileChooser fc;
-	JFileChooser fcs = new JFileChooser();
-	JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
+	private JTextArea output;
+	private JScrollPane scrollPane;
+	private JFileChooser fc;
+	private JFileChooser fcs = new JFileChooser();
+	private JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
 				menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
 				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
 				menuItemMCQStucki;
-	JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
-	JLabel imageLabel, outputLabel;
-	JPanel contentPane;
+	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
+	private JLabel imageLabel, outputLabel;
+	private JTabbedPane contentPane;
 
 	// init the java frame
 	static JFrame frame;
 
 	// image function and image file
-	ImageModel ImageModel = new ImageModel();
-	File inputImage;
+	private ImageModel ImageModel = new ImageModel();
+	private File inputImage;
 
 	// constructor
 	public ImageView() {
@@ -156,6 +158,60 @@ public class ImageView extends JPanel implements ActionListener {
 		return menuBar;
 	}
 
+	/*
+	 Getter/ Setters
+	 */
+	public JFileChooser getFC() {
+		return fc;
+	}
+
+	public void setFC(JFileChooser fc) {
+		this.fc = fc;
+	}
+
+	public JFileChooser getFCS() {
+		return fcs;
+	}
+
+	public void setFCS(JFileChooser fcs) {
+		this.fcs = fcs;
+	}
+
+	public File getInputImage() {
+		return inputImage;
+	}
+
+	public void setInputImage(File inputImage) {
+		this.inputImage = inputImage;
+	}
+
+	public JLabel getImageLabel() {
+		return imageLabel;
+	}
+
+	public void setImageLabel(JLabel imageLabel) {
+		this.imageLabel = imageLabel;
+	}
+
+	public JLabel getOutputLabel() {
+		return outputLabel;
+	}
+
+	public void setOutputLabel(JLabel outputLabel) {
+		this.outputLabel = outputLabel;
+	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public void setFrame(JFrame frame) {
+		this.frame = frame;
+	}
+
+	/*
+	 Add events to button
+	 */
 	public void addSaveListener(ActionListener action) {
 		menuItemSave.addActionListener(action);
 	}
@@ -224,10 +280,7 @@ public class ImageView extends JPanel implements ActionListener {
  
 	public Container createContentPane() {
 		//Create the content-pane-to-be.
-		JPanel intrPane = new JPanel(new BorderLayout());
-		intrPane.setOpaque(true);
-
-		contentPane = new JPanel(new BorderLayout());
+		contentPane = new JTabbedPane();
 		contentPane.setOpaque(true);
  
 		imageLabel = new JLabel();
@@ -235,19 +288,10 @@ public class ImageView extends JPanel implements ActionListener {
 
 		outputLabel = new JLabel();
 		outputLabel.setVisible(true);
-
-		JLabel imageIntr = new JLabel("Input Image");
-		imageIntr.setVisible(true);
-
-		JLabel outputIntr = new JLabel("Output Image");
-		outputIntr.setVisible(true);
  
 		//Add the text area to the content pane.
-		intrPane.add(imageIntr, BorderLayout.LINE_START);
-		intrPane.add(outputIntr, BorderLayout.LINE_END);
-		contentPane.add(intrPane, BorderLayout.PAGE_START);
-		contentPane.add(imageLabel, BorderLayout.LINE_START);
-		contentPane.add(outputLabel, BorderLayout.LINE_END);
+		contentPane.add(imageLabel, "Input Image");
+		contentPane.add(outputLabel, "Output Image");
  
 		return contentPane;
 	}

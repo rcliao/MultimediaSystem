@@ -36,7 +36,9 @@ import java.beans.*;
 import java.awt.*;
 import java.io.File;
 
-import ImageSystem.*;
+import models.*;
+import views.*;
+import ctrl.*;
 
 public class ImagePreview extends JComponent
                           implements PropertyChangeListener {

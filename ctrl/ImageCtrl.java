@@ -2,7 +2,7 @@
  * Image Controller class
  */
 
-package ImageSystem;
+package ctrl;
 
 import java.io.*;
 import java.util.*;
@@ -13,6 +13,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
 
 import ImageUtils.*;
+import models.*;
+import views.*;
 
 public class ImageCtrl {
 	//... The Controller needs to interact with both the Model and View.
@@ -54,45 +56,45 @@ public class ImageCtrl {
 	class LoadListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			//Set up the file chooser.
-			if (m_view.fc == null) {
-				m_view.fc = new JFileChooser();
+			if (m_view.getFC() == null) {
+				m_view.setFC(new JFileChooser());
 	 
 				//Add a custom file filter and disable the default
 				//(Accept All) file filter.
-				m_view.fc.addChoosableFileFilter(new ImageFilter());
-				m_view.fc.setAcceptAllFileFilterUsed(false);
+				m_view.getFC().addChoosableFileFilter(new ImageFilter());
+				m_view.getFC().setAcceptAllFileFilterUsed(false);
 	 
 				//Add the preview pane.
-				m_view.fc.setAccessory(new ImagePreview(m_view.fc));
+				m_view.getFC().setAccessory(new ImagePreview(m_view.getFC()));
 			}
 	 
 			//Show it.
-			int returnVal = m_view.fc.showDialog(m_view,
+			int returnVal = m_view.getFC().showDialog(m_view,
 										  "Attach");
 	 
 			//Process the results.
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				m_view.inputImage = m_view.fc.getSelectedFile();
-				output.readPPM(m_view.inputImage);
-				m_model.readPPM(m_view.inputImage);
-				m_view.imageLabel.setIcon(new ImageIcon(m_model.img));
-				m_view.outputLabel.setIcon(new ImageIcon(output.img));
-				m_view.frame.setSize(m_model.getW()*2+20, m_model.getH()+110);
+				m_view.setInputImage(m_view.getFC().getSelectedFile());
+				output.readPPM(m_view.getInputImage());
+				m_model.readPPM(m_view.getInputImage());
+				m_view.getImageLabel().setIcon(new ImageIcon(m_model.getImg()));
+				m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+				m_view.getFrame().setSize(m_model.getW(), m_model.getH()+110);
 			} else {
 				// cancel case
 			}
 	 
 			//Reset the file chooser for the next time it's shown.
-			m_view.fc.setSelectedFile(null);
+			m_view.getFC().setSelectedFile(null);
 		}
 	}
 
 	class SaveListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			if (m_model.img != null) {
-				int returnVal = m_view.fcs.showSaveDialog(m_view);
+			if (m_model.getImg() != null) {
+				int returnVal = m_view.getFCS().showSaveDialog(m_view);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = m_view.fcs.getSelectedFile();
+					File file = m_view.getFCS().getSelectedFile();
 					output.write2PPM(file);
 				} else {
 					// cancel case
@@ -104,42 +106,42 @@ public class ImageCtrl {
 	class GrayListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			output.convertToGray();
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
 	}
 
 	class BiDirectlyListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			output.convertToBiDirectly();
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
 	}
 
 	class BiErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			output.convertToBiError("floyd");
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
 	}
 
 	class BiErrorBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			output.convertToBiError("bell");
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
 	}
 
 	class BiErrorStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			output.convertToBiError("stucki");
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
 	}
 
 	class QuadErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			output.convertToQuadError();
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
 	}
 
@@ -152,7 +154,7 @@ public class ImageCtrl {
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = output.lookUpTable.keySet().iterator();
+			Iterator<Integer> iter = output.getLookUpTable().keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\n");
@@ -163,7 +165,7 @@ public class ImageCtrl {
 				tableArea.append(index + "\t");
 
 				for (int i = 0; i < 3; i ++)
-					tableArea.append(output.lookUpTable.get(index)[i] + "\t");
+					tableArea.append(output.getLookUpTable().get(index)[i] + "\t");
 
 				tableArea.append("\n");
 			}
@@ -176,13 +178,13 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
 	}
 
@@ -195,7 +197,7 @@ public class ImageCtrl {
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.getLookUpTableMedian().keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -205,11 +207,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getRmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getGmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getBmean() + "\t");
 
-				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.getLookUpTableMedian().get(index).getHistogram().size());
 
 				tableArea.append("\n");
 			}
@@ -222,13 +224,13 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
 			// write to file
 			output.writeToFile("LUT.txt");
@@ -244,7 +246,7 @@ public class ImageCtrl {
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.getLookUpTableMedian().keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -254,11 +256,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getRmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getGmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getBmean() + "\t");
 
-				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.getLookUpTableMedian().get(index).getHistogram().size());
 
 				tableArea.append("\n");
 			}
@@ -271,13 +273,13 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
 			// write to file
 			output.writeToFile("LUT.txt");
@@ -293,7 +295,7 @@ public class ImageCtrl {
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.getLookUpTableMedian().keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -303,11 +305,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getRmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getGmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getBmean() + "\t");
 
-				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.getLookUpTableMedian().get(index).getHistogram().size());
 
 				tableArea.append("\n");
 			}
@@ -320,13 +322,13 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
 			// write to file
 			output.writeToFile("LUT.txt");
@@ -342,7 +344,7 @@ public class ImageCtrl {
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
-			Iterator<Integer> iter = output.lookUpTableMedian.keySet().iterator();
+			Iterator<Integer> iter = output.getLookUpTableMedian().keySet().iterator();
 
 			tableArea.append("Look Up Table\n");
 			tableArea.append("index\tR\tG\tB\tFrequency\n");
@@ -352,11 +354,11 @@ public class ImageCtrl {
 				Integer index = iter.next();
 				tableArea.append(index + "\t");
 
-				tableArea.append(output.lookUpTableMedian.get(index).rmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).gmean + "\t");
-				tableArea.append(output.lookUpTableMedian.get(index).bmean + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getRmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getGmean() + "\t");
+				tableArea.append(output.getLookUpTableMedian().get(index).getBmean() + "\t");
 
-				tableArea.append("" + output.lookUpTableMedian.get(index).histogram.size());
+				tableArea.append("" + output.getLookUpTableMedian().get(index).getHistogram().size());
 
 				tableArea.append("\n");
 			}
@@ -369,13 +371,13 @@ public class ImageCtrl {
 
 			// display index image
 			JFrame frame2 = new JFrame();
-			JLabel label2 = new JLabel(new ImageIcon(output.indexImg));
+			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
 			frame2.add(label2, BorderLayout.CENTER);
 			frame2.setTitle("Index Image");
 			frame2.pack();
 			frame2.setVisible(true);
 
-			m_view.outputLabel.setIcon(new ImageIcon(output.img));
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
 			// write to file
 			output.writeToFile("LUT.txt");

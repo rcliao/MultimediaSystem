@@ -2,7 +2,10 @@
  CS451 Multimedia Software Systems
  *******************************************************/
 
-import ImageSystem.*;
+// import all homework assignments
+import ctrl.*;
+import views.*;
+import models.*;
 
 public class CS451_Liao {
 	public static void main(String[] args) {

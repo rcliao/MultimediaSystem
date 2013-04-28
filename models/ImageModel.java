@@ -5,7 +5,7 @@
  This image class is for a 24bit RGB image only.
  *******************************************************/
 
-package ImageSystem;
+package models;
 
 import java.io.*;
 import java.util.*;
@@ -60,6 +60,14 @@ public class ImageModel {
 		this.img = img;
 	}
 
+	public BufferedImage getIndexImg() {
+		return indexImg;
+	}
+
+	public void setIndexImg(BufferedImage indexImg) {
+		this.indexImg = indexImg;
+	}
+
 	public int getW() {
 		return width;
 	}
@@ -108,6 +116,22 @@ public class ImageModel {
 		rgb[0]= (int) (0xFF & r);
 		rgb[1]= (int) (0xFF & g);
 		rgb[2]= (int) (0xFF & b);
+	}
+
+	public Map<Integer, int[]> getLookUpTable() {
+		return lookUpTable;
+	}
+
+	public void setLookUpTable(Map<Integer, int[]> lookUpTable) {
+		this.lookUpTable = lookUpTable;
+	}
+
+	public Map<Integer, ColorCube> getLookUpTableMedian() {
+		return lookUpTableMedian;
+	}
+
+	public void setLookUpTableMedian(Map<Integer, ColorCube> lookUpTableMedian) {
+		this.lookUpTableMedian = lookUpTableMedian;
 	}
 
 	// display pixel value for testing purpose
@@ -415,7 +439,7 @@ public class ImageModel {
 				double grayValue = original[x][y];
 				double error = 0;
 				
-				if (grayValue > ga) {
+				if (grayValue < ga) {
 					error = grayValue;
 
 					for(int i=0;i<3;i++) {
@@ -1374,19 +1398,58 @@ public class ImageModel {
 	/*************************************
 		Inner class as helpers
 	 ************************************/
-	class ColorCube implements Comparable<ColorCube> {
-		Map<int[], Integer> histogram = new HashMap<int[], Integer>();
+	public class ColorCube implements Comparable<ColorCube> {
+		private Map<int[], Integer> histogram = new HashMap<int[], Integer>();
 
-		int rmin, rmax;
-		int gmin, gmax;
-		int bmin, bmax;
-		int size;
+		private int rmin, rmax;
+		private int gmin, gmax;
+		private int bmin, bmax;
+		private int size;
 
-		Integer rmean;
-		Integer gmean;
-		Integer bmean;
+		private Integer rmean;
+		private Integer gmean;
+		private Integer bmean;
 
+		/**
+		 * contructor
+		 */
 		public ColorCube() {
+		}
+
+		/*
+		  Getter/ Setters
+		 */
+		
+		public Integer getRmean() {
+			return rmean;
+		}
+
+		public void setRmean(Integer rmean) {
+			this.rmean = rmean;
+		}
+
+		public Integer getGmean() {
+			return gmean;
+		}
+
+		public void setGmean(Integer gmean) {
+			this.gmean = gmean;
+		}
+
+		public Integer getBmean() {
+			return bmean;
+		}
+
+		public void setBmean() {
+			this.bmean = bmean;
+		}
+
+		public Map<int[], Integer> getHistogram() {
+			return histogram;
+		}
+
+		public void setHistogram(Map<int[], Integer> histogram) {
+			this.histogram = histogram;
 		}
 
 		@Override
