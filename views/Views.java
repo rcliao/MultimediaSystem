@@ -35,7 +35,8 @@ public class Views extends JPanel implements ActionListener {
 				menuItemMCQStucki;
 	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
 	private JLabel imageLabel, outputLabel;
-	private JTabbedPane contentPane;
+	private JTabbedPane mainPanel;
+	private JPanel container, optionPanel;
 
 	// init the java frame
 	static JFrame frame;
@@ -209,6 +210,30 @@ public class Views extends JPanel implements ActionListener {
 		this.frame = frame;
 	}
 
+	public JTabbedPane getMainPanel() {
+		return mainPanel;
+	}
+
+	public void setMainPanel(JTabbedPane mainPanel) {
+		this.mainPanel = mainPanel;
+	}
+
+	public JPanel getContainer() {
+		return container;
+	}
+
+	public void setContainer(JPanel container) {
+		this.container = container;
+	}
+
+	public JPanel getOptionPanel() {
+		return optionPanel;
+	}
+
+	public void setOptionPanel(JPanel optionPanel) {
+		this.optionPanel = optionPanel;
+	}
+
 	/*
 	 Add events to button
 	 */
@@ -280,8 +305,12 @@ public class Views extends JPanel implements ActionListener {
  
 	public Container createContentPane() {
 		//Create the content-pane-to-be.
-		contentPane = new JTabbedPane();
-		contentPane.setOpaque(true);
+		container = new JPanel(new BorderLayout());
+
+		optionPanel = new JPanel(new BoxLayout(optionPanel, BoxLayout.Y_AXIS));
+
+		mainPanel = new JTabbedPane();
+		mainPanel.setOpaque(true);
  
 		imageLabel = new JLabel();
 		imageLabel.setVisible(true);
@@ -290,10 +319,12 @@ public class Views extends JPanel implements ActionListener {
 		outputLabel.setVisible(true);
  
 		//Add the text area to the content pane.
-		contentPane.add(imageLabel, "Input Image");
-		contentPane.add(outputLabel, "Output Image");
+		mainPanel.add(imageLabel, "Input Image");
+		mainPanel.add(outputLabel, "Output Image");
+
+		container.add(mainPanel, BorderLayout.CENTER);
  
-		return contentPane;
+		return container;
 	}
  
 	/**

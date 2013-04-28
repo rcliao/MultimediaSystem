@@ -52,6 +52,14 @@ public class ImageModel {
 	/*****************************
 		Getters / Setters
 	 ****************************/
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
+	}
+
 	public BufferedImage getImg() {
 		return img;
 	}

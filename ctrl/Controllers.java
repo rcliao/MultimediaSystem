@@ -79,7 +79,7 @@ public class Controllers {
 				m_model.readPPM(m_view.getInputImage());
 				m_view.getImageLabel().setIcon(new ImageIcon(m_model.getImg()));
 				m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
-				m_view.getFrame().setSize(m_model.getW(), m_model.getH()+110);
+				m_view.getFrame().setSize(m_model.getW(), m_model.getH()+100);
 			} else {
 				// cancel case
 			}
@@ -105,6 +105,7 @@ public class Controllers {
 
 	class GrayListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertToGray();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
@@ -112,6 +113,7 @@ public class Controllers {
 
 	class BiDirectlyListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertToBiDirectly();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
@@ -119,6 +121,7 @@ public class Controllers {
 
 	class BiErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("floyd");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
@@ -126,6 +129,7 @@ public class Controllers {
 
 	class BiErrorBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("bell");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
@@ -133,6 +137,7 @@ public class Controllers {
 
 	class BiErrorStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("stucki");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
@@ -140,6 +145,7 @@ public class Controllers {
 
 	class QuadErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertToQuadError();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
@@ -147,6 +153,7 @@ public class Controllers {
 
 	class UCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitUCQ();
 
 			// Use a textarea to display the table
@@ -190,6 +197,7 @@ public class Controllers {
 
 	class MCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQ();
 
 			// Use a textarea to display the table
@@ -239,6 +247,7 @@ public class Controllers {
 
 	class MCQErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("floyd");
 
 			// Use a textarea to display the table
@@ -288,6 +297,7 @@ public class Controllers {
 
 	class MCQBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("bell");
 
 			// Use a textarea to display the table
@@ -337,6 +347,7 @@ public class Controllers {
 
 	class MCQStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("floyd");
 
 			// Use a textarea to display the table
