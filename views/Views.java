@@ -342,7 +342,7 @@ public class Views extends JPanel implements ActionListener {
 		frame.setContentPane(this.createContentPane());
  
 		//Display the window.
-		frame.setSize(450, 260);
+		frame.setSize(800, 600);
 		frame.setVisible(true);
 	}
 }

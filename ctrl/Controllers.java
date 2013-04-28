@@ -79,7 +79,6 @@ public class Controllers {
 				m_model.readPPM(m_view.getInputImage());
 				m_view.getImageLabel().setIcon(new ImageIcon(m_model.getImg()));
 				m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
-				m_view.getFrame().setSize(m_model.getW(), m_model.getH()+100);
 			} else {
 				// cancel case
 			}
@@ -153,11 +152,18 @@ public class Controllers {
 
 	class UCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
+
+
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitUCQ();
 
 			// Use a textarea to display the table
-			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
@@ -178,18 +184,12 @@ public class Controllers {
 			}
 
 			JScrollPane logScrollPane = new JScrollPane(tableArea);
-			frame.add(logScrollPane, BorderLayout.CENTER);
-			frame.setTitle("Look Up Table");
-			frame.pack();
-			frame.setVisible(true);
 
 			// display index image
-			JFrame frame2 = new JFrame();
+			
 			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
-			frame2.add(label2, BorderLayout.CENTER);
-			frame2.setTitle("Index Image");
-			frame2.pack();
-			frame2.setVisible(true);
+			m_view.getMainPanel().add(logScrollPane, "Look Up Table");
+			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 		}
@@ -197,11 +197,17 @@ public class Controllers {
 
 	class MCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
+
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQ();
 
 			// Use a textarea to display the table
-			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
@@ -225,18 +231,12 @@ public class Controllers {
 			}
 
 			JScrollPane logScrollPane = new JScrollPane(tableArea);
-			frame.add(logScrollPane, BorderLayout.CENTER);
-			frame.setTitle("Look Up Table");
-			frame.pack();
-			frame.setVisible(true);
 
 			// display index image
-			JFrame frame2 = new JFrame();
 			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
-			frame2.add(label2, BorderLayout.CENTER);
-			frame2.setTitle("Index Image");
-			frame2.pack();
-			frame2.setVisible(true);
+
+			m_view.getMainPanel().add(logScrollPane, "Look Up Table");
+			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
@@ -247,11 +247,17 @@ public class Controllers {
 
 	class MCQErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
+
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("floyd");
 
 			// Use a textarea to display the table
-			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
@@ -275,18 +281,12 @@ public class Controllers {
 			}
 
 			JScrollPane logScrollPane = new JScrollPane(tableArea);
-			frame.add(logScrollPane, BorderLayout.CENTER);
-			frame.setTitle("Look Up Table");
-			frame.pack();
-			frame.setVisible(true);
 
 			// display index image
-			JFrame frame2 = new JFrame();
 			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
-			frame2.add(label2, BorderLayout.CENTER);
-			frame2.setTitle("Index Image");
-			frame2.pack();
-			frame2.setVisible(true);
+			
+			m_view.getMainPanel().add(logScrollPane, "Look Up Table");
+			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
@@ -297,11 +297,17 @@ public class Controllers {
 
 	class MCQBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
+
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("bell");
 
 			// Use a textarea to display the table
-			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
@@ -325,18 +331,12 @@ public class Controllers {
 			}
 
 			JScrollPane logScrollPane = new JScrollPane(tableArea);
-			frame.add(logScrollPane, BorderLayout.CENTER);
-			frame.setTitle("Look Up Table");
-			frame.pack();
-			frame.setVisible(true);
-
+			
 			// display index image
-			JFrame frame2 = new JFrame();
 			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
-			frame2.add(label2, BorderLayout.CENTER);
-			frame2.setTitle("Index Image");
-			frame2.pack();
-			frame2.setVisible(true);
+			
+			m_view.getMainPanel().add(logScrollPane, "Look Up Table");
+			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
@@ -347,11 +347,17 @@ public class Controllers {
 
 	class MCQStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
+
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("floyd");
 
 			// Use a textarea to display the table
-			JFrame frame = new JFrame();
 			JTextArea tableArea = new JTextArea(30,40);
 
 			// print the table to the textarea
@@ -375,18 +381,12 @@ public class Controllers {
 			}
 
 			JScrollPane logScrollPane = new JScrollPane(tableArea);
-			frame.add(logScrollPane, BorderLayout.CENTER);
-			frame.setTitle("Look Up Table");
-			frame.pack();
-			frame.setVisible(true);
-
+			
 			// display index image
-			JFrame frame2 = new JFrame();
 			JLabel label2 = new JLabel(new ImageIcon(output.getIndexImg()));
-			frame2.add(label2, BorderLayout.CENTER);
-			frame2.setTitle("Index Image");
-			frame2.pack();
-			frame2.setVisible(true);
+			
+			m_view.getMainPanel().add(logScrollPane, "Look Up Table");
+			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 
