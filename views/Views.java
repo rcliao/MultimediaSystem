@@ -20,7 +20,7 @@ import models.*;
  * This class exists solely to show you what menus look like.
  * It has no menu-related event handling.
  */
-public class ImageView extends JPanel implements ActionListener {
+public class Views extends JPanel implements ActionListener {
 	static private String newline = "\n";
 
 	// initiated all gui variables
@@ -45,11 +45,11 @@ public class ImageView extends JPanel implements ActionListener {
 	private File inputImage;
 
 	// constructor
-	public ImageView() {
+	public Views() {
 
 	}
 
-	public ImageView(ImageModel model) {
+	public Views(ImageModel model) {
 		ImageModel = model;
 
 		// set up gui

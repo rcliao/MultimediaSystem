@@ -16,15 +16,15 @@ import ImageUtils.*;
 import models.*;
 import views.*;
 
-public class ImageCtrl {
+public class Controllers {
 	//... The Controller needs to interact with both the Model and View.
 	private ImageModel m_model;
-	private ImageView m_view;
+	private Views m_view;
 	private ImageModel output;
 	
 	//========================================================== constructor
 	/** Constructor */
-	public ImageCtrl(ImageModel model, ImageView view) {
+	public Controllers(ImageModel model, Views view) {
 		m_model = model;
 		m_view  = view;
 		output = new ImageModel();

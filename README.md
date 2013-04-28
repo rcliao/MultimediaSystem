@@ -3,13 +3,18 @@ CS 451 MultimediaSystem
 
 CS 451 Multi-Media system Homework 1 will be focusing on image conversion.
 
+## Dependencies
+
+1. (Java)[http://www.java.com/en/]
+2. (JUnit & hamcrest-core)[https://github.com/junit-team/junit/wiki/Download-and-Install]
+
 ## How to run this program
 
-1. Compile the main class(CS451_Liao.java) by
+1. Compile the main class(CS451_Liao.java) by  
 ```
 javac CS451_Liao.java
 ```
-2. Run the main class(CS451_Liao), which will lead user to the GUI program by
+2. Run the main class(CS451_Liao), which will lead user to the GUI program by  
 ```
 java CS451_Liao
 ```
@@ -34,3 +39,30 @@ Image 	->	Gray Scale	=>	This will transform the current image to the gray Scale
 					->	Median Cut Color Quantization(Error-Diffusion(Bell))			=>	Applying Median Cut Algorithm with error difufsion(Bell)
 					->	Median Cut Color Quantization(Error-Diffusion(Stucki))			=>	Applying Median Cut Algorithm with error difufsion(Stucki)
 ```
+
+## How to run unit test
+
+1. Download junit.jar and hamcrest-core.jar
+2. Put *junit.jar* and *hamcrest-core.jar* to be under C:\JUnit\
+3. Set `CLASSPATH` Environment Variable to be `C:\JUnit\junit.jar; C:\JUnit\hamcrest-core.jar`
+4. Compile unit test main class by `javac CS451_Test.java`
+5. Run unit test main class by `java CS451_Test`
+
+## File Structure
+
+	MultimediaSystem/			-->	Main folder
+		/ctrl/ 					--> controller package
+			Controllers.java 	-->	Controller to bind view and model together
+		/ImageUtils/			--> Utilities methods for image preview on file chooser
+			ImageFilter.java 	--> Used to filter the image extension for file chooser
+			ImagePreview.java 	--> Used to display the preview image from file chooser
+			Utils.java 			--> Methods being used from ImageFilter.java and ImagePreview.java
+		/models/
+			ImageModel.java 	--> Image model class (image convertions, methods)
+		/test/
+			UnitTest.java 		--> UnitTest class (JUnit Test)
+		/views/
+			Views.java 			--> View class (GUI related)
+		CS451_Liao.java 		--> Main class
+		CS451_Test.java 		--> Main class for testing
+		README.md 				--> Read me file
