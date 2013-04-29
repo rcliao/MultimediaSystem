@@ -23,13 +23,15 @@ public class Controllers {
 	private ImageModel m_model;
 	private Views m_view;
 	private ImageModel output;
+	private TextModel text_model;
 	
 	//========================================================== constructor
 	/** Constructor */
-	public Controllers(ImageModel model, Views view) {
+	public Controllers(ImageModel model, Views view, TextModel text_model) {
 		m_model = model;
 		m_view  = view;
 		output = new ImageModel();
+		this.text_model = text_model;
 		
 		//... Add listeners to the view.
 		m_view.addQuitListener(new QuitListener());
@@ -96,19 +98,17 @@ public class Controllers {
 				} else if (Utils.getExtension(inputFile).equals("txt")) {
 					m_view.getTextMenu().setEnabled(true);
 					m_view.getImageMenu().setEnabled(false);
+
 					m_view.setTextArea(new JTextArea());
-					try {
-						BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(inputFile));
-						DataInputStream dis = new DataInputStream(inputStream);
-						String value;
-						while (dis.available() != 0) {
-							m_view.getTextArea().append(dis.readLine());
-							m_view.getTextArea().append("\n");
-						}
-						m_view.getInput().setViewportView(new JScrollPane(m_view.getTextArea()));
-					} catch (IOException exc) {
-						exc.printStackTrace();
-					}
+					m_view.setOutputText(new JTextArea());
+
+					text_model.readFile(inputFile);
+					
+					m_view.getTextArea().append(text_model.getMessage());
+					m_view.getOutputText().append(text_model.getMessage());
+					
+					m_view.getInput().setViewportView(new JScrollPane(m_view.getTextArea()));
+					m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputText()));
 				}
 			} else {
 				// cancel case
@@ -430,7 +430,44 @@ public class Controllers {
 
 	class LZWEncodingListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
 
+			String result = text_model.lzwEncoding(text_model.getMessage(), 256);
+
+			m_view.getOutputText().setText(result);
+
+			JTextArea tableArea = new JTextArea();
+
+			Iterator<Integer> iter = text_model.getLzwTable().keySet().iterator();
+
+			tableArea.append("LZW Table\n");
+			tableArea.append("index\tvalue\n");
+			tableArea.append("---------------------------\n");
+
+			while (iter.hasNext()) {
+				Integer index = iter.next();
+				tableArea.append(index + "\t");
+
+				tableArea.append(text_model.getLzwTable().get(index));
+
+				tableArea.append("\n");
+			}
+
+			JScrollPane logScrollPane = new JScrollPane(tableArea);
+
+			double compressionRatio = (double) text_model.getSizeAfterEncoded() / text_model.getSize();
+
+			JTextArea ratio = new JTextArea("Compression Ratio: " + compressionRatio);
+
+			JScrollPane ratioPane = new JScrollPane(ratio);
+
+			m_view.getMainPanel().add(logScrollPane, "LZW Table");
+			m_view.getMainPanel().add(ratioPane, "Compression Ratio");
 		}
 	}
 }

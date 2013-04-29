@@ -21,7 +21,10 @@ public class TextModel {
 	private File file;
 	private String message;
 	private int size;
+	private int sizeAfterEncoded = 0;
 	private int sizeOfDictonary = 256;
+
+	private Map<Integer, String> lzwTable;
 
 	/**
 	 *	Constructors
@@ -62,6 +65,15 @@ public class TextModel {
 	}
 
 
+	public int getSizeAfterEncoded() {
+		return sizeAfterEncoded;
+	}
+	 
+	public void setSizeAfterEncoded(int sizeAfterEncoded) {
+		this.sizeAfterEncoded = sizeAfterEncoded;
+	}
+
+
 	public int getSizeOfDisctionary() {
 		return sizeOfDictonary;
 	}
@@ -70,21 +82,48 @@ public class TextModel {
 		this.sizeOfDictonary = sizeOfDictonary;
 	}
 
+
+	public Map<Integer, String> getLzwTable() {
+		return lzwTable;
+	}
+	 
+	public void setLzwTable(Map<Integer, String> lzwTable) {
+		this.lzwTable = lzwTable;
+	}
+
 	/**
 	 * 	Text Compression Methods
 	 */
+	
+	public void readFile(File file) {
+		this.file = file;
+
+		try {
+			BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+			DataInputStream dis = new DataInputStream(inputStream);
+			message = "";
+			while (dis.available() != 0) {
+				message = message + dis.readLine();
+			}
+		} catch (IOException exc) {
+			exc.printStackTrace();
+		}
+	}
 	
 	/**
 	 * LZW Pattern Substitution (Text Compression)
 	 * @param inputText         input message before encoded
 	 * @param maxDictionarySize the dictionary size
 	 */
-	public void lzwEncoding(String inputText, int maxDictionarySize) {
+	public String lzwEncoding(String inputText, int maxDictionarySize) {
 		// initiate the dictionary
 		Map<Integer, String> dictionary = initDictionary(inputText, maxDictionarySize);
 
+		size = inputText.length() * 8;
+		sizeAfterEncoded = 0;
+
 		// Recursive solving the lzw encoding
-		
+		return lzwEncodingHelper(inputText, "", maxDictionarySize, dictionary);
 	}
 
 	/**
@@ -110,6 +149,11 @@ public class TextModel {
 					encodedString = String.valueOf(index);
 				}
 			}
+
+			lzwTable = dictionary;
+
+			sizeAfterEncoded += encodedString.length() * 8;
+
 			return encodedString;
 		}
 		// recursive case
@@ -143,11 +187,13 @@ public class TextModel {
 					String newEntry = letter + input.substring(0, 1);
 
 					dictionary.put(dictionary.size(), newEntry);
-
-					return encodedString + lzwEncodingHelper(input, "", maxSize, dictionary);
 				} else {
-					return encodedString + lzwEncodingHelper(input, "", maxSize, dictionary);
+
 				}
+
+				sizeAfterEncoded += encodedString.length() * 8;
+
+				return encodedString + " " + lzwEncodingHelper(input, "", maxSize, dictionary);
 			}
 		}
 	}

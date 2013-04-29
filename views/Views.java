@@ -36,7 +36,7 @@ public class Views extends JPanel implements ActionListener {
 	private JLabel imageLabel, outputLabel;
 	private JTabbedPane mainPanel;
 	private JPanel container, optionPanel;
-	private JTextArea textArea;
+	private JTextArea textArea, outputText;
 
 	// init the java frame
 	static JFrame frame;
@@ -279,6 +279,15 @@ public class Views extends JPanel implements ActionListener {
 
 	public void setTextArea(JTextArea textArea) {
 		this.textArea = textArea;
+	}
+
+
+	public JTextArea getOutputText() {
+		return outputText;
+	}
+	 
+	public void setOutputText(JTextArea outputText) {
+		this.outputText = outputText;
 	}
 
 	/*

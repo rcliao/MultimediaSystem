@@ -17,7 +17,8 @@ public class CS451_Liao {
 		 **************************************/
 
 		ImageModel model = new ImageModel();
+		TextModel textModel = new TextModel();
 		Views view = new Views(model);
-		Controllers controller = new Controllers(model, view);
+		Controllers controller = new Controllers(model, view, textModel);
 	}
 }
