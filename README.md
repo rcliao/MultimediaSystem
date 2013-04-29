@@ -60,6 +60,7 @@ Text 	->	LZW Encoding
 			Utils.java 			--> Methods being used from ImageFilter.java and ImagePreview.java
 		/models/
 			ImageModel.java 	--> Image model class (image convertions, methods)
+			TextModel.java 		--> Text model class (Text compression)
 		/test/
 			ModelSuite.java		--> Test models
 			TextModelTest.java 	--> Test case for the text model
