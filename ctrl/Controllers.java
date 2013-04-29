@@ -430,6 +430,15 @@ public class Controllers {
 
 	class LZWEncodingListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			// pop out dialog to ask for the size of the dictionary
+			String sizeString = "";
+
+			while (sizeString.isEmpty() || !sizeString.matches("[0-9]+")) {
+				sizeString = JOptionPane.showInputDialog("Please input the size of the dictionary");
+			}
+
+			Integer size = Integer.valueOf(sizeString);
+
 			// remove the uncessary tabs
 			int tabCount = m_view.getMainPanel().getTabCount();
 			if (tabCount > 2) {
@@ -437,7 +446,7 @@ public class Controllers {
 					m_view.getMainPanel().remove(2);
 			}
 
-			String result = text_model.lzwEncoding(text_model.getMessage(), 256);
+			String result = text_model.lzwEncoding(text_model.getMessage(), size);
 
 			m_view.getOutputText().setText(result);
 
