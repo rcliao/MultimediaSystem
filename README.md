@@ -38,6 +38,7 @@ Image 	->	Gray Scale	=>	This will transform the current image to the gray Scale
 					->	Median Cut Color Quantization(Error-Diffusion(Floyd))			=>	Applying Median Cut Algorithm with error diffusion(Floyd)
 					->	Median Cut Color Quantization(Error-Diffusion(Bell))			=>	Applying Median Cut Algorithm with error difufsion(Bell)
 					->	Median Cut Color Quantization(Error-Diffusion(Stucki))			=>	Applying Median Cut Algorithm with error difufsion(Stucki)
+Text 	->	LZW Encoding
 ```
 
 ## How to run unit test
@@ -60,7 +61,8 @@ Image 	->	Gray Scale	=>	This will transform the current image to the gray Scale
 		/models/
 			ImageModel.java 	--> Image model class (image convertions, methods)
 		/test/
-			UnitTest.java 		--> UnitTest class (JUnit Test)
+			ModelSuite.java		--> Test models
+			TextModelTest.java 	--> Test case for the text model
 		/views/
 			Views.java 			--> View class (GUI related)
 		CS451_Liao.java 		--> Main class
