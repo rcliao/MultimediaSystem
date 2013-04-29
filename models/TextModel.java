@@ -1,0 +1,173 @@
+/**
+ * Text Model class
+ * Doing all the text convertion and storage work
+ */
+package models;
+
+import java.awt.*;
+import java.awt.image.*;
+import java.io.*;
+import java.util.*;
+import javax.swing.*;
+
+public class TextModel {
+	/**
+	 * Constants
+	 */
+	
+	public final int SIZE_PER_LETTER = 8;
+	public final int MAX_SIZE_OF_DICTIONARY = 256;
+
+	private File file;
+	private String message;
+	private int size;
+	private int sizeOfDictonary = 256;
+
+	/**
+	 *	Constructors
+	 */
+	
+	public TextModel() {
+
+	}
+
+	/**
+	 *	Getters/Setters
+	 */
+	
+	public File getFile() {
+		return file;
+	}
+
+	public void setFile(File file) {
+		this.file = file;
+	}
+
+
+	public String getMessage() {
+		return message;
+	}
+	 
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+
+	public int getSize() {
+		return size;
+	}
+	 
+	public void setSize(int size) {
+		this.size = size;
+	}
+
+
+	public int getSizeOfDisctionary() {
+		return sizeOfDictonary;
+	}
+	 
+	public void setSizeOfDisctionary(int sizeOfDictonary) {
+		this.sizeOfDictonary = sizeOfDictonary;
+	}
+
+	/**
+	 * 	Text Compression Methods
+	 */
+	
+	/**
+	 * LZW Pattern Substitution (Text Compression)
+	 * @param inputText         input message before encoded
+	 * @param maxDictionarySize the dictionary size
+	 */
+	public void lzwEncoding(String inputText, int maxDictionarySize) {
+		// initiate the dictionary
+		Map<Integer, String> dictionary = initDictionary(inputText, maxDictionarySize);
+
+		// Recursive solving the lzw encoding
+		
+	}
+
+	/**
+	 * Recursive way of solving the lzw encoding problem
+	 * @param input       			input String
+	 * @param maxSize     			dictionary size
+	 * @param result      			final result
+	 * @param Map<Integer, String>	dictionary
+	 */
+	public String lzwEncodingHelper(String input, String letter, int maxSize, Map<Integer,String> dictionary) {
+		// base case when the input is empty
+		if (input.isEmpty()) {
+			// print the table to the textarea
+			Iterator<Integer> iter = dictionary.keySet().iterator();
+
+			String encodedString = "";
+
+			// find the longest value and encoded the string
+			while (iter.hasNext()) {
+				Integer index = iter.next();
+				String value = dictionary.get(index);
+				if (value.equals(letter)) {
+					encodedString = String.valueOf(index);
+				}
+			}
+			return encodedString;
+		}
+		// recursive case
+		else {
+			/** getting the first letter out of the original text */
+			String firstLetter = input.substring(0, 1);
+			/** conc with the letter */
+			String newLetter = letter + firstLetter;
+			/** if the dictionary contains this value, then keep recursive call */
+			if (dictionary.containsValue(newLetter)) {
+				return lzwEncodingHelper(input.substring(1, input.length()), newLetter, maxSize, dictionary);
+			}
+			/** else find the longest value from the  */
+			else {
+				// print the table to the textarea
+				Iterator<Integer> iter = dictionary.keySet().iterator();
+
+				String encodedString = "";
+
+				// find the longest value and encoded the string
+				while (iter.hasNext()) {
+					Integer index = iter.next();
+					String value = dictionary.get(index);
+					if (value.equals(letter)) {
+						encodedString = String.valueOf(index);
+					}
+				}
+
+				if (dictionary.size() < maxSize) {
+					// create the new entry
+					String newEntry = letter + input.substring(0, 1);
+
+					dictionary.put(dictionary.size(), newEntry);
+
+					return encodedString + lzwEncodingHelper(input, "", maxSize, dictionary);
+				} else {
+					return encodedString + lzwEncodingHelper(input, "", maxSize, dictionary);
+				}
+			}
+		}
+	}
+
+	/**
+	 * initialize the dictionary to contain all the single symbles
+	 * @param  inputText         [input message]
+	 * @param  maxDictionarySize [dictionary size]
+	 * @return                   [return the dictionary]
+	 */
+	public Map<Integer, String> initDictionary(String inputText, int maxDictionarySize) {
+		Map<Integer, String> result = new TreeMap<Integer, String>();
+
+		for (int i = 0; i < inputText.length(); i ++) {
+			String single = inputText.substring(i, i + 1);
+			if (!result.containsValue(single)){
+				result.put(result.size(), single);
+			}
+		}
+
+		return result;
+	}
+}

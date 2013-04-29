@@ -12,6 +12,8 @@ import javax.swing.*;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
 
+import java.io.*;
+
 import ImageUtils.*;
 import models.*;
 import views.*;
@@ -44,6 +46,7 @@ public class Controllers {
 		m_view.add8BitMCQErrorListener(new MCQErrorListener());
 		m_view.add8BitMCQBellListener(new MCQBellListener());
 		m_view.add8BitMCQStuckiListener(new MCQStuckiListener());
+		m_view.addLZWEncodingListener(new LZWEncodingListener());
 	}
 	
 	//====================== Action Listeners
@@ -74,17 +77,47 @@ public class Controllers {
 	 
 			//Process the results.
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				m_view.setInputImage(m_view.getFC().getSelectedFile());
-				output.readPPM(m_view.getInputImage());
-				m_model.readPPM(m_view.getInputImage());
-				m_view.getImageLabel().setIcon(new ImageIcon(m_model.getImg()));
-				m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+				File inputFile = m_view.getFC().getSelectedFile();
+				if (Utils.getExtension(inputFile).equals("ppm") || Utils.getExtension(inputFile).equals("png")
+					|| Utils.getExtension(inputFile).equals("jpg") || Utils.getExtension(inputFile).equals("jpeg")
+					|| Utils.getExtension(inputFile).equals("gif")) {
+					m_view.getTextMenu().setEnabled(false);
+					m_view.getImageMenu().setEnabled(true);
+					m_view.setInputImage(m_view.getFC().getSelectedFile());
+					output.readPPM(m_view.getInputImage());
+					m_model.readPPM(m_view.getInputImage());
+					m_view.getImageLabel().setIcon(new ImageIcon(m_model.getImg()));
+					m_view.getImageLabel().setText("");
+					m_view.getInput().setViewportView(new JScrollPane(m_view.getImageLabel()));
+					m_view.getInput().updateUI();
+					m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+					m_view.getOutputLabel().setText("");
+					m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
+				} else if (Utils.getExtension(inputFile).equals("txt")) {
+					m_view.getTextMenu().setEnabled(true);
+					m_view.getImageMenu().setEnabled(false);
+					m_view.setTextArea(new JTextArea());
+					try {
+						BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(inputFile));
+						DataInputStream dis = new DataInputStream(inputStream);
+						String value;
+						while (dis.available() != 0) {
+							m_view.getTextArea().append(dis.readLine());
+							m_view.getTextArea().append("\n");
+						}
+						m_view.getInput().setViewportView(new JScrollPane(m_view.getTextArea()));
+					} catch (IOException exc) {
+						exc.printStackTrace();
+					}
+				}
 			} else {
 				// cancel case
 			}
 	 
 			//Reset the file chooser for the next time it's shown.
 			m_view.getFC().setSelectedFile(null);
+
+			m_view.updatePanel();
 		}
 	}
 
@@ -392,6 +425,12 @@ public class Controllers {
 
 			// write to file
 			output.writeToFile("LUT.txt");
+		}
+	}
+
+	class LZWEncodingListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+
 		}
 	}
 }

@@ -24,19 +24,19 @@ public class Views extends JPanel implements ActionListener {
 	static private String newline = "\n";
 
 	// initiated all gui variables
-	private JTextArea output;
-	private JScrollPane scrollPane;
+	private JScrollPane input, output;
 	private JFileChooser fc;
 	private JFileChooser fcs = new JFileChooser();
 	private JMenuItem menuItemLoad, menuItemSave, menuItemQuit, menuItemGray,
 				menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
 				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
-				menuItemMCQStucki;
-	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits;
+				menuItemMCQStucki, menuItemLZW;
+	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu;
 	private JLabel imageLabel, outputLabel;
 	private JTabbedPane mainPanel;
 	private JPanel container, optionPanel;
+	private JTextArea textArea;
 
 	// init the java frame
 	static JFrame frame;
@@ -155,6 +155,13 @@ public class Views extends JPanel implements ActionListener {
 		submenu8Bits.add(menuItemMCQStucki);
 
 		imageMenu.add(submenu8Bits);
+		imageMenu.setEnabled(false);
+
+		textMenu = new JMenu("Text");
+		menuItemLZW = new JMenuItem("LZW Coding");
+		textMenu.add(menuItemLZW);
+		menuBar.add(textMenu);
+		textMenu.setEnabled(false);
 
 		return menuBar;
 	}
@@ -162,6 +169,22 @@ public class Views extends JPanel implements ActionListener {
 	/*
 	 Getter/ Setters
 	 */
+	public JMenu getTextMenu(){
+		return textMenu;
+	}
+
+	public void setTextMenu(JMenu textMenu) {
+		this.textMenu = textMenu;
+	}
+
+	public JMenu getImageMenu() {
+		return imageMenu;
+	}
+
+	public void setImageMenu(JMenu imageMenu) {
+		this.imageMenu = imageMenu;
+	}
+
 	public JFileChooser getFC() {
 		return fc;
 	}
@@ -234,6 +257,30 @@ public class Views extends JPanel implements ActionListener {
 		this.optionPanel = optionPanel;
 	}
 
+	public JScrollPane getInput() {
+		return input;
+	}
+
+	public void setInput(JScrollPane input) {
+		this.input = input;
+	}
+
+	public JScrollPane getOutput() {
+		return output;
+	}
+
+	public void setOutput(JScrollPane output) {
+		this.output = output;
+	}
+
+	public JTextArea getTextArea() {
+		return textArea;
+	}
+
+	public void setTextArea(JTextArea textArea) {
+		this.textArea = textArea;
+	}
+
 	/*
 	 Add events to button
 	 */
@@ -293,6 +340,10 @@ public class Views extends JPanel implements ActionListener {
 		menuItemMCQStucki.addActionListener(action);
 	}
 
+	public void addLZWEncodingListener(ActionListener action) {
+		menuItemLZW.addActionListener(action);
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		// refresh the panel everytime a button is clicked
 		updatePanel();
@@ -312,15 +363,17 @@ public class Views extends JPanel implements ActionListener {
 		mainPanel = new JTabbedPane();
 		mainPanel.setOpaque(true);
  
-		imageLabel = new JLabel();
+		imageLabel = new JLabel("Please read a file");
 		imageLabel.setVisible(true);
+		input = new JScrollPane(imageLabel);
 
-		outputLabel = new JLabel();
+		outputLabel = new JLabel("Please read a file");
 		outputLabel.setVisible(true);
+		output = new JScrollPane(outputLabel);
  
 		//Add the text area to the content pane.
-		mainPanel.add(imageLabel, "Input Image");
-		mainPanel.add(outputLabel, "Output Image");
+		mainPanel.add(input, "Input");
+		mainPanel.add(output, "Output");
 
 		container.add(mainPanel, BorderLayout.CENTER);
  
