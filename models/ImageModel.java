@@ -40,7 +40,6 @@ public class ImageModel {
 		height = h;
 
 		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		System.out.println("Created an empty image with size " + width + "x" + height);
 	}
 
 	public ImageModel(File file) {
@@ -1524,8 +1523,8 @@ public class ImageModel {
 		int[] rgb = new int[3];
 
 
-		for (int i = -1; i <= 1; i ++) {
-			for (int j = -1; j <= 1; j ++) {
+		for (int i = 0; i <= 2; i ++) {
+			for (int j = 0; j <= 2; j ++) {
 				if (x + i < width && x + i >= 0 && y + j < height && y + j >= 0) {
 					getPixel(x+i, y+j, rgb);
 
@@ -1533,7 +1532,12 @@ public class ImageModel {
 						result += rgb[0]/9;
 
 					else if (option == "filter2") { 
-						result += rgb[0] * Math.pow(2, 2-(Math.abs(i)+Math.abs(j)))/16;
+						if ((i + j)% 2 == 1)
+							result += rgb[0] * 2/16;
+						else if (i == 1 && j == 1)
+							result += rgb[0] * 4/16;
+						else
+							result += rgb[0] * 1/16;
 					}
 				}
 			}

@@ -97,6 +97,9 @@ public class Controllers {
 					m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 					m_view.getOutputLabel().setText("");
 					m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
+
+					m_view.getMainPanel().setTitleAt(0, "Input Image");
+					m_view.getMainPanel().setTitleAt(0, "Output Image");
 				} else if (Utils.getExtension(inputFile).equals("txt")) {
 					m_view.getTextMenu().setEnabled(true);
 					m_view.getImageMenu().setEnabled(false);
@@ -111,6 +114,9 @@ public class Controllers {
 					
 					m_view.getInput().setViewportView(new JScrollPane(m_view.getTextArea()));
 					m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputText()));
+
+					m_view.getMainPanel().setTitleAt(0, "Input Text");
+					m_view.getMainPanel().setTitleAt(0, "Output Text");
 				}
 			} else {
 				// cancel case
@@ -142,6 +148,8 @@ public class Controllers {
 			output = new ImageModel(m_model.getFile());
 			output.convertToGray();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "Gray Scale");
 		}
 	}
 
@@ -150,6 +158,8 @@ public class Controllers {
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiDirectly();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "1-Bit Level Image (Directly)");
 		}
 	}
 
@@ -158,6 +168,8 @@ public class Controllers {
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("floyd");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "1-Bit Level Image (Error Diffusion(Floyd))");
 		}
 	}
 
@@ -166,6 +178,8 @@ public class Controllers {
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("bell");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "1-Bit Level Image (Error Diffusion(Bell))");
 		}
 	}
 
@@ -174,6 +188,8 @@ public class Controllers {
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("stucki");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "1-Bit Level Image (Error Diffusion(Stucki))");
 		}
 	}
 
@@ -182,6 +198,8 @@ public class Controllers {
 			output = new ImageModel(m_model.getFile());
 			output.convertToQuadError();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "2-Bit Level Image (Error Diffusion)");
 		}
 	}
 
@@ -227,6 +245,7 @@ public class Controllers {
 			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+			m_view.getMainPanel().setTitleAt(1, "Uniform Color Quantization");
 		}
 	}
 
@@ -274,6 +293,8 @@ public class Controllers {
 			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "Median Cut Algorithm");
 
 			// write to file
 			output.writeToFile("LUT.txt");
@@ -324,6 +345,7 @@ public class Controllers {
 			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+			m_view.getMainPanel().setTitleAt(1, "Median Cut Algorithm (Floyd)");
 
 			// write to file
 			output.writeToFile("LUT.txt");
@@ -374,6 +396,7 @@ public class Controllers {
 			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+			m_view.getMainPanel().setTitleAt(1, "Median Cut Algorithm (Bell)");
 
 			// write to file
 			output.writeToFile("LUT.txt");
@@ -424,6 +447,7 @@ public class Controllers {
 			m_view.getMainPanel().add(label2, "Index Image");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+			m_view.getMainPanel().setTitleAt(1, "Median Cut Algorithm (Stucki)");
 
 			// write to file
 			output.writeToFile("LUT.txt");
@@ -455,6 +479,8 @@ public class Controllers {
 			String result = text_model.lzwEncoding(text_model.getMessage(), size);
 
 			m_view.getOutputText().setText(result);
+
+			m_view.getMainPanel().setTitleAt(1, "LZW Encoding");
 
 			JTextArea tableArea = new JTextArea();
 
@@ -523,11 +549,34 @@ public class Controllers {
 				k = inputDialog("Please input k (sampling routine)", 1);
 			}
 
-			output.subSampling(k, "filter2");
+			ImageModel output2 = new ImageModel(output.getW(), output.getH());
+			output2.setImg(output.getImg());
+			ImageModel output3 = new ImageModel(output.getW(), output.getH());
+			output3.setImg(output.getImg());
+			ImageModel output4 = new ImageModel(output.getW(), output.getH());
+			output4.setImg(output.getImg());
+
+			output.subSampling(k, "default");
+			output2.subSampling(k, "average");
+			output3.subSampling(k, "filter1");
+			output4.subSampling(k, "filter2");
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 			m_view.getOutputLabel().setText("");
 			m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
+			m_view.getMainPanel().setTitleAt(1, "No filter");
+
+			JLabel outputImage2 = new JLabel(new ImageIcon(output2.getImg()));
+			JLabel outputImage3 = new JLabel(new ImageIcon(output3.getImg()));
+			JLabel outputImage4 = new JLabel(new ImageIcon(output4.getImg()));
+
+			JScrollPane outputPane2 = new JScrollPane(outputImage2);
+			JScrollPane outputPane3 = new JScrollPane(outputImage3);
+			JScrollPane outputPane4 = new JScrollPane(outputImage4);
+
+			m_view.getMainPanel().add(outputPane2, "Average");
+			m_view.getMainPanel().add(outputPane3, "Filter 1");
+			m_view.getMainPanel().add(outputPane4, "Filter 2");
 		}
 	}
 
@@ -569,6 +618,9 @@ public class Controllers {
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
 			m_view.getOutputLabel().setText("");
 			m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
+
+			m_view.getMainPanel().setTitleAt(1, "Circle_"+m+"_"+n);
+			m_view.getMainPanel().setTitleAt(0, "Circle_"+m+"_"+n);
 		}
 	}
 }
