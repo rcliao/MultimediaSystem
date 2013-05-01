@@ -19,14 +19,14 @@ public class ImageModel {
 	private int width;  // number of columns
 	private int height;  // number of rows
 	private int pixelDepth=3;  // pixel depth in byte
-	BufferedImage img;  // image array to store rgb values, 8 bits per channel
-	String filename;  // store file name to save the index file
-	File file;
+	private BufferedImage img;  // image array to store rgb values, 8 bits per channel
+	private String filename;  // store file name to save the index file
+	private File file;
 
-	BufferedImage indexImg;  // store index image to display later on
+	private BufferedImage indexImg;  // store index image to display later on
 
-	Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();  // this is the look up talbe for the uniform color quantization
-	Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();  // look up table for the median cut algorithm
+	private Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();  // this is the look up talbe for the uniform color quantization
+	private Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();  // look up table for the median cut algorithm
 
 	/*****************************
 		Constructors
@@ -348,6 +348,38 @@ public class ImageModel {
 			fos.close();
 		} catch(Exception e) {
 			System.err.println(e.getMessage());
+		}
+	}
+
+	/**
+	 * Image Generation methods
+	 */
+	
+	public void createCircleImage(int m, int n) {
+		int[][] circlePoints = generateRadiuses(m, n);
+
+		width = 512;
+		height = 512;
+
+		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+		int[] white = new int[3];
+		int[] black = new int[3];
+
+		for (int i = 0; i < 3; i ++) {
+			white[i] = 255;
+			black[i] = 0;
+		}
+
+		for (int w = 0; w < width; w ++) {
+			for (int h = 0; h < height; h ++) {
+				if (circlePoints[w][h] == 1) {
+					setPixel(w, h, black);
+				}
+				else {
+					setPixel(w, h, white);
+				}
+			}
 		}
 	}
 
@@ -824,6 +856,68 @@ public class ImageModel {
 
 				// write it to img (BufferedImage)
 				setPixel(x, y, rgb);
+			}
+		}
+	}
+
+	// homework 2 Aliasing
+	public void subSampling(int k, String option) {
+		int[][] graph = new int[width / k][height / k];
+
+		// no filter
+		if (option == "default") {
+			for (int x = 0; x < 512; x += k) {
+				for (int y = 0; y < 512; y += k) {
+					int[] point = new int[3];
+					getPixel(x, y, point);
+
+					graph[x/k][y/k] = point[0];
+				}
+			}
+		}
+		// calculating average for the k
+		else if (option == "average") {
+			for (int x = 0; x < 512; x += k) {
+				for (int y = 0; y < 512; y += k) {
+					int averageRGB = 0;
+
+					for (int xi = x; xi < x + k; xi ++) {
+						for (int yi = y; yi < y + k; yi ++) {
+							int[] point = new int[3];
+							getPixel(xi, yi, point);
+
+							averageRGB += point[0];
+						}
+					}
+
+					averageRGB /= k;
+					
+					graph[x/k][y/k] = averageRGB;
+				}
+			}
+		}
+		// 3 x 3 filter case
+		else if (option == "filter1" || option == "filter2") {
+			for (int x = 0; x < 512; x += k) {
+				for (int y = 0; y < 512; y += k) {
+					int value = filter(x, y, option);
+
+					graph[x/k][y/k] = value;
+				}
+			}
+		}
+
+		width = width / k;
+		height = height / k;
+
+		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+		for (int x = 0; x < width; x ++) {
+			for (int y = 0; y < height; y ++) {				
+				int[] resultRGB = new int[3];
+				for (int i = 0; i < 3; i ++)
+					resultRGB[i] = graph[x][y];
+				setPixel(x, y, resultRGB);
 			}
 		}
 	}
@@ -1391,6 +1485,66 @@ public class ImageModel {
         	e.printStackTrace();
         }
 	}
+
+	public int[][] generateRadiuses(int m, int n) {
+		int[][] result = new int[512][512];
+		
+		// calculate the radiuses according to the input m and n
+		for (int r = n; r < 256; r += n) {
+			for (int w = 0; w <= m; w ++) {
+				generateRadius(r+w, result);
+			}
+		}
+
+		return result;
+	}
+
+	public void generateRadius(int r, int[][] input) {
+		/**
+		 * Formula to find all the points on the map for the circle
+		 * x = cx + r * cos(a)
+		 * y = cy + r * sin(a)
+		 */
+		
+		int centerX = 255;
+		int centerY = 255;
+
+		for (double degree = 0; degree < 360; degree += 0.01) {
+			int x  = (int) Math.round(centerX + r * Math.cos(Math.toRadians(degree)));
+			int y  = (int) Math.round(centerY + r * Math.sin(Math.toRadians(degree)));
+
+			if (x < 512 && y < 512 && x >= 0 && y >= 0)
+				input[x][y] = 1;
+		}
+	}
+
+	public int filter(int x, int y, String option) {
+		double result = 0;
+
+		int[] rgb = new int[3];
+
+
+		for (int i = -1; i <= 1; i ++) {
+			for (int j = -1; j <= 1; j ++) {
+				if (x + i < width && x + i >= 0 && y + j < height && y + j >= 0) {
+					getPixel(x+i, y+j, rgb);
+
+					if (option == "filter1")
+						result += rgb[0]/9;
+
+					else if (option == "filter2") { 
+						result += rgb[0] * Math.pow(2, 2-(Math.abs(i)+Math.abs(j)))/16;
+					}
+				}
+			}
+		}
+
+		return (int) Math.round(result);
+	}
+
+	/****************************************
+	 Testing functions
+	 **************************************/
 
 	public void display(String title) {
 	// display the image on the screen

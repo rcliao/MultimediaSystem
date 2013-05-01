@@ -31,8 +31,9 @@ public class Views extends JPanel implements ActionListener {
 				menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
 				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
-				menuItemMCQStucki, menuItemLZW;
-	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu;
+				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle;
+	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu,
+				imageTextMenu;
 	private JLabel imageLabel, outputLabel;
 	private JTabbedPane mainPanel;
 	private JPanel container, optionPanel;
@@ -158,10 +159,20 @@ public class Views extends JPanel implements ActionListener {
 		imageMenu.setEnabled(false);
 
 		textMenu = new JMenu("Text");
+
 		menuItemLZW = new JMenuItem("LZW Coding");
 		textMenu.add(menuItemLZW);
 		menuBar.add(textMenu);
 		textMenu.setEnabled(false);
+
+		imageTextMenu = new JMenu("Image Test");
+
+		menuItemCircle = new JMenuItem("Create Circle");
+		imageTextMenu.add(menuItemCircle);
+
+		menuItemAliasing = new JMenuItem("Aliasing");
+		imageTextMenu.add(menuItemAliasing);
+		menuBar.add(imageTextMenu);
 
 		return menuBar;
 	}
@@ -353,6 +364,14 @@ public class Views extends JPanel implements ActionListener {
 		menuItemLZW.addActionListener(action);
 	}
 
+	public void addAliasingListener(ActionListener action) {
+		menuItemAliasing.addActionListener(action);
+	}
+
+	public void addCircleListener(ActionListener action) {
+		menuItemCircle.addActionListener(action);
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		// refresh the panel everytime a button is clicked
 		updatePanel();
@@ -396,7 +415,7 @@ public class Views extends JPanel implements ActionListener {
 	 */
 	private void createAndShowGUI() {
 		//Create and set up the window.
-		frame = new JFrame("CS 451 Multi-Media System - Homework1");
+		frame = new JFrame("CS 451 Multi-Media System - Homework2");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
 		//Create and set up the content pane.

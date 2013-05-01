@@ -23,7 +23,7 @@ public class CS451_Test {
 		if (DEV_OPTION) {
 			Result result = JUnitCore.runClasses(ModelSuite.class);
 			for (Failure failure : result.getFailures()) {
-				System.out.println(failure.toString());
+				System.out.println(failure.getTrace());
 			}
 			System.out.println("Number of test cases: " + result.getRunCount());
 			System.out.println("Number of failures: " + result.getFailureCount());

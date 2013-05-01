@@ -49,6 +49,8 @@ public class Controllers {
 		m_view.add8BitMCQBellListener(new MCQBellListener());
 		m_view.add8BitMCQStuckiListener(new MCQStuckiListener());
 		m_view.addLZWEncodingListener(new LZWEncodingListener());
+		m_view.addAliasingListener(new AliasingListener());
+		m_view.addCircleListener(new CircleListener());
 	}
 	
 	//====================== Action Listeners
@@ -433,11 +435,15 @@ public class Controllers {
 			// pop out dialog to ask for the size of the dictionary
 			String sizeString = "";
 
-			while (sizeString.isEmpty() || !sizeString.matches("[0-9]+")) {
+			while (sizeString.isEmpty() || !sizeString.matches("[0-9]+") || Integer.valueOf(sizeString) > 256) {
 				sizeString = JOptionPane.showInputDialog("Please input the size of the dictionary");
 			}
 
-			Integer size = Integer.valueOf(sizeString);
+			// if user doesnt input value, default to be max size 256
+			Integer size = 256;
+
+			if (sizeString != null)
+				size = Integer.valueOf(sizeString);
 
 			// remove the uncessary tabs
 			int tabCount = m_view.getMainPanel().getTabCount();
@@ -477,6 +483,92 @@ public class Controllers {
 
 			m_view.getMainPanel().add(logScrollPane, "LZW Table");
 			m_view.getMainPanel().add(ratioPane, "Compression Ratio");
+		}
+	}
+
+	class AliasingListener implements ActionListener {
+		public Integer inputDialog(String message, Integer defaultValue) {
+			String mString = "";
+
+			while (mString.isEmpty() || !mString.matches("[0-9]+")) {
+				mString = JOptionPane.showInputDialog(message);
+			}
+
+			// if user doesnt input value, default is 1
+			Integer m = defaultValue;
+
+			if (mString != null)
+				m = Integer.valueOf(mString);
+
+			return m;
+		}
+
+		public boolean powerOf2(int number) {
+			if (number == 0)
+				return false;
+			while (number % 2 == 0) {
+				number /= 2;
+			}
+			if (number > 1)
+				return false;
+			else
+				return true;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			Integer k = 0;
+
+			while (k > 16 || !powerOf2(k)) {
+				k = inputDialog("Please input k (sampling routine)", 1);
+			}
+
+			output.subSampling(k, "filter2");
+
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+			m_view.getOutputLabel().setText("");
+			m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
+		}
+	}
+
+	class CircleListener implements ActionListener {
+		public Integer inputDialog(String message, Integer defaultValue) {
+			String mString = "";
+
+			while (mString.isEmpty() || !mString.matches("[0-9]+")) {
+				mString = JOptionPane.showInputDialog(message);
+			}
+
+			// if user doesnt input value, default is 1
+			Integer m = defaultValue;
+
+			if (mString != null)
+				m = Integer.valueOf(mString);
+
+			return m;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			// pop out dialog to ask for the value of the N
+			Integer m = 0;
+
+			m = inputDialog("Please input M (the thickness of the circle)", 1);
+
+			// pop out dialog to ask for the value of the M
+			Integer n = 0;
+
+			n = inputDialog("Please input N (the radius step of the circle)", 5);
+
+			m_model.createCircleImage(m, n);
+			output.createCircleImage(m, n);
+
+			m_view.getImageLabel().setIcon(new ImageIcon(m_model.getImg()));
+			m_view.getImageLabel().setText("");
+			m_view.getInput().setViewportView(new JScrollPane(m_view.getImageLabel()));
+
+			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
+			m_view.getOutputLabel().setText("");
+			m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
 		}
 	}
 }
