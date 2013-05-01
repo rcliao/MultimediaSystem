@@ -119,7 +119,7 @@ public class TextModel {
 		// initiate the dictionary
 		Map<Integer, String> dictionary = initDictionary(inputText, maxDictionarySize);
 
-		size = inputText.length() * 8;
+		size = inputText.length() * SIZE_PER_LETTER;
 		sizeAfterEncoded = 0;
 
 		// Recursive solving the lzw encoding
@@ -150,9 +150,17 @@ public class TextModel {
 				}
 			}
 
+			int indexSize = 0;
+
+			for (int i = 0; i <= 8; i ++) {
+				if (Math.pow(2, i) == maxSize) {
+					indexSize = i;
+				}
+			}
+
 			lzwTable = dictionary;
 
-			sizeAfterEncoded += encodedString.length() * 8;
+			sizeAfterEncoded += indexSize;
 
 			return encodedString;
 		}
@@ -191,11 +199,52 @@ public class TextModel {
 
 				}
 
-				sizeAfterEncoded += encodedString.length() * 8;
+				int indexSize = 0;
+
+				for (int i = 0; i <= 8; i ++) {
+					if (Math.pow(2, i) == maxSize) {
+						indexSize = i;
+					}
+				}
+
+				sizeAfterEncoded += indexSize;
 
 				return encodedString + " " + lzwEncodingHelper(input, "", maxSize, dictionary);
 			}
 		}
+	}
+
+	/**
+	 * LZW Decoding
+	 * @param  input             input String
+	 * @param  maxDictionarySize the dictionary size
+	 * @return                   decoded decoded string
+	 */
+	public String lzwDecoding(Map<Integer, String> dictionary, String input, int maxDictionarySize) {
+		String[] indexes = input.split(" ");
+
+		return lzwDecodingHelper(indexes, "", maxDictionarySize, dictionary);
+	}
+
+	public String lzwDecodingHelper(String[] indexes, String letter, int maxSize, Map<Integer, String> dictionary) {
+		String result = "";
+
+		for (int i = 0; i < indexes.length; i ++) {
+			if (dictionary.containsKey(Integer.valueOf(indexes[i]))) {
+				String entry = dictionary.get(Integer.valueOf(indexes[i]));
+				result += entry;
+				String nextEntry;
+				if (i + 1 < indexes.length) {
+					if (dictionary.containsKey(Integer.valueOf(indexes[i+1])))
+						nextEntry = entry + dictionary.get(Integer.valueOf(indexes[i+1]));
+					else
+						nextEntry = entry + entry.substring(0, 1);
+					dictionary.put(dictionary.size(), nextEntry);
+				}
+			}
+		}
+
+		return result;
 	}
 
 	/**

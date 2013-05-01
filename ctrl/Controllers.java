@@ -22,7 +22,7 @@ public class Controllers {
 	//... The Controller needs to interact with both the Model and View.
 	private ImageModel m_model;
 	private Views m_view;
-	private ImageModel output;
+	private ImageModel output, output2, output3, output4;
 	private TextModel text_model;
 	
 	//========================================================== constructor
@@ -131,13 +131,45 @@ public class Controllers {
 
 	class SaveListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			if (m_model.getImg() != null) {
-				int returnVal = m_view.getFCS().showSaveDialog(m_view);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = m_view.getFCS().getSelectedFile();
-					output.write2PPM(file);
-				} else {
-					// cancel case
+			if (m_view.getMainPanel().getSelectedIndex() == 1) {
+				if (output.getImg() != null) {
+					int returnVal = m_view.getFCS().showSaveDialog(m_view);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = m_view.getFCS().getSelectedFile();
+						output.write2PPM(file);
+					} else {
+						// cancel case
+					}
+				}
+			} else if (m_view.getMainPanel().getSelectedIndex() == 2) {
+				if (output2.getImg() != null) {
+					int returnVal = m_view.getFCS().showSaveDialog(m_view);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = m_view.getFCS().getSelectedFile();
+						output2.write2PPM(file);
+					} else {
+						// cancel case
+					}
+				}
+			} else if (m_view.getMainPanel().getSelectedIndex() == 3) {
+				if (output3.getImg() != null) {
+					int returnVal = m_view.getFCS().showSaveDialog(m_view);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = m_view.getFCS().getSelectedFile();
+						output3.write2PPM(file);
+					} else {
+						// cancel case
+					}
+				}
+			} else if (m_view.getMainPanel().getSelectedIndex() == 4) {
+				if (output4.getImg() != null) {
+					int returnVal = m_view.getFCS().showSaveDialog(m_view);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = m_view.getFCS().getSelectedFile();
+						output4.write2PPM(file);
+					} else {
+						// cancel case
+					}
 				}
 			}
 		}
@@ -499,16 +531,23 @@ public class Controllers {
 				tableArea.append("\n");
 			}
 
+			String decodedMessage = text_model.lzwDecoding(text_model.getLzwTable(), result, size);
+
+			JTextArea decodedTextArea = new JTextArea("Decoded Message: \n" + decodedMessage);
+
+			JScrollPane decodedPane = new JScrollPane(decodedTextArea);
+
 			JScrollPane logScrollPane = new JScrollPane(tableArea);
 
 			double compressionRatio = (double) text_model.getSizeAfterEncoded() / text_model.getSize();
 
-			JTextArea ratio = new JTextArea("Compression Ratio: " + compressionRatio);
+			JTextArea ratio = new JTextArea("Compression Ratio: \n" + compressionRatio);
 
 			JScrollPane ratioPane = new JScrollPane(ratio);
 
 			m_view.getMainPanel().add(logScrollPane, "LZW Table");
 			m_view.getMainPanel().add(ratioPane, "Compression Ratio");
+			m_view.getMainPanel().add(decodedPane, "Decoded Message");
 		}
 	}
 
@@ -543,17 +582,24 @@ public class Controllers {
 
 		public void actionPerformed(ActionEvent e) {
 
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
+
 			Integer k = 0;
 
 			while (k > 16 || !powerOf2(k)) {
 				k = inputDialog("Please input k (sampling routine)", 1);
 			}
 
-			ImageModel output2 = new ImageModel(output.getW(), output.getH());
+			output2 = new ImageModel(output.getW(), output.getH());
 			output2.setImg(output.getImg());
-			ImageModel output3 = new ImageModel(output.getW(), output.getH());
+			output3 = new ImageModel(output.getW(), output.getH());
 			output3.setImg(output.getImg());
-			ImageModel output4 = new ImageModel(output.getW(), output.getH());
+			output4 = new ImageModel(output.getW(), output.getH());
 			output4.setImg(output.getImg());
 
 			output.subSampling(k, "default");
@@ -598,6 +644,13 @@ public class Controllers {
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			// remove the uncessary tabs
+			int tabCount = m_view.getMainPanel().getTabCount();
+			if (tabCount > 2) {
+				for (int i = 2; i < tabCount; i ++)
+					m_view.getMainPanel().remove(2);
+			}
+
 			// pop out dialog to ask for the value of the N
 			Integer m = 0;
 

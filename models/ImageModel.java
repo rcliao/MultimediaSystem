@@ -861,61 +861,66 @@ public class ImageModel {
 
 	// homework 2 Aliasing
 	public void subSampling(int k, String option) {
-		int[][] graph = new int[width / k][height / k];
+		Map<xyAxis, int[]> graph = new TreeMap<xyAxis, int[]>();
 
 		// no filter
 		if (option == "default") {
-			for (int x = 0; x < 512; x += k) {
-				for (int y = 0; y < 512; y += k) {
+			for (int x = 0; x < width; x += k) {
+				for (int y = 0; y < height; y += k) {
 					int[] point = new int[3];
 					getPixel(x, y, point);
 
-					graph[x/k][y/k] = point[0];
+					graph.put(new xyAxis(x/k, y/k), point);
 				}
 			}
 		}
 		// calculating average for the k
 		else if (option == "average") {
-			for (int x = 0; x < 512; x += k) {
-				for (int y = 0; y < 512; y += k) {
-					int averageRGB = 0;
+			for (int x = 0; x < width; x += k) {
+				for (int y = 0; y < height; y += k) {
+					int[] averageRGB = new int[3];
 
-					for (int xi = x; xi < x + k; xi ++) {
-						for (int yi = y; yi < y + k; yi ++) {
-							int[] point = new int[3];
-							getPixel(xi, yi, point);
+					for (int xi = x; xi < (x + k); xi ++) {
+						for (int yi = y; yi < (y + k); yi ++) {
+							if (xi >= 0 && xi < width && yi >= 0 && yi < height) {
+								int[] point = new int[3];
+								getPixel(xi, yi, point);
 
-							averageRGB += point[0];
+								averageRGB[0] += point[0];
+								averageRGB[1] += point[1];
+								averageRGB[2] += point[2];
+							}
 						}
 					}
 
-					averageRGB /= k;
+					for (int i = 0; i < 3; i ++)
+						averageRGB[i] = (int) Math.round(averageRGB[i]/(k*k));
 					
-					graph[x/k][y/k] = averageRGB;
+					graph.put(new xyAxis(x/k, y/k), averageRGB);
 				}
 			}
 		}
 		// 3 x 3 filter case
 		else if (option == "filter1" || option == "filter2") {
-			for (int x = 0; x < 512; x += k) {
-				for (int y = 0; y < 512; y += k) {
-					int value = filter(x, y, option);
+			for (int x = 0; x < width; x += k) {
+				for (int y = 0; y < height; y += k) {
+					int[] value = filter(x, y, option);
 
-					graph[x/k][y/k] = value;
+					graph.put(new xyAxis(x/k, y/k), value);
 				}
 			}
 		}
 
+		// required output
 		width = width / k;
 		height = height / k;
 
 		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
 		for (int x = 0; x < width; x ++) {
-			for (int y = 0; y < height; y ++) {				
+			for (int y = 0; y < height; y ++) {			
 				int[] resultRGB = new int[3];
-				for (int i = 0; i < 3; i ++)
-					resultRGB[i] = graph[x][y];
+				resultRGB = graph.get(new xyAxis(x, y));
 				setPixel(x, y, resultRGB);
 			}
 		}
@@ -1490,8 +1495,9 @@ public class ImageModel {
 		
 		// calculate the radiuses according to the input m and n
 		for (int r = n; r < 256; r += n) {
-			for (int w = 0; w <= m; w ++) {
-				generateRadius(r+w, result);
+			for (int w = 0; w <= m-1; w ++) {
+				if (m != 0)
+					generateRadius(r+w, result);
 			}
 		}
 
@@ -1517,8 +1523,9 @@ public class ImageModel {
 		}
 	}
 
-	public int filter(int x, int y, String option) {
-		double result = 0;
+	public int[] filter(int x, int y, String option) {
+		double[] result = new double[3];
+		int[] resultInt = new int[3];
 
 		int[] rgb = new int[3];
 
@@ -1528,22 +1535,38 @@ public class ImageModel {
 				if (x + i < width && x + i >= 0 && y + j < height && y + j >= 0) {
 					getPixel(x+i, y+j, rgb);
 
-					if (option == "filter1")
-						result += rgb[0]/9;
+					if (option == "filter1") {
+						result[0] += rgb[0]/9;
+						result[1] += rgb[1]/9;
+						result[2] += rgb[2]/9;
+					}
 
 					else if (option == "filter2") { 
-						if ((i + j)% 2 == 1)
-							result += rgb[0] * 2/16;
-						else if (i == 1 && j == 1)
-							result += rgb[0] * 4/16;
-						else
-							result += rgb[0] * 1/16;
+						if ((i + j)% 2 == 1) {
+							result[0] += rgb[0] * 2/16;
+							result[1] += rgb[1] * 2/16;
+							result[2] += rgb[2] * 2/16;
+						}
+						else if (i == 1 && j == 1) {
+							result[0] += rgb[0] * 4/16;
+							result[1] += rgb[1] * 4/16;
+							result[2] += rgb[2] * 4/16;
+						}
+						else {
+							result[0] += rgb[0] * 1/16;
+							result[1] += rgb[1] * 1/16;
+							result[2] += rgb[2] * 1/16;
+						}
 					}
 				}
 			}
 		}
 
-		return (int) Math.round(result);
+		for (int i = 0; i < 3; i ++) {
+			resultInt[i] = (int) Math.round(result[i]);
+		}
+
+		return resultInt;
 	}
 
 	/****************************************
