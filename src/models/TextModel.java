@@ -12,10 +12,12 @@ import javax.swing.*;
 
 public class TextModel {
 	/**
-	 * Constants
+	 * Assume the size per letter is 8
 	 */
-	
 	public final int SIZE_PER_LETTER = 8;
+	/**
+	 * Max size of the dictionary should be 256
+	 */
 	public final int MAX_SIZE_OF_DICTIONARY = 256;
 
 	private File file;
@@ -25,19 +27,11 @@ public class TextModel {
 	private int sizeOfDictonary = 256;
 
 	private Map<Integer, String> lzwTable;
-
-	/**
-	 *	Constructors
-	 */
 	
 	public TextModel() {
 
 	}
 
-	/**
-	 *	Getters/Setters
-	 */
-	
 	public File getFile() {
 		return file;
 	}
@@ -92,9 +86,10 @@ public class TextModel {
 	}
 
 	/**
-	 * 	Text Compression Methods
+	 * read the text file and store the input string to the input message
+	 * 
+	 * @param file input text file
 	 */
-	
 	public void readFile(File file) {
 		this.file = file;
 
@@ -112,6 +107,7 @@ public class TextModel {
 	
 	/**
 	 * LZW Pattern Substitution (Text Compression)
+	 * 
 	 * @param inputText         input message before encoded
 	 * @param maxDictionarySize the dictionary size
 	 */
@@ -128,6 +124,7 @@ public class TextModel {
 
 	/**
 	 * Recursive way of solving the lzw encoding problem
+	 * 
 	 * @param input       			input String
 	 * @param maxSize     			dictionary size
 	 * @param result      			final result
@@ -216,6 +213,7 @@ public class TextModel {
 
 	/**
 	 * LZW Decoding
+	 * 
 	 * @param  input             input String
 	 * @param  maxDictionarySize the dictionary size
 	 * @return                   decoded decoded string
@@ -249,6 +247,7 @@ public class TextModel {
 
 	/**
 	 * initialize the dictionary to contain all the single symbles
+	 * 
 	 * @param  inputText         [input message]
 	 * @param  maxDictionarySize [dictionary size]
 	 * @return                   [return the dictionary]

@@ -1,6 +1,6 @@
 /*******************************************************
  CS451 Multimedia Software Systems
- @ Author: Elaine Kang
+ @ Author: Eric Liao
 
  This image class is for a 24bit RGB image only.
  *******************************************************/
@@ -15,6 +15,9 @@ import javax.swing.*;
 
 import ImageUtils.*;
 
+/**
+ * Image class, dealing with all the image functions, such as convert image to gray scale, 2-bit scale ...
+ */
 public class ImageModel {
 	private int width;  // number of columns
 	private int height;  // number of rows
@@ -23,17 +26,36 @@ public class ImageModel {
 	private String filename;  // store file name to save the index file
 	private File file;
 
-	private BufferedImage indexImg;  // store index image to display later on
+	/**
+	 * Store index image to display separately from result image
+	 */
+	private BufferedImage indexImg;
 
-	private Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();  // this is the look up talbe for the uniform color quantization
-	private Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();  // look up table for the median cut algorithm
+	/**
+	 * look up talbe for the uniform color quantization
+	 */
+	private Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();
 
-	/*****************************
-		Constructors
-	 ****************************/
+	/**
+	 * look up table for the median cut algorithm
+	 */
+	private Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();
+
+	/**
+	 * Default Constructor
+	 * 
+	 * @return Basic constructor
+	 */
 	public ImageModel() {
 	}
 
+	/**
+	 * Constructor creating empty image according to the width, and height as input
+	 * 
+	 * @param  w width
+	 * @param  h height
+	 * @return   Create ImageModel Class with preset height and width
+	 */
 	public ImageModel(int w, int h) {
 		// create an empty image with width and height
 		width = w;
@@ -42,15 +64,18 @@ public class ImageModel {
 		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 	}
 
+	/**
+	 * Constructor according to the input file
+	 * 
+	 * @param  file image file
+	 * @return      Create IamgeModel and read the input image file
+	 */
 	public ImageModel(File file) {
 		// Create an image and read the data from the file
 		readPPM(file);
 		System.out.println("Created an image from " + file.getName()+ " with size "+width+"x"+height);
 	}
 
-	/*****************************
-		Getters / Setters
-	 ****************************/
 	public File getFile() {
 		return file;
 	}
@@ -152,9 +177,11 @@ public class ImageModel {
 		System.out.println("RGB Pixel value at ("+x+","+y+"):"+(0xFF & r)+","+(0xFF & g)+","+(0xFF & b));
 	}
 
-	/************************************
-		Read/Write Methods
-	 ************************************/
+	/**
+	 * read the ppm file and set the current image to be input file
+	 * 
+	 * @param file read from file
+	 */
 	public void readPPM(File file) {
 		// read a data from a PPM file
 		FileInputStream fis = null;
@@ -217,6 +244,11 @@ public class ImageModel {
 		}
 	}
 
+	/**
+	 * write the image file to ppm format
+	 * 
+	 * @param file will store according to the file destination
+	 */
 	public void write2PPM(File file) {
 		// wrrite the image data in img to a PPM file
 		FileOutputStream fos = null;
@@ -351,9 +383,8 @@ public class ImageModel {
 	}
 
 	/**
-	 * Image Generation methods
+	 * Create a circle image according to the input M(width) and N(radius)
 	 */
-	
 	public void createCircleImage(int m, int n) {
 		int[][] circlePoints = generateRadiuses(m, n);
 
@@ -382,11 +413,11 @@ public class ImageModel {
 		}
 	}
 
-	/************************************
-		Image Conversion Functions
-	 ***********************************/
-
-	// Homework Part 1:
+	/**
+	 * Homework 1 problem:
+	 * This will convert image from 24 bit to gray scale according to the formula as below:
+	 * gray = math.round(0.299 * r + 0.587 * g + 0.114 * b)
+	 */
 	public void convertToGray() {
 		// Formula: Gr(ay) = round(0.299 * R + 0.587 * G + 0.114 * B)
 		for (int y = 0; y < height; y ++) {
@@ -407,7 +438,12 @@ public class ImageModel {
 		}
 	}
 
-	// Homework 1 part 2: Bi-Scale (Directly)
+	/**
+	 * Homework 1 part 2 convert to 1bit scale directly
+	 * Step1 convert the image to gray value so that the average gray value can be calculated
+	 * Then by comparing the pixel value to average gray value, the pixel can either assigned as
+	 * white or black.
+	 */
 	public void convertToBiDirectly() {
 		// ga = average of all pixel
 
@@ -437,22 +473,25 @@ public class ImageModel {
 		}
 	}
 
-	// homework 1 part 2: Bi-Scale (Error diffusion)
+	/**
+	 * Homework 1 part 2 Error diffusion
+	 * For each pixel A[i,j],
+	 * <p>
+	 *	– Pick up the palette value that is nearest to the original pixel’s value. 
+	 *	<p>
+	 *	– Store this palette value in the destination B[i,j]. (Quantization)
+	 *	<p>
+	 *	– Calculate the quantization error e=A[i,j]-B[i,j] for the pixel A[i,j]. 
+	 *	<p>
+	 *	Error e can be negative.
+	 *	<p>
+	 *	– Distribute this error e to four of A[i,j]’s nearest neighbors that haven’t 
+	 *	been scanned yet (the one on the right and the three ones centered 
+	 *	below) according to a filter weight. Eg –Floyd-Steinberg
+	 *	
+	 * @param method take which error diffusion formula to apply
+	 */
 	public void convertToBiError(String method) {
-		/* Error Diffusion
-
-			For each pixel A[i,j],
-		– Pick up the palette value that is nearest to the original pixel’s value. 
-		– Store this palette value in the destination B[i,j]. (Quantization)
-		– Calculate the quantization error e=A[i,j]-B[i,j] for the pixel A[i,j]. 
-		Error e can be negative.
-		– Distribute this error e to four of A[i,j]’s nearest neighbors that haven’t 
-		been scanned yet (the one on the right and the three ones centered 
-		below) according to a filter weight. Eg –Floyd-Steinberg
-
-		A[i+1,j] = A[i+1,j] + 7*e/16
-		 */
-
 		// step 1 convert to Gray Scale
 		convertToGray();
 
@@ -501,22 +540,11 @@ public class ImageModel {
 		}
 	}
 
-	// homweork 1 part 3: convert to quad-level by Error Diffusion
+	/**
+	 * Homework 1 part 3: 2-bit scale using error diffusion
+	 * By default, this will use floyd error diffusion method
+	 */
 	public void convertToQuadError() {
-		/* Error Diffusion
-
-			For each pixel A[i,j],
-			– Pick up the palette value that is nearest to the original pixel’s value. 
-			– Store this palette value in the destination B[i,j]. (Quantization)
-			– Calculate the quantization error e=A[i,j]-B[i,j] for the pixel A[i,j]. 
-			Error e can be negative.
-			– Distribute this error e to four of A[i,j]’s nearest neighbors that haven’t 
-			been scanned yet (the one on the right and the three ones centered 
-			below) according to a filter weight. Eg –Floyd-Steinberg
-
-			A[i+1,j] = A[i+1,j] + 7*e/16
-		 */
-
 		// step 1 convert to Gray Scale
 		convertToGray();
 
@@ -574,7 +602,13 @@ public class ImageModel {
 		}
 	}
 
-	// homework 1 part 4: convert to 8bit using Uniform Color Quantization
+	/**
+	 * Homework 1 part 4: Uniform Color Quantization
+	 * Step 1 create a uniform color look up table
+	 * Step 2 using look up table to convert the 24 bit image to indexed iamge
+	 * After convert to indexed image, store indexed image to indexImg to be able to display it later on
+	 * Then convert the indexed image back to 8-bit color by usng same look up table again
+	 */
 	public void convertTo8BitUCQ() {
 		// building Look up table
 		uniformColorTable();
@@ -633,7 +667,14 @@ public class ImageModel {
 		}
 	}
 
-	// homework 1 extra credit: convert to 8bit using Median Cut Algorithm
+	/**
+	 * Homework 1 Extra Credit: Median Cut Algorithm
+	 * Step 1 create a min color cube
+	 * Step 2 Find the largest axis and divide the color cube by mean value into two sub color cube
+	 * Step 3 continue doing step 1 and 2 until there is 256 color cube or there is no more color to divide
+	 * Then using the result color cubes to produce a look up table for this specific image
+	 * After having table, using table to create indexed image and 8-bit image using the indexed image
+	 */
 	public void convertTo8BitMCQ() {
 		ArrayList<Integer> redValues = new ArrayList<Integer>();
 		ArrayList<Integer> greenValues = new ArrayList<Integer>();
@@ -732,6 +773,11 @@ public class ImageModel {
 		}
 	}
 
+	/**
+	 * Apply the error diffusion into median cut algorithm
+	 * 
+	 * @param method Which error diffusion formula to use
+	 */
 	public void convertTo8BitMCQError(String method) {
 		ArrayList<Integer> redValues = new ArrayList<Integer>();
 		ArrayList<Integer> greenValues = new ArrayList<Integer>();
@@ -859,7 +905,13 @@ public class ImageModel {
 		}
 	}
 
-	// homework 2 Aliasing
+	/**
+	 * Homework 2 Aliasing
+	 * Resize the image to width/k and height/k by using filter to see the differences
+	 * 
+	 * @param k      Determine how small image will be
+	 * @param option check which filter to apply
+	 */
 	public void subSampling(int k, String option) {
 		Map<xyAxis, int[]> graph = new TreeMap<xyAxis, int[]>();
 
@@ -926,10 +978,11 @@ public class ImageModel {
 		}
 	}
 
-	/*****************************************
-		Utility functions used to convert image
-	 *****************************************/
-
+	/**
+	 * Given the gray scale image, find the average gray value
+	 * 
+	 * @return average gray value of all pixels
+	 */
 	public int calculateGrayAverage() {
 		// calculate sum of all pixel
 		int sum = 0;
@@ -948,7 +1001,9 @@ public class ImageModel {
 		return (int) sum / pixels;
 	}
 
-	// creating Look Up Table for uniform color quantization
+	/**
+	 * Generating the look up table for uniform color quantization
+	 */
 	public void uniformColorTable() {
 		for (int index = 0; index <= 255; index ++) {
 			String binaryString = Integer.toBinaryString(index);
@@ -985,7 +1040,11 @@ public class ImageModel {
 		}
 	}
 
-	// creating look up table for median cut algorithm
+	/**
+	 * Generate the look up table for the median cut algorithm
+	 * 
+	 * @param cube Take original color cube as input
+	 */
 	public void createColorTableMCQ(ColorCube cube) {
 		ArrayList<ColorCube> values = new ArrayList<ColorCube>();
 
@@ -1021,6 +1080,14 @@ public class ImageModel {
 		}
 	}
 
+	/**
+	 * Recursively dividing the color cube until there is 256 color cubes or no more color to divide
+	 * 
+	 * @param cube   Taking the original color cube as input
+	 * @param count  trace how much cube have been created
+	 * @param n      max cubes to create
+	 * @param result return as the result
+	 */
 	public void buildValues(ColorCube cube, int count, int n, ArrayList<ColorCube> result) {
 		if (count > n)
 			// base case
@@ -1237,6 +1304,15 @@ public class ImageModel {
 		}
 	}
 
+	/**
+	 * Apply the error difussion formula to the adjacent pixel values
+	 * 
+	 * @param x        X value of the current pixel
+	 * @param y        Y value of the current pixel
+	 * @param method   check which formula to apply
+	 * @param original original arrays storing the pixel values
+	 * @param error    the error value(ouput - original) from current pixel
+	 */
 	public void errorDiffusionFormula(int x, int y, String method, double[][] original, double error) {
 		if (method.equals("floyd")) {
 			if (x+1 < width)
@@ -1304,6 +1380,15 @@ public class ImageModel {
 		}
 	}
 
+	/**
+	 * Same as error difussion as above, except this time using rgb value
+	 * 
+	 * @param x          X value of current pixel
+	 * @param y          Y value of current pixel
+	 * @param method     check which formula to use
+	 * @param original   original map storing all the pixel rgb values corresponding to the x and y
+	 * @param error      error value from the current pixel
+	 */
 	public void errorDiffusionFormula(int x, int y, String method, Map<xyAxis, int[]> original, int[] error) {
 		if (method.equals("floyd")) {
 			if (x+1 < width) {
@@ -1451,6 +1536,12 @@ public class ImageModel {
 		}
 	}
 
+	/**
+	 * clone the image since image class has no clone method
+	 * 
+	 * @param  bi input image
+	 * @return    return the cloned input image
+	 */
 	public BufferedImage deepCopy(BufferedImage bi) {
 		ColorModel cm = bi.getColorModel();
 		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
@@ -1458,6 +1549,11 @@ public class ImageModel {
 		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
 	}
 
+	/**
+	 * write the look up table to file
+	 * 
+	 * @param filename Look up table txt name
+	 */
 	public void writeToFile(String filename) {
 		try {
         	BufferedWriter out = new BufferedWriter(new FileWriter(filename));
@@ -1490,6 +1586,9 @@ public class ImageModel {
         }
 	}
 
+	/**
+	 * generate all the radiuses for all the circle according to input m and n
+	 */
 	public int[][] generateRadiuses(int m, int n) {
 		int[][] result = new int[512][512];
 		
@@ -1504,6 +1603,12 @@ public class ImageModel {
 		return result;
 	}
 
+	/**
+	 * Trig formula to generate all the points on the xy axis for the circle radius r
+	 * 
+	 * @param r     radius
+	 * @param input marker to mark which point should be black
+	 */
 	public void generateRadius(int r, int[][] input) {
 		/**
 		 * Formula to find all the points on the map for the circle
@@ -1523,6 +1628,9 @@ public class ImageModel {
 		}
 	}
 
+	/**
+	 * filter method, will resize the image according to the option
+	 */
 	public int[] filter(int x, int y, String option) {
 		double[] result = new double[3];
 		int[] resultInt = new int[3];
@@ -1569,10 +1677,11 @@ public class ImageModel {
 		return resultInt;
 	}
 
-	/****************************************
-	 Testing functions
-	 **************************************/
-
+	/**
+	 * Display the current image in a new java frame
+	 * 
+	 * @param title frame requires a title
+	 */
 	public void display(String title) {
 	// display the image on the screen
 		// Use a label to display the image
@@ -1584,9 +1693,9 @@ public class ImageModel {
 		frame.setVisible(true);
 	}
 
-	/*************************************
-		Inner class as helpers
-	 ************************************/
+	/**
+	 * Color cube containing all the data that median cut algorithm needs
+	 */
 	public class ColorCube implements Comparable<ColorCube> {
 		private Map<int[], Integer> histogram = new HashMap<int[], Integer>();
 
@@ -1657,6 +1766,9 @@ public class ImageModel {
 	    }
 	}
 
+	/**
+	 * Using xy axis to trace x and y position
+	 */
 	class xyAxis implements Comparable<xyAxis> {
 		Integer x;
 		Integer y;

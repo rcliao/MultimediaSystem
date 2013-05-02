@@ -11,19 +11,25 @@ public class TextModelTest {
 
    private TextModel text = new TextModel();
 
-   // Test the basic 1+1 operation
+   /**
+    * Test the basic 1+1 operation
+    */
    @Test
    public void test_onePlusOne() {
       assertTrue((1 + 1)== 2) ;
    }
 
-   // more basic operation testing
+   /**
+    * more basic operation testing
+    */
    @Test
    public void test_equals() {
       assertEquals(1+1, 2) ;
    }
 
-   // test the initDictionary works as predicted
+   /**
+    * test the initDictionary works as predicted
+    */
    @Test
    public void test_InitDictionary() {
       Map<Integer, String> expectedResult = new TreeMap<Integer, String>();
@@ -33,6 +39,9 @@ public class TextModelTest {
       assertEquals(text.initDictionary("abababab", 256), expectedResult);
    }
 
+   /**
+    * test the initDictionary works as predicted
+    */
    @Test
    public void test_InitDictionary2() {
       Map<Integer, String> secondResult = new TreeMap<Integer, String>();
@@ -44,7 +53,9 @@ public class TextModelTest {
       assertEquals(text.initDictionary("eric", 256), secondResult);
    }
 
-   // test the recursive lzw encoding method
+   /**
+    * test the recursive lzw encoding method
+    */
    @Test
    public void test_LZWEncodingHelper() {
       assertEquals(text.lzwEncodingHelper("ericicic", "", 256, text.initDictionary("eric", 256)), "0 1 2 3 6 6");

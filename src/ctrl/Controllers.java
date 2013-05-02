@@ -25,7 +25,6 @@ public class Controllers {
 	private ImageModel output, output2, output3, output4;
 	private TextModel text_model;
 	
-	//========================================================== constructor
 	/** Constructor */
 	public Controllers(ImageModel model, Views view, TextModel text_model) {
 		m_model = model;

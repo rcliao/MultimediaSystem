@@ -58,6 +58,11 @@ public class Views extends JPanel implements ActionListener {
 		createAndShowGUI();
 	}
  
+ 	/**
+ 	 * Create the menu bar
+ 	 * 
+ 	 * @return the menu bar
+ 	 */
 	public JMenuBar createMenuBar() {
 		JMenuBar menuBar;
  
@@ -177,9 +182,6 @@ public class Views extends JPanel implements ActionListener {
 		return menuBar;
 	}
 
-	/*
-	 Getter/ Setters
-	 */
 	public JMenu getTextMenu(){
 		return textMenu;
 	}
@@ -301,9 +303,6 @@ public class Views extends JPanel implements ActionListener {
 		this.outputText = outputText;
 	}
 
-	/*
-	 Add events to button
-	 */
 	public void addSaveListener(ActionListener action) {
 		menuItemSave.addActionListener(action);
 	}
