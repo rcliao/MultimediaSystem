@@ -587,12 +587,14 @@ public class Controllers {
 				k = inputDialog("Please input k (sampling routine)", 1);
 			}
 
-			output2 = new ImageModel(output.getW(), output.getH());
-			output2.setImg(output.getImg());
-			output3 = new ImageModel(output.getW(), output.getH());
-			output3.setImg(output.getImg());
-			output4 = new ImageModel(output.getW(), output.getH());
-			output4.setImg(output.getImg());
+			output = new ImageModel(m_model.getW(), m_model.getH());
+			output.setImg(m_model.getImg());
+			output2 = new ImageModel(m_model.getW(), m_model.getH());
+			output2.setImg(m_model.getImg());
+			output3 = new ImageModel(m_model.getW(), m_model.getH());
+			output3.setImg(m_model.getImg());
+			output4 = new ImageModel(m_model.getW(), m_model.getH());
+			output4.setImg(m_model.getImg());
 
 			output.subSampling(k, "default");
 			output2.subSampling(k, "average");
