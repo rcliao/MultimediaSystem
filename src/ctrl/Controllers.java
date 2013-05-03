@@ -18,6 +18,7 @@ import ImageUtils.*;
 import models.*;
 import views.*;
 
+/** Controller class to connect view and models */
 public class Controllers {
 	//... The Controller needs to interact with both the Model and View.
 	private ImageModel m_model;
@@ -51,6 +52,20 @@ public class Controllers {
 		m_view.addAliasingListener(new AliasingListener());
 		m_view.addCircleListener(new CircleListener());
 	}
+
+	/**
+	 * Clean all the tabs after nth tab
+	 * 
+	 * @param n index of tab + 1
+	 */
+	public void cleanTabs(int n) {
+		// remove the uncessary tabs
+		int tabCount = m_view.getMainPanel().getTabCount();
+		if (tabCount > n) {
+			for (int i = n; i < tabCount; i ++)
+				m_view.getMainPanel().remove(n);
+		}
+	}
 	
 	//====================== Action Listeners
 	class QuitListener implements ActionListener {
@@ -61,6 +76,9 @@ public class Controllers {
 
 	class LoadListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			
+			cleanTabs(2);
+
 			//Set up the file chooser.
 			if (m_view.getFC() == null) {
 				m_view.setFC(new JFileChooser());
@@ -98,7 +116,7 @@ public class Controllers {
 					m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
 
 					m_view.getMainPanel().setTitleAt(0, "Input Image");
-					m_view.getMainPanel().setTitleAt(0, "Output Image");
+					m_view.getMainPanel().setTitleAt(1, "Output Image");
 				} else if (Utils.getExtension(inputFile).equals("txt")) {
 					m_view.getTextMenu().setEnabled(true);
 					m_view.getImageMenu().setEnabled(false);
@@ -115,7 +133,7 @@ public class Controllers {
 					m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputText()));
 
 					m_view.getMainPanel().setTitleAt(0, "Input Text");
-					m_view.getMainPanel().setTitleAt(0, "Output Text");
+					m_view.getMainPanel().setTitleAt(1, "Output Text");
 				}
 			} else {
 				// cancel case
@@ -176,6 +194,8 @@ public class Controllers {
 
 	class GrayListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
 			output = new ImageModel(m_model.getFile());
 			output.convertToGray();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
@@ -186,6 +206,8 @@ public class Controllers {
 
 	class BiDirectlyListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiDirectly();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
@@ -196,6 +218,8 @@ public class Controllers {
 
 	class BiErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("floyd");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
@@ -206,6 +230,8 @@ public class Controllers {
 
 	class BiErrorBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("bell");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
@@ -216,6 +242,8 @@ public class Controllers {
 
 	class BiErrorStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
 			output = new ImageModel(m_model.getFile());
 			output.convertToBiError("stucki");
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
@@ -226,6 +254,8 @@ public class Controllers {
 
 	class QuadErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
 			output = new ImageModel(m_model.getFile());
 			output.convertToQuadError();
 			m_view.getOutputLabel().setIcon(new ImageIcon(output.getImg()));
@@ -236,13 +266,7 @@ public class Controllers {
 
 	class UCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
-
+			cleanTabs(2);
 
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitUCQ();
@@ -282,12 +306,7 @@ public class Controllers {
 
 	class MCQListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
+			cleanTabs(2);
 
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQ();
@@ -334,12 +353,7 @@ public class Controllers {
 
 	class MCQErrorListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
+			cleanTabs(2);
 
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("floyd");
@@ -385,12 +399,7 @@ public class Controllers {
 
 	class MCQBellListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
+			cleanTabs(2);
 
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("bell");
@@ -436,12 +445,7 @@ public class Controllers {
 
 	class MCQStuckiListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
+			cleanTabs(2);
 
 			output = new ImageModel(m_model.getFile());
 			output.convertTo8BitMCQError("floyd");
@@ -487,6 +491,8 @@ public class Controllers {
 
 	class LZWEncodingListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
 			// pop out dialog to ask for the size of the dictionary
 			String sizeString = "";
 
@@ -499,13 +505,6 @@ public class Controllers {
 
 			if (sizeString != null)
 				size = Integer.valueOf(sizeString);
-
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
 
 			String result = text_model.lzwEncoding(text_model.getMessage(), size);
 
@@ -580,13 +579,7 @@ public class Controllers {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
+			cleanTabs(2);
 
 			Integer k = 0;
 
@@ -643,12 +636,7 @@ public class Controllers {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			// remove the uncessary tabs
-			int tabCount = m_view.getMainPanel().getTabCount();
-			if (tabCount > 2) {
-				for (int i = 2; i < tabCount; i ++)
-					m_view.getMainPanel().remove(2);
-			}
+			cleanTabs(2);
 
 			// pop out dialog to ask for the value of the N
 			Integer m = 0;

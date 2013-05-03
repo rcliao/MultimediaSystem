@@ -5,8 +5,9 @@ CS 451 Multi-Media system Homework 1 will be focusing on image conversion.
 
 ## Dependencies
 
-1. (Java)[http://www.java.com/en/]
-2. (JUnit & hamcrest-core)[https://github.com/junit-team/junit/wiki/Download-and-Install]
+1. (Apache Ant)[http://ant.apache.org/]
+2. (Java)[http://www.java.com/en/]
+3. (JUnit & hamcrest-core)[https://github.com/junit-team/junit/wiki/Download-and-Install]
 
 ## How to run this program
 
@@ -22,22 +23,21 @@ java CS451_Liao
 3. The gui will provide the menu bar for user to test the function. Here is the control flow to each function
 
 ```
-File 	->	Load	=>	This will open a file chooser to let user to pick which image to load
-		->	Save	=>	This will save the current image from the file chooser
-		->	Quit	=>	This will quit the program
+File 	->	Load
+		->	Save
+		->	Quit
 
-Image 	->	Gray Scale	=>	This will transform the current image to the gray Scale
-		->	Bi-Scale(Black and White)	->	Directly				=>	This will convert to the 1-bit image directly
-										->	Error-Diffusion(Floyd)	=>	Applying Floyd formula to the error diffusion
-										->	Error-Diffusion(Bell)	=>	Applying Bell formula to the error diffusion
-										->	Error-Diffusion(Stucki)	=>	Applying Stucki formula to the error diffusion
-		-> Quad-Level	=>	This will convert the image to the 2-bit scale image by applying error diffusion (Floyd)
-		-> 8-Bits	->	Uniform Color Quantization										=>	Create a Look Up Table(static) and use table to convert the image to index value only and display it, 
-																	and save index file as [filename]-index.ppm and continue converting index.ppm to 8-bit image
-					->	Median Cut Color Quantization									=>	Applying Median Cut Algorithm to the image
-					->	Median Cut Color Quantization(Error-Diffusion(Floyd))			=>	Applying Median Cut Algorithm with error diffusion(Floyd)
-					->	Median Cut Color Quantization(Error-Diffusion(Bell))			=>	Applying Median Cut Algorithm with error difufsion(Bell)
-					->	Median Cut Color Quantization(Error-Diffusion(Stucki))			=>	Applying Median Cut Algorithm with error difufsion(Stucki)
+Image 	->	Gray Scale
+		->	Bi-Scale(Black and White)	->	Directly
+										->	Error-Diffusion(Floyd)
+										->	Error-Diffusion(Bell)
+										->	Error-Diffusion(Stucki)
+		-> Quad-Level
+		-> 8-Bits	->	Uniform Color Quantization
+					->	Median Cut Color Quantization
+					->	Median Cut Color Quantization(Error-Diffusion(Floyd))
+					->	Median Cut Color Quantization(Error-Diffusion(Bell))
+					->	Median Cut Color Quantization(Error-Diffusion(Stucki))
 Text 	->	LZW Encoding
 ```
 
@@ -52,20 +52,26 @@ Text 	->	LZW Encoding
 ## File Structure
 
 	MultimediaSystem/			-->	Main folder
-		/ctrl/ 					--> controller package
-			Controllers.java 	-->	Controller to bind view and model together
-		/ImageUtils/			--> Utilities methods for image preview on file chooser
-			ImageFilter.java 	--> Used to filter the image extension for file chooser
-			ImagePreview.java 	--> Used to display the preview image from file chooser
-			Utils.java 			--> Methods being used from ImageFilter.java and ImagePreview.java
-		/models/
-			ImageModel.java 	--> Image model class (image convertions, methods)
-			TextModel.java 		--> Text model class (Text compression)
-		/test/
-			ModelSuite.java		--> Test models
-			TextModelTest.java 	--> Test case for the text model
-		/views/
-			Views.java 			--> View class (GUI related)
-		CS451_Liao.java 		--> Main class
-		CS451_Test.java 		--> Main class for testing
+		/src/
+			/ctrl/ 					--> controller package
+				Controllers.java 	-->	Controller to bind view and model together
+			/ImageUtils/			--> Utilities methods for image preview on file chooser
+				ImageFilter.java 	--> Used to filter the image extension for file chooser
+				ImagePreview.java 	--> Used to display the preview image from file chooser
+				Utils.java 			--> Methods being used from ImageFilter.java and ImagePreview.java
+			/models/
+				ImageModel.java 	--> Image model class (image convertions, methods)
+				TextModel.java 		--> Text model class (Text compression)
+			/test/
+				ModelSuite.java		--> Test models
+				TextModelTest.java 	--> Test case for the text model
+			/views/
+				Views.java 			--> View class (GUI related)
+			CS451_Liao.java 		--> Main class
+			CS451_Test.java 		--> Main class for testing
+		/lib/
+			junit.jar 				--> JUnit library
+			hamcrest-core.jar 		--> JUnit library
+		/bin/
+			
 		README.md 				--> Read me file

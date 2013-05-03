@@ -18,7 +18,7 @@ public class TextModel {
 	/**
 	 * Max size of the dictionary should be 256
 	 */
-	public final int MAX_SIZE_OF_DICTIONARY = 256;
+	public final int MAX_POWER_OF_2_DICTIONARY = 8;
 
 	private File file;
 	private String message;
@@ -118,8 +118,20 @@ public class TextModel {
 		size = inputText.length() * SIZE_PER_LETTER;
 		sizeAfterEncoded = 0;
 
-		// Recursive solving the lzw encoding
-		return lzwEncodingHelper(inputText, "", maxDictionarySize, dictionary);
+		String result = lzwEncodingHelper(inputText, "", maxDictionarySize, dictionary);
+
+		int indexSize = 8;
+
+		for (int i = MAX_POWER_OF_2_DICTIONARY; i >= 0; i --) {
+			if (Math.pow(2, i) <= dictionary.size()) {
+				break;
+			}
+			indexSize = i;
+		}
+
+		sizeAfterEncoded *= indexSize;
+
+		return result;
 	}
 
 	/**
@@ -147,17 +159,9 @@ public class TextModel {
 				}
 			}
 
-			int indexSize = 0;
-
-			for (int i = 0; i <= 8; i ++) {
-				if (Math.pow(2, i) == maxSize) {
-					indexSize = i;
-				}
-			}
-
 			lzwTable = dictionary;
 
-			sizeAfterEncoded += indexSize;
+			sizeAfterEncoded += 1;
 
 			return encodedString;
 		}
@@ -196,15 +200,7 @@ public class TextModel {
 
 				}
 
-				int indexSize = 0;
-
-				for (int i = 0; i <= 8; i ++) {
-					if (Math.pow(2, i) == maxSize) {
-						indexSize = i;
-					}
-				}
-
-				sizeAfterEncoded += indexSize;
+				sizeAfterEncoded += 1;
 
 				return encodedString + " " + lzwEncodingHelper(input, "", maxSize, dictionary);
 			}

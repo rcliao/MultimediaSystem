@@ -43,7 +43,7 @@
 
   <!-- Creates Javadoc -->
   <target name="docs" depends="compile">
-    <javadoc packagenames="src" destdir="${build.dir}" sourcepath="${src.dir}">
+    <javadoc packagenames="src" destdir="${docs.dir}" sourcepath="${src.dir}">
       <packageset dir="${src.dir}" defaultexcludes="yes">
         <include name="**/**"/>
       </packageset>
