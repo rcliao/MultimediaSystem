@@ -12,6 +12,26 @@ Homework 2 will perform the following methods: 1. Aliasing and 2. LZW Encoding</
 
 <h2 id="how-to-run-this-program">How to run this program</h2>
 
+<h3 id="using-exectubable-jar-file">Using exectubable jar file</h3>
+
+<p>Double click on dist\CS451_Liao.jar</p>
+
+<h3 id="using-command-prompt">Using command prompt</h3>
+
+<ol>
+<li>Direct yourself to the location of source folder by <br />
+<code>
+cd src\
+</code></li>
+<li>Compile the main class(CS451_Liao.java) by <br />
+<code>
+javac CS451_Liao.java
+</code></li>
+<li>Run the main class(CS451<em>Liao), which will lead user to the GUI program by <br />
+```
+java CS451</em>Liao</li>
+</ol>
+
 <h3 id="for-professor">For professor</h3>
 
 <p>Homework 2 requirements can be performed as following flow:</p>
@@ -30,10 +50,12 @@ System will pop out a <strong>dialog</strong> to ask for input of K</li>
 
 <h6 id="finding-from-part-1-aliasing">Finding from part 1 Aliasing</h6>
 
-<p>As result, average &gt; filter2 &gt; filter1 &gt; no filter for K = 2.
-For K = 4, average &gt; filter2 &gt;= filter1 &gt; no filter.
-As width of circle line grows, it becomes harder and harder to tell the artifact just from the resized image.
-Although average always performs the best result, the image still turns out to be blury after zoom back to 512*512 size.</p>
+<ul>
+<li>As result, average &gt; filter2 &gt; filter1 &gt; no filter for K = 2.</li>
+<li>For K = 4, average &gt; filter2 &gt;= filter1 &gt; no filter.</li>
+<li>As width of circle line grows, it becomes harder and harder to tell the artifact just from the resized image.</li>
+<li>Although average always performs the best result, the image still turns out to be blury after zoom back to 512*512 size.</li>
+</ul>
 
 <h5 id="part-2-lzw-encoding">Part 2 LZW Encoding:</h5>
 
@@ -48,57 +70,32 @@ After applying the LZW Encoding, the central panel will have 5 tabs(Input Text, 
 Please click on each panel to see the output</li>
 </ol>
 
-<h3 id="using-apache-ant">Using Apache Ant</h3>
+<pre><code>
+## GUI Logic Flow
 
-<ol>
-<li>Download the Ant from (website)[http://ant.apache.org/]</li>
-<li>Set up the environments for the apache ant as below
-<ol>
-<li>Set up environment variable <code>ANT_HOME</code> to be <strong>location of the ant folder</strong></li>
-<li>Include <strong>%ANT_HOME%/bin/;</strong> in the end of <code>PATH</code></li>
-<li>Test ant has been installed by typing the following command in command prompt <code>ant -version</code></li>
-</ol></li>
-<li>Direct yourself to the location of this project</li>
-<li>Type in <code>ant</code>　from the command prompt under the location of this project to deploy everything</li>
-<li>Double click <code>dist\CS451_Liao.jar</code></li>
-</ol>
+The gui will provide the menu bar for user to test the function. Here is the control flow to each function
 
-<h3 id="using-command-prompt">Using command prompt</h3>
-
-<ol>
-<li>Compile the main class(CS451_Liao.java) by <br />
-<code>
-javac CS451_Liao.java
-</code></li>
-<li>Run the main class(CS451_Liao), which will lead user to the GUI program by <br />
-<code>
-java CS451_Liao
-</code></li>
-</ol>
-
-<h2 id="gui-logic-flow">GUI Logic Flow</h2>
-
-<p>The gui will provide the menu bar for user to test the function. Here is the control flow to each function</p>
-
-<pre><code>File    -&gt;  Load
-        -&gt;  Save
-        -&gt;  Quit
-
-Image   -&gt;  Gray Scale
-        -&gt;  Bi-Scale(Black and White)   -&gt;  Directly
-                                        -&gt;  Error-Diffusion(Floyd)
-                                        -&gt;  Error-Diffusion(Bell)
-                                        -&gt;  Error-Diffusion(Stucki)
-        -&gt; Quad-Level
-        -&gt; 8-Bits   -&gt;  Uniform Color Quantization
-                    -&gt;  Median Cut Color Quantization
-                    -&gt;  Median Cut Color Quantization(Error-Diffusion(Floyd))
-                    -&gt;  Median Cut Color Quantization(Error-Diffusion(Bell))
-                    -&gt;  Median Cut Color Quantization(Error-Diffusion(Stucki))
-Text    -&gt;  LZW Encoding
-ImageTest   -&gt;  Create Circle
-            -&gt;  Aliasing
 </code></pre>
+
+<p>File    ->  Load
+        ->  Save
+        ->  Quit</p>
+
+<p>Image   ->  Gray Scale
+        ->  Bi-Scale(Black and White)   ->  Directly
+                                        ->  Error-Diffusion(Floyd)
+                                        ->  Error-Diffusion(Bell)
+                                        ->  Error-Diffusion(Stucki)
+        -> Quad-Level
+        -> 8-Bits   ->  Uniform Color Quantization
+                    ->  Median Cut Color Quantization
+                    ->  Median Cut Color Quantization(Error-Diffusion(Floyd))
+                    ->  Median Cut Color Quantization(Error-Diffusion(Bell))
+                    ->  Median Cut Color Quantization(Error-Diffusion(Stucki))
+Text    ->  LZW Encoding
+ImageTest   ->  Create Circle
+            ->  Aliasing
+```</p>
 
 <h2 id="dependencies">Dependencies</h2>
 
@@ -135,7 +132,7 @@ ImageTest   -&gt;  Create Circle
         ...                     --&gt; Classes
     /docs/                  --&gt; Java Docs Generated API Documents
         index.html              --&gt; Click here to check the api documents
+    /testreport/            --&gt; Report relating to unit tests
 
     README.md               --&gt; Read me file
 </code></pre>
-

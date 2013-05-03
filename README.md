@@ -8,6 +8,24 @@ Homework 2 will perform the following methods: 1. Aliasing and 2. LZW Encoding
 
 ## How to run this program
 
+### Using exectubable jar file
+
+Double click on dist\CS451_Liao.jar
+
+### Using command prompt
+
+1. Direct yourself to the location of source folder by  
+```
+cd src\
+```
+2. Compile the main class(CS451_Liao.java) by  
+```
+javac CS451_Liao.java
+```
+3. Run the main class(CS451_Liao), which will lead user to the GUI program by  
+```
+java CS451_Liao
+
 ### For professor
 
 Homework 2 requirements can be performed as following flow:
@@ -40,26 +58,7 @@ The system will ask for input of max size of the dictionary
 After applying the LZW Encoding, the central panel will have 5 tabs(Input Text, LZW Encoding, LZW Table, Compression Ratio, Decoded Message)  
 Please click on each panel to see the output
 
-### Using Apache Ant
 
-1. Download the Ant from (website)[http://ant.apache.org/]
-2. Set up the environments for the apache ant as below
-    1. Set up environment variable `ANT_HOME` to be **location of the ant folder**
-    2. Include **%ANT_HOME%/bin/;** in the end of `PATH`
-    3. Test ant has been installed by typing the following command in command prompt `ant -version`
-3. Direct yourself to the location of this project
-4. Type in `ant`　from the command prompt under the location of this project to deploy everything
-5. Double click `dist\CS451_Liao.jar`
-
-### Using command prompt
-
-1. Compile the main class(CS451_Liao.java) by  
-```
-javac CS451_Liao.java
-```
-2. Run the main class(CS451_Liao), which will lead user to the GUI program by  
-```
-java CS451_Liao
 ```
 
 ## GUI Logic Flow
@@ -120,5 +119,6 @@ ImageTest	->	Create Circle
 			...						--> Classes
 		/docs/					--> Java Docs Generated API Documents
 			index.html 				--> Click here to check the api documents
+		/testreport/			--> Report relating to unit tests
 
 		README.md 				--> Read me file
