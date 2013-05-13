@@ -31,7 +31,8 @@ public class Views extends JPanel implements ActionListener {
 				menuItemBiDirectly, menuItemBiErrorDiff, menuItemQuadErrorDiff,
 				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
-				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle;
+				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle,
+				menuItemHuffman;
 	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu,
 				imageTextMenu;
 	private JLabel imageLabel, outputLabel;
@@ -167,7 +168,11 @@ public class Views extends JPanel implements ActionListener {
 
 		menuItemLZW = new JMenuItem("LZW Coding");
 		textMenu.add(menuItemLZW);
+
+		menuItemHuffman = new JMenuItem("Huffman Coding");
+		textMenu.add(menuItemHuffman);
 		menuBar.add(textMenu);
+
 		textMenu.setEnabled(false);
 
 		imageTextMenu = new JMenu("Image Test");
@@ -369,6 +374,10 @@ public class Views extends JPanel implements ActionListener {
 
 	public void addCircleListener(ActionListener action) {
 		menuItemCircle.addActionListener(action);
+	}
+
+	public void addHuffmanListener(ActionListener action) {
+		menuItemHuffman.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {

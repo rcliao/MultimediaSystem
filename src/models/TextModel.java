@@ -260,4 +260,69 @@ public class TextModel {
 
 		return result;
 	}
+
+	/**
+	 * Given the root of huffman tree, translate the huffman tree into Array of String to get the binary code of the tree
+	 */
+	public String[] getCode(Tree.Node root) {
+		if (root == null)
+			return null;
+		String[] codes = new String[2 * 128];
+		assignCode(root, codes);
+		return codes;
+	}
+	
+	/**
+	 * Given Huffman tree, assign the binary code to the nodes
+	 * 
+	 * @param root  The root of Huffman tree
+	 * @param codes The code of the parent
+	 */
+	private void assignCode(Tree.Node root, String[] codes) {
+		if (root.left != null) {
+			root.left.code = root.code + "0";
+			assignCode(root.left, codes);
+			
+			root.right.code = root.code + "1";
+			assignCode(root.right, codes);
+		}
+		else {
+			codes[(int)root.element] = root.code;
+		}
+	}
+	
+	/**
+	 * Given the frequency of characters, create a huffman tree
+	 * 
+	 * @param  counts Frequency of character
+	 * @return        Huffman tree
+	 */
+	public Tree getHuffmanTree(int[] counts) {
+		Heap<Tree> heap = new Heap<Tree>();
+		for (int i = 0; i < counts.length; i ++) {
+			if (counts[i] > 0)
+				heap.add(new Tree(counts[i], (char)i));
+		}
+		
+		while (heap.getSize() > 1) {
+			Tree t1 = heap.remove();
+			Tree t2 = heap.remove();
+			heap.add(new Tree(t1, t2));
+		}
+		
+		return heap.remove();
+	}
+	
+	/**
+	 * Given the input sentence, get the frequency of the characters in the sentence
+	 */
+	public int[] getCharacterFrequency(String text) {
+		int[] counts = new int[256];
+		
+		for (int i = 0; i < text.length(); i ++)
+			counts[(int)text.charAt(i)]++;
+		
+		return counts;
+	}
+
 }

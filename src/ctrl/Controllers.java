@@ -51,6 +51,7 @@ public class Controllers {
 		m_view.addLZWEncodingListener(new LZWEncodingListener());
 		m_view.addAliasingListener(new AliasingListener());
 		m_view.addCircleListener(new CircleListener());
+		m_view.addHuffmanListener(new HuffmanListener());
 	}
 
 	/**
@@ -506,7 +507,7 @@ public class Controllers {
 			if (sizeString != null)
 				size = Integer.valueOf(sizeString);
 
-			String result = text_model.lzwEncoding(text_model.getMessage(), size);
+			String result = text_model.lzwEncoding(m_view.getTextArea().getText(), size);
 
 			m_view.getOutputText().setText(result);
 
@@ -663,6 +664,40 @@ public class Controllers {
 
 			m_view.getMainPanel().setTitleAt(1, "Circle_"+m+"_"+n);
 			m_view.getMainPanel().setTitleAt(0, "Circle_"+m+"_"+n);
+		}
+	}
+
+	class HuffmanListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			cleanTabs(1);
+
+			String inputMessage = m_view.getTextArea().getText();
+
+			int[] counts = text_model.getCharacterFrequency(inputMessage);
+			Tree huffmanTree = text_model.getHuffmanTree(counts);
+			String[] codes = text_model.getCode(huffmanTree.getRoot());
+
+			char[] chars = inputMessage.toCharArray();
+
+			JTextArea huffmanTable = new JTextArea();
+			JTextArea huffmanResult = new JTextArea();
+
+			huffmanTable.append("Huffman table to visualize the huffman node\n");
+			huffmanTable.append("ASCII Code\tCharacter\tFrequency\tCode\n");
+
+			for (int i = 0; i < codes.length; i ++)
+				if (counts[i] != 0)
+					huffmanTable.append("" + i + "\t" + (char) i + "\t" + counts[i] + "\t" + codes[i] + "\n");
+
+			for (char character: chars) {
+				huffmanResult.append(codes[(int)character] + " ");
+			}
+
+			JScrollPane resultPane = new JScrollPane(huffmanResult);
+			JScrollPane tablePane = new JScrollPane(huffmanTable);
+
+			m_view.getMainPanel().add(resultPane, "Decoded Message");
+			m_view.getMainPanel().add(tablePane, "Huffman Table");
 		}
 	}
 }

@@ -35,8 +35,9 @@ public class TextModelTest {
       Map<Integer, String> expectedResult = new TreeMap<Integer, String>();
       expectedResult.put(0, "a");
       expectedResult.put(1, "b");
+      expectedResult.put(2, "c");
 
-      assertEquals(text.initDictionary("abababab", 256), expectedResult);
+      assertEquals(expectedResult, text.initDictionary("abcababab", 256));
    }
 
    /**
@@ -58,7 +59,7 @@ public class TextModelTest {
     */
    @Test
    public void test_LZWEncodingHelper() {
-      assertEquals(text.lzwEncodingHelper("ericicic", "", 256, text.initDictionary("eric", 256)), "0 1 2 3 6 6");
+      assertEquals("0 1 2 3 6 6", text.lzwEncodingHelper("ericicic", "", 256, text.initDictionary("eric", 256)));
    }
 
    @Test
@@ -99,5 +100,29 @@ public class TextModelTest {
       text.lzwEncoding("abababab", 256);
 
       assertEquals(text.getSizeAfterEncoded(), 3*5);
+   }
+
+   /**
+    * Test Huffman coding(getting frequency of the input string)
+    */
+   @Test
+   public void test_HuffmanFrequency() {
+      int[] counts = text.getCharacterFrequency("Hello");
+
+      assertEquals(2, counts[(int)'l']);
+   }
+
+   /**
+    * Test Huffman Tree
+    */
+   @Test
+   public void test_HuffmanTree() {
+      int[] counts = text.getCharacterFrequency("go go gopher");
+
+      Tree huffmanTree = text.getHuffmanTree(counts);
+
+      String[] codes = text.getCode(huffmanTree.getRoot());
+
+      assertEquals("01", codes[(int)'o']);
    }
 }
