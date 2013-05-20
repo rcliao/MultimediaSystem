@@ -25,6 +25,7 @@ public class Controllers {
 	private Views m_view;
 	private ImageModel output, output2, output3, output4;
 	private TextModel text_model;
+	private JPEGImage jpegImage;
 	
 	/** Constructor */
 	public Controllers(ImageModel model, Views view, TextModel text_model) {
@@ -52,6 +53,8 @@ public class Controllers {
 		m_view.addAliasingListener(new AliasingListener());
 		m_view.addCircleListener(new CircleListener());
 		m_view.addHuffmanListener(new HuffmanListener());
+		m_view.addResizeListener(new ResizeListener());
+		m_view.addDeResizeListener(new DeResizeLisetner());
 	}
 
 	/**
@@ -698,6 +701,24 @@ public class Controllers {
 
 			m_view.getMainPanel().add(resultPane, "Decoded Message");
 			m_view.getMainPanel().add(tablePane, "Huffman Table");
+		}
+	}
+
+	class ResizeListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
+			jpegImage = new JPEGImage(m_model.getFile());
+			jpegImage.resize();
+			m_view.getOutputLabel().setIcon(new ImageIcon(jpegImage.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "Resize");
+		}
+	}
+
+	class DeResizeLisetner implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+
 		}
 	}
 }

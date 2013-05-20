@@ -32,9 +32,9 @@ public class Views extends JPanel implements ActionListener {
 				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
 				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle,
-				menuItemHuffman;
+				menuItemHuffman, menuItemResize, menuItemDeResize;
 	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu,
-				imageTextMenu;
+				imageTextMenu, jpegMenu;
 	private JLabel imageLabel, outputLabel;
 	private JTabbedPane mainPanel;
 	private JPanel container, optionPanel;
@@ -183,6 +183,16 @@ public class Views extends JPanel implements ActionListener {
 		menuItemAliasing = new JMenuItem("Aliasing");
 		imageTextMenu.add(menuItemAliasing);
 		menuBar.add(imageTextMenu);
+
+		jpegMenu = new JMenu("Jpeg Compression");
+
+		menuItemResize = new JMenuItem("Resize Image");
+		jpegMenu.add(menuItemResize);
+
+		menuItemDeResize = new JMenuItem("De Resize Image");
+		jpegMenu.add(menuItemDeResize);
+
+		menuBar.add(jpegMenu);
 
 		return menuBar;
 	}
@@ -378,6 +388,14 @@ public class Views extends JPanel implements ActionListener {
 
 	public void addHuffmanListener(ActionListener action) {
 		menuItemHuffman.addActionListener(action);
+	}
+
+	public void addResizeListener(ActionListener action) {
+		menuItemResize.addActionListener(action);
+	}
+
+	public void addDeResizeListener(ActionListener action) {
+		menuItemDeResize.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {
