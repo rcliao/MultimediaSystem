@@ -11,7 +11,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
    TextModelTest.class,
-   ImageModelTest.class
+   ImageModelTest.class,
+   JPEGImageTest.class
 })
 
 public class ModelSuite {   

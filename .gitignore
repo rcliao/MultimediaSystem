@@ -8,3 +8,6 @@
 
 # image files #
 *.ppm
+
+# unit test stuff #
+*.properties

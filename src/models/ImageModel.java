@@ -19,27 +19,27 @@ import ImageUtils.*;
  * Image class, dealing with all the image functions, such as convert image to gray scale, 2-bit scale ...
  */
 public class ImageModel {
-	private int width;  // number of columns
-	private int height;  // number of rows
-	private int pixelDepth=3;  // pixel depth in byte
-	private BufferedImage img;  // image array to store rgb values, 8 bits per channel
-	private String filename;  // store file name to save the index file
-	private File file;
+	protected int width;  // number of columns
+	protected int height;  // number of rows
+	protected int pixelDepth=3;  // pixel depth in byte
+	protected BufferedImage img;  // image array to store rgb values, 8 bits per channel
+	protected String filename;  // store file name to save the index file
+	protected File file;
 
 	/**
 	 * Store index image to display separately from result image
 	 */
-	private BufferedImage indexImg;
+	protected BufferedImage indexImg;
 
 	/**
 	 * look up talbe for the uniform color quantization
 	 */
-	private Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();
+	protected Map<Integer, int[]> lookUpTable = new TreeMap<Integer, int[]>();
 
 	/**
 	 * look up table for the median cut algorithm
 	 */
-	private Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();
+	protected Map<Integer, ColorCube> lookUpTableMedian = new TreeMap<Integer, ColorCube>();
 
 	/**
 	 * Default Constructor
@@ -209,6 +209,8 @@ public class ImageModel {
 			String[] WidthHeight = dis.readLine().split(" ");
 			width = Integer.parseInt(WidthHeight[0]);
 			height = Integer.parseInt(WidthHeight[1]);
+
+			System.out.println("width: " + width + ", height: " + height);
 
 			// read maximum value
 			int maxVal = Integer.parseInt(dis.readLine());
