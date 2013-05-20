@@ -55,6 +55,7 @@ public class Controllers {
 		m_view.addHuffmanListener(new HuffmanListener());
 		m_view.addResizeListener(new ResizeListener());
 		m_view.addDeResizeListener(new DeResizeLisetner());
+		m_view.addColorTransformListener(new ColorTransformListener());
 	}
 
 	/**
@@ -718,7 +719,32 @@ public class Controllers {
 
 	class DeResizeLisetner implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
 
+			jpegImage.deResize();
+
+			m_view.getOutputLabel().setIcon(new ImageIcon(jpegImage.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "De-Resize");
+		}
+	}
+
+	class ColorTransformListener implements ActionListener {
+		public void actionPerformed (ActionEvent e) {
+			cleanTabs(2);
+
+			jpegImage = new JPEGImage(m_model.getFile());
+
+			jpegImage.resize();
+
+			jpegImage.colorTransAndSubsample();
+			jpegImage.invColorTransAndSubSample();
+
+			jpegImage.deResize();
+
+			m_view.getOutputLabel().setIcon(new ImageIcon(jpegImage.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "Color Transform and De-Color-Transform");
 		}
 	}
 }

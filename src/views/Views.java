@@ -32,7 +32,7 @@ public class Views extends JPanel implements ActionListener {
 				menuItemUCQ, menuItemMCQ, menuItemBiErrorDiffBell,
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
 				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle,
-				menuItemHuffman, menuItemResize, menuItemDeResize;
+				menuItemHuffman, menuItemResize, menuItemDeResize, menuItemColorTransform;
 	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu,
 				imageTextMenu, jpegMenu;
 	private JLabel imageLabel, outputLabel;
@@ -191,6 +191,9 @@ public class Views extends JPanel implements ActionListener {
 
 		menuItemDeResize = new JMenuItem("De Resize Image");
 		jpegMenu.add(menuItemDeResize);
+
+		menuItemColorTransform = new JMenuItem("Color Transform");
+		jpegMenu.add(menuItemColorTransform);
 
 		menuBar.add(jpegMenu);
 
@@ -396,6 +399,10 @@ public class Views extends JPanel implements ActionListener {
 
 	public void addDeResizeListener(ActionListener action) {
 		menuItemDeResize.addActionListener(action);
+	}
+
+	public void addColorTransformListener(ActionListener action) {
+		menuItemColorTransform.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {
