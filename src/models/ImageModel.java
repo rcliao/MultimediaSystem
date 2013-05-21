@@ -43,18 +43,12 @@ public class ImageModel {
 
 	/**
 	 * Default Constructor
-	 * 
-	 * @return Basic constructor
 	 */
 	public ImageModel() {
 	}
 
 	/**
 	 * Constructor creating empty image according to the width, and height as input
-	 * 
-	 * @param  w width
-	 * @param  h height
-	 * @return   Create ImageModel Class with preset height and width
 	 */
 	public ImageModel(int w, int h) {
 		// create an empty image with width and height
@@ -66,9 +60,6 @@ public class ImageModel {
 
 	/**
 	 * Constructor according to the input file
-	 * 
-	 * @param  file image file
-	 * @return      Create IamgeModel and read the input image file
 	 */
 	public ImageModel(File file) {
 		// Create an image and read the data from the file
@@ -1771,7 +1762,7 @@ public class ImageModel {
 	/**
 	 * Using xy axis to trace x and y position
 	 */
-	class xyAxis implements Comparable<xyAxis> {
+	public class xyAxis implements Comparable<xyAxis> {
 		Integer x;
 		Integer y;
 

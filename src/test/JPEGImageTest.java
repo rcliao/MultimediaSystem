@@ -21,8 +21,8 @@ public class JPEGImageTest {
 
    @Test
    public void initImageSetup() {
-	assertEquals(250, jpegImage.getW());
-	assertEquals(273, jpegImage.getH());
+   	assertEquals(250, jpegImage.getW());
+   	assertEquals(273, jpegImage.getH());
    }
 
    @Test
@@ -197,5 +197,30 @@ public class JPEGImageTest {
       assertEquals(cr, jpegImage.getCr(30, 30), 0.01);
    }
 
+   @Test
+   public void testSubSampling() {
+      jpegImage.resize();
+      jpegImage.colorTransAndSubsample();
 
+      assertEquals(256*280, jpegImage.getYValues().size());
+      assertEquals(128*144, jpegImage.getCbValues().size());
+      assertEquals(128*144, jpegImage.getCrValues().size());
+   }
+
+   @Test
+   public void divideBlocks() {
+      jpegImage.resize();
+      jpegImage.colorTransAndSubsample();
+      jpegImage.divideBlocks();
+
+      assertEquals(32*35, jpegImage.getYBlocks().size());
+      assertEquals(16*18, jpegImage.getCbBlocks().size());
+      assertEquals(16*18, jpegImage.getCrBlocks().size());
+      assertEquals(8*8, jpegImage.getCrBlock(15, 17).size());
+   }
+
+   @Test
+   public void testDCTTransform() {
+
+   }
 }

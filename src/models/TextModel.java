@@ -140,7 +140,7 @@ public class TextModel {
 	 * @param input       			input String
 	 * @param maxSize     			dictionary size
 	 * @param result      			final result
-	 * @param Map<Integer, String>	dictionary
+	 * @return String - Encoded Message
 	 */
 	public String lzwEncodingHelper(String input, String letter, int maxSize, Map<Integer,String> dictionary) {
 		// base case when the input is empty

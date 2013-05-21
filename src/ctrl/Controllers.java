@@ -56,6 +56,7 @@ public class Controllers {
 		m_view.addResizeListener(new ResizeListener());
 		m_view.addDeResizeListener(new DeResizeLisetner());
 		m_view.addColorTransformListener(new ColorTransformListener());
+		m_view.addDCTListener(new DCTListener());
 	}
 
 	/**
@@ -738,8 +739,28 @@ public class Controllers {
 			jpegImage.resize();
 
 			jpegImage.colorTransAndSubsample();
-			jpegImage.invColorTransAndSubSample();
+			jpegImage.invColorTransAndSuperSample();
 
+			jpegImage.deResize();
+
+			m_view.getOutputLabel().setIcon(new ImageIcon(jpegImage.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "Color Transform and De-Color-Transform");
+		}
+	}
+
+	class DCTListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
+			jpegImage = new JPEGImage(m_model.getFile());
+
+			jpegImage.resize();
+			jpegImage.colorTransAndSubsample();
+			jpegImage.dctEncoding();
+
+			jpegImage.dctDecoding();
+			jpegImage.invColorTransAndSuperSample();
 			jpegImage.deResize();
 
 			m_view.getOutputLabel().setIcon(new ImageIcon(jpegImage.getImg()));

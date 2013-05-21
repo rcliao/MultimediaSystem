@@ -14,7 +14,6 @@ public class Tree implements Comparable<Tree> {
 	 * 
 	 * @param  t1 Tree 1
 	 * @param  t2 Tree 2
-	 * @return    Combined Tree
 	 */
 	public Tree (Tree t1, Tree t2) {
 		root = new Node();
@@ -28,7 +27,6 @@ public class Tree implements Comparable<Tree> {
 	 * 
 	 * @param  weight  The frequency of the character
 	 * @param  element The character
-	 * @return         Singleton tree
 	 */
 	public Tree (int weight, char element) {
 		root = new Node(weight, element);

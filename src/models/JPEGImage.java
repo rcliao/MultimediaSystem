@@ -14,14 +14,16 @@ public class JPEGImage extends ImageModel {
 	private int originalHeight;
 	private int originalWidth;
 
-	private Map<xyAxis, Double> yValues = new TreeMap<xyAxis, Double>();
-	private Map<xyAxis, Double> cbValues = new TreeMap<xyAxis, Double>();
-	private Map<xyAxis, Double> crValues = new TreeMap<xyAxis, Double>();
+	private Map<xyAxis, Double> yValues = new HashMap<xyAxis, Double>();
+	private Map<xyAxis, Double> cbValues = new HashMap<xyAxis, Double>();
+	private Map<xyAxis, Double> crValues = new HashMap<xyAxis, Double>();
+
+	private Map<xyAxis, Map<xyAxis, Double>> yblocks = new HashMap<xyAxis, Map<xyAxis, Double>>();
+	private Map<xyAxis, Map<xyAxis, Double>> cbblocks = new HashMap<xyAxis, Map<xyAxis, Double>>();
+	private Map<xyAxis, Map<xyAxis, Double>> crblocks = new HashMap<xyAxis, Map<xyAxis, Double>>();
 
 	/**
 	 * Default constructor
-	 * 
-	 * @return JPEGImage Class
 	 */
 	public JPEGImage() {
 
@@ -47,7 +49,6 @@ public class JPEGImage extends ImageModel {
 		this.originalWidth = originalWidth;
 	}
 
-
 	public double getY(int x, int y) {
 		return yValues.get(new xyAxis(x, y));
 	}
@@ -72,6 +73,66 @@ public class JPEGImage extends ImageModel {
 		crValues.put(new xyAxis(x, y), crValue);
 	}
 
+	public Map<xyAxis, Double> getYValues() {
+		return yValues;
+	}
+	 
+	public void setYValues(Map<xyAxis, Double> yValues) {
+		this.yValues = yValues;
+	}
+
+	public Map<xyAxis, Double> getCrValues() {
+		return crValues;
+	}
+	 
+	public void setCrValues(Map<xyAxis, Double> crValues) {
+		this.crValues = crValues;
+	}
+
+	public Map<xyAxis, Double> getCbValues() {
+		return cbValues;
+	}
+	 
+	public void setCbValues(Map<xyAxis, Double> cbValues) {
+		this.cbValues = cbValues;
+	}
+
+	public Map<xyAxis, Map<xyAxis, Double>> getYBlocks() {
+		return yblocks;
+	}
+
+	public Map<xyAxis, Double> getYBlock(int x, int y) {
+		return yblocks.get(new xyAxis(x, y));
+	}
+	 
+	public void setYBlocks(Map<xyAxis, Map<xyAxis, Double>> yblocks) {
+		this.yblocks = yblocks;
+	}
+
+	public Map<xyAxis, Map<xyAxis, Double>> getCrBlocks() {
+		return crblocks;
+	}
+
+	public Map<xyAxis, Double> getCrBlock(int x, int y) {
+		return crblocks.get(new xyAxis(x, y));
+	}
+	 
+	public void setCrBlocks(Map<xyAxis, Map<xyAxis, Double>> crblocks) {
+		this.crblocks = crblocks;
+	}
+
+	public Map<xyAxis, Map<xyAxis, Double>> getCbBlocks() {
+		return cbblocks;
+	}
+
+	public Map<xyAxis, Double> getCbBlock(int x, int y) {
+		return cbblocks.get(new xyAxis(x, y));
+	}
+	 
+	public void setCbBlocks(Map<xyAxis, Map<xyAxis, Double>> cbblocks) {
+		this.cbblocks = cbblocks;
+	}
+
 	/**
 	 * Homework 3 Step f-1: Resize the image and fill the extra pixels with black values({0, 0, 0})
 	 */
@@ -93,12 +154,13 @@ public class JPEGImage extends ImageModel {
 			}
 		}
 
+		originalHeight = super.height;
+		originalWidth = super.width;
+
 		if (super.height % 8 != 0) {
-			originalHeight = super.height;
 			super.height += 8 - super.height % 8;
 		}
 		if (super.width % 8 != 0) {
-			originalWidth = super.width;
 			super.width += 8 - super.width % 8;
 		}
 
@@ -185,6 +247,9 @@ public class JPEGImage extends ImageModel {
 	 * Homework 3 step f-2: Subsampling 4:2:0
 	 */
 	public void subsamplingCbCr() {
+		Map<xyAxis, Double> newCrValues = new HashMap<xyAxis, Double>();
+		Map<xyAxis, Double> newCbValues = new HashMap<xyAxis, Double>();
+
 		for (int x = 0; x < width; x += 2) {
 			for (int y = 0; y < height; y += 2) {
 				double averageCr = 0.0;
@@ -205,16 +270,48 @@ public class JPEGImage extends ImageModel {
 				averageCr = averageCr/(2*2);
 				averageCb = averageCb/(2*2);
 				
-				crValues.put(new xyAxis(x/2, y/2), averageCr);
-				cbValues.put(new xyAxis(x/2, y/2), averageCb);
+				newCrValues.put(new xyAxis(x/2, y/2), averageCr);
+				newCbValues.put(new xyAxis(x/2, y/2), averageCb);
 			}
 		}
+
+		// if Cr,Cb is not dividable by 8, pad it with black pixel
+
+		if ((width/2)%8 != 0) {
+			for (int i = width/2; i < width/2+4; i ++) {
+				for (int j = 0; j < height/2; j ++) {
+					newCrValues.put(new xyAxis(i, j), 0.0);
+					newCbValues.put(new xyAxis(i, j), 0.0);
+				}
+			}
+		}
+
+		if ((height/2)%8 != 0) {
+			for (int i = 0; i < width/2; i ++) {
+				for (int j = height/2; j < height/2+4; j ++) {
+					newCrValues.put(new xyAxis(i, j), 0.0);
+					newCbValues.put(new xyAxis(i, j), 0.0);
+				}
+			}
+		}
+
+		if ((height/2) %8 != 0 && (width/2)%8 != 0) {
+			for (int i = width/2; i < width/2+4; i ++) {
+				for (int j = height/2; j < height/2+4; j ++) {
+					newCrValues.put(new xyAxis(i, j), 0.0);
+					newCbValues.put(new xyAxis(i, j), 0.0);
+				}
+			}
+		}
+
+		crValues = newCrValues;
+		cbValues = newCbValues;
 	}
 
 	/**
 	 * Homework 3 step i-3: Inverse color transformation and supersampling
 	 */
-	public void invColorTransAndSubSample() {
+	public void invColorTransAndSuperSample() {
 		superSamplingCbCr();
 		invColorTransform();
 	}
@@ -253,7 +350,7 @@ public class JPEGImage extends ImageModel {
 		// add 128 to y value and 0.5 to cr, cb value
 		for (int i = 0; i < width; i ++) {
 			for (int j = 0; j < height; j ++) {
-				double y = yValues.get(new xyAxis(i, j)) + 128;
+				double y = yValues.get(new xyAxis(i, j));
 				double cr = crValues.get(new xyAxis(i, j)) + 0.5;
 				double cb = cbValues.get(new xyAxis(i, j)) + 0.5;
 
@@ -278,5 +375,280 @@ public class JPEGImage extends ImageModel {
 				setPixel(i, j, rgb);
 			}
 		}		
+	}
+
+	/**
+	 * Homework 3 step f-3: DCT Encoding
+	 */
+	public void dctEncoding() {
+		divideBlocks();
+		dctTransform();
+	}
+
+	/**
+	 * Homework 3 step f-3: Divide image into 8*8 blocks
+	 */
+	public void divideBlocks() {
+		for (int y = 0; y < height; y += 8) {
+			for (int x = 0; x < width; x += 8) {
+				Map<xyAxis, Double> yblock = new HashMap<xyAxis, Double>();
+				Map<xyAxis, Double> crblock = new HashMap<xyAxis, Double>();
+				Map<xyAxis, Double> cbblock = new HashMap<xyAxis, Double>();
+
+				for (int yi = y; yi < (y + 8); yi ++) {
+					for (int xi = x; xi < (x + 8); xi ++) {
+						if ((width/2)%8 == 0 && (height/2)%8 == 0) {
+							if (xi < width/2 && yi < height/2) {
+								crblock.put(new xyAxis(xi - x, yi - y), crValues.get(new xyAxis(xi, yi)));
+								cbblock.put(new xyAxis(xi - x, yi - y), cbValues.get(new xyAxis(xi, yi)));
+							}
+						} else if ((width/2)%8 != 0 && (height/2)%8 != 0) {
+							if (xi < width/2+4 && yi < height/2+4) {
+								crblock.put(new xyAxis(xi - x, yi - y), crValues.get(new xyAxis(xi, yi)));
+								cbblock.put(new xyAxis(xi - x, yi - y), cbValues.get(new xyAxis(xi, yi)));
+							}
+						} else if ((width/2)%8 != 0) {
+							if (xi < width/2+4 && yi < height/2) {
+								crblock.put(new xyAxis(xi - x, yi - y), crValues.get(new xyAxis(xi, yi)));
+								cbblock.put(new xyAxis(xi - x, yi - y), cbValues.get(new xyAxis(xi, yi)));
+							}
+						} else if ((height/2)%8 != 0) {
+							if (xi < width/2 && yi < height/2+4) {
+								crblock.put(new xyAxis(xi - x, yi - y), crValues.get(new xyAxis(xi, yi)));
+								cbblock.put(new xyAxis(xi - x, yi - y), cbValues.get(new xyAxis(xi, yi)));
+							}
+						}
+						if (xi < width && yi < height) {
+							yblock.put(new xyAxis(xi - x, yi - y), yValues.get(new xyAxis(xi, yi)));
+						}
+					}
+				}
+
+				if (!crblock.isEmpty())
+					crblocks.put(new xyAxis(x/8, y/8), crblock);
+				if (!cbblock.isEmpty())
+					cbblocks.put(new xyAxis(x/8, y/8), cbblock);
+
+				yblocks.put(new xyAxis(x/8, y/8), yblock);
+			}
+		}
+	}
+
+	/**
+	 * Homework 3 step f-3: DCT Transform
+	 */
+	public void dctTransform() {
+		// calculating DCT transformation for y value
+		for (int y = 0; y < height; y += 8) {
+			for (int x = 0; x < width; x += 8) {
+				Map<xyAxis, Double> yblock = yblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> newyBlock = new HashMap<xyAxis, Double>();
+
+				for (int v = 0; v < 8; v ++) {
+					for (int u = 0; u < 8; u ++) {
+						double cu = 1.0;
+						double cv = 1.0;
+
+						if (u == 0)
+							cu = 1 / Math.sqrt(2);
+						if (v == 0)
+							cv = 1 / Math.sqrt(2);
+
+						double sum = 0.0;
+
+						for (int xi = 0; xi < 8; xi ++) {
+							for (int yi = 0; yi < 8; yi ++) {
+								double yValue = yblock.get(new xyAxis(xi, yi));
+
+								double h1 = Math.cos((2 * xi + 1) * u * Math.PI / 16);
+								double h2 = Math.cos((2 * yi + 1) * v * Math.PI / 16);
+
+								sum += yValue * h1 * h2;
+							}
+						}
+
+						sum = sum * cu * cv / 4;
+
+						newyBlock.put(new xyAxis(u, v), sum);
+					}
+				}
+
+				yblocks.put(new xyAxis(x/8, y/8), newyBlock);
+			}
+		}
+
+		// calculating cb,cr value for each block
+		for (int y = 0; y < height/2 + height/2%8; y += 8) {
+			for (int x = 0; x < width/2 + width/2%8; x += 8) {
+				Map<xyAxis, Double> cbblock = cbblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> crblock = crblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
+				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
+
+				for (int v = 0; v < 8; v ++) {
+					for (int u = 0; u < 8; u ++) {
+						double cu = 1.0;
+						double cv = 1.0;
+
+						if (u == 0)
+							cu = 1 / Math.sqrt(2);
+						if (v == 0)
+							cv = 1 / Math.sqrt(2);
+
+						double sumcb = 0.0;
+						double sumcr = 0.0;
+
+						for (int xi = 0; xi < 8; xi ++) {
+							for (int yi = 0; yi < 8; yi ++) {
+								double cbValue = cbblock.get(new xyAxis(xi, yi));
+								double crValue = crblock.get(new xyAxis(xi, yi));
+
+								double h1 = Math.cos((2 * xi + 1) * u * Math.PI / 16);
+								double h2 = Math.cos((2 * yi + 1) * v * Math.PI / 16);
+
+								sumcb += cbValue * h1 * h2;
+								sumcr += crValue * h1 * h2;
+							}
+						}
+
+						sumcb = sumcb * cu * cv / 4;
+						sumcr = sumcr * cu * cv / 4;
+
+						newcbBlock.put(new xyAxis(u, v), sumcb);
+						newcrBlock.put(new xyAxis(u, v), sumcr);
+					}
+				}
+
+				cbblocks.put(new xyAxis(x/8, y/8), newcbBlock);
+				crblocks.put(new xyAxis(x/8, y/8), newcrBlock);
+			}
+		}
+	}
+
+	/**
+	 * Homework 3 step i-2: Inverse DCT Transform
+	 */
+	public void dctDecoding() {
+		invDctTransform();
+		combineBlocks();
+	}
+
+	/**
+	 * Inverse DCT Formula
+	 */
+	public void invDctTransform() {
+		// calculating DCT transformation for y value
+		for (int y = 0; y < height; y += 8) {
+			for (int x = 0; x < width; x += 8) {
+				Map<xyAxis, Double> yblock = yblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> newyBlock = new HashMap<xyAxis, Double>();
+
+				for (int xi = 0; xi < 8; xi ++) {
+					for (int yi = 0; yi < 8; yi ++) {
+
+						double sum = 0.0;
+
+						for (int v = 0; v < 8; v ++) {
+							for (int u = 0; u < 8; u ++) {
+								double cu = 1.0;
+								double cv = 1.0;
+
+								if (u == 0)
+									cu = 1 / Math.sqrt(2);
+								if (v == 0)
+									cv = 1 / Math.sqrt(2);
+
+								double yValue = yblock.get(new xyAxis(u, v));
+
+								double h1 = Math.cos((2 * xi + 1) * u * Math.PI / 16);
+								double h2 = Math.cos((2 * yi + 1) * v * Math.PI / 16);
+
+								sum += cu * cv * yValue * h1 * h2;
+							}
+						}
+
+						sum = sum / 4;
+
+						newyBlock.put(new xyAxis(xi, yi), sum);
+					}
+				}
+
+				yblocks.put(new xyAxis(x/8, y/8), newyBlock);
+			}
+		}
+
+		// calculating cb,cr value for each block
+		for (int y = 0; y < height/2+height/2%8; y += 8) {
+			for (int x = 0; x < width/2+width/2%8; x += 8) {
+				Map<xyAxis, Double> cbblock = cbblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> crblock = crblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
+				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
+
+				for (int xi = 0; xi < 8; xi ++) {
+					for (int yi = 0; yi < 8; yi ++) {
+
+						double sumcb = 0.0;
+						double sumcr = 0.0;
+
+						for (int v = 0; v < 8; v ++) {
+							for (int u = 0; u < 8; u ++) {
+								double cu = 1.0;
+								double cv = 1.0;
+
+								if (u == 0)
+									cu = 1 / Math.sqrt(2);
+								if (v == 0)
+									cv = 1 / Math.sqrt(2);
+
+								double cbValue = cbblock.get(new xyAxis(u, v));
+								double crValue = crblock.get(new xyAxis(u, v));
+
+								double h1 = Math.cos((2 * xi + 1) * u * Math.PI / 16);
+								double h2 = Math.cos((2 * yi + 1) * v * Math.PI / 16);
+
+								sumcb += cu * cv * cbValue * h1 * h2;
+								sumcr += cu * cv * crValue * h1 * h2;
+							}
+						}
+
+						sumcb = sumcb / 4;
+						sumcr = sumcr / 4;
+
+						newcbBlock.put(new xyAxis(xi, yi), sumcb);
+						newcrBlock.put(new xyAxis(xi, yi), sumcr);
+					}
+				}
+
+				cbblocks.put(new xyAxis(x/8, y/8), newcbBlock);
+				crblocks.put(new xyAxis(x/8, y/8), newcrBlock);
+			}
+		}
+	}
+
+	/**
+	 * Combime blocks into one y, cb, cr values
+	 */
+	public void combineBlocks() {
+		for (int y = 0; y < height; y += 8) {
+			for (int x = 0; x < width; x += 8) {
+				Map<xyAxis, Double> cbblock = cbblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> crblock = crblocks.get(new xyAxis(x/8, y/8));
+
+				Map<xyAxis, Double> yblock = yblocks.get(new xyAxis(x/8, y/8));
+
+				for (int yi = y; yi < (y + 8); yi ++) {
+					for (int xi = x; xi < (x + 8); xi ++) {
+						if (xi < width/2+width/2%8 && yi < height/2+height/2%8) {
+							crValues.put(new xyAxis(xi, yi), crblock.get(new xyAxis(xi - x, yi - y)));
+							cbValues.put(new xyAxis(xi, yi), cbblock.get(new xyAxis(xi - x, yi - y)));
+						}
+						if (xi < width && yi < height) {
+							yValues.put(new xyAxis(xi, yi), yblock.get(new xyAxis(xi - x, yi - y)));
+						}
+					}
+				}
+			}
+		}
 	}
 }
