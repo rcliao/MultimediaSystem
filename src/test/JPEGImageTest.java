@@ -218,4 +218,18 @@ public class JPEGImageTest {
       assertEquals(16*18, jpegImage.getCrBlocks().size());
       assertEquals(8*8, jpegImage.getCrBlock(15, 17).size());
    }
+
+   @Test
+   public void testCompressionRatio() {
+      jpegImage.resize();
+      jpegImage.colorTransAndSubsample();
+      jpegImage.dctEncoding();
+      jpegImage.quantization(0);
+      jpegImage.calculateCompressionRatio();
+
+      assertEquals(1638000.0, jpegImage.getOriginalSize(), 0);
+      assertTrue(133140.0 >= jpegImage.getDSizeY());
+      assertEquals(21358.0, jpegImage.getDSizeCr(), 200);
+      assertTrue(30276.0 >= jpegImage.getDSizeCb());
+   }
 }

@@ -11,6 +11,10 @@ import java.awt.image.*;
 import javax.swing.*;
 
 public class JPEGImage extends ImageModel {
+	public final int BIT_FOR_Y = 9;
+	public final int BIT_FOR_C = 8;
+	public final int BIT_FOR_LENGTH = 6;
+
 	private int originalHeight;
 	private int originalWidth;
 
@@ -26,6 +30,11 @@ public class JPEGImage extends ImageModel {
 	private double[][] quantizeTableC;
 
 	private int compressLevel;
+
+	private double originalSize;
+	private double dSizeY;
+	private double dSizeCb;
+	private double dSizeCr;
 
 	/**
 	 * Default constructor
@@ -136,6 +145,38 @@ public class JPEGImage extends ImageModel {
 	 
 	public void setCbBlocks(Map<xyAxis, Map<xyAxis, Double>> cbblocks) {
 		this.cbblocks = cbblocks;
+	}
+
+	public double getOriginalSize() {
+		return originalSize;
+	}
+	 
+	public void setOriginalSize(double originalSize) {
+		this.originalSize = originalSize;
+	}
+
+	public double getDSizeY() {
+		return dSizeY;
+	}
+	 
+	public void setDSizeY(double dSizeY) {
+		this.dSizeY = dSizeY;
+	}
+
+	public double getDSizeCb() {
+		return dSizeCb;
+	}
+	 
+	public void setDSizeCb(double dSizeCb) {
+		this.dSizeCb = dSizeCb;
+	}
+
+	public double getDSizeCr() {
+		return dSizeCr;
+	}
+	 
+	public void setDSizeCr(double dSizeCr) {
+		this.dSizeCr = dSizeCr;
 	}
 
 	/**
@@ -790,6 +831,167 @@ public class JPEGImage extends ImageModel {
 				cbblocks.put(new xyAxis(x/8, y/8), newcbBlock);
 				crblocks.put(new xyAxis(x/8, y/8), newcrBlock);
 			}
+		}
+	}
+
+	/**
+	 * Homework 3 step f-5: Compression Ratio
+	 */
+	public void calculateCompressionRatio() {
+		originalSize = originalHeight * originalWidth * 24;
+		dSizeY = 0.0;
+		dSizeCb = 0.0;
+		dSizeCr = 0.0;
+
+		// calculating DCT transformation for y value
+		for (int y = 0; y < height; y += 8) {
+			for (int x = 0; x < width; x += 8) {
+				Map<xyAxis, Double> yblock = yblocks.get(new xyAxis(x/8, y/8));
+
+				Queue<node> yQueue = zipZag(yblock);
+
+				node nextValue = new node();
+				while (nextValue != null) {
+					nextValue = yQueue.poll();
+
+					if (nextValue == null)
+						break;
+
+					if (nextValue.frequency == 0)
+						dSizeY += this.BIT_FOR_Y - compressLevel;
+					else
+						dSizeY += this.BIT_FOR_Y - compressLevel + this.BIT_FOR_LENGTH;
+				}
+			}
+		}
+
+		// calculating cb,cr value for each block
+		for (int y = 0; y < height/2 + height/2%8; y += 8) {
+			for (int x = 0; x < width/2 + width/2%8; x += 8) {
+				Map<xyAxis, Double> cbblock = cbblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> crblock = crblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
+				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
+
+				Queue<node> cbQueue = zipZag(cbblock);
+				Queue<node> crQueue = zipZag(crblock);
+
+				node nextcbValue = new node();
+				while (nextcbValue != null) {
+					nextcbValue = cbQueue.poll();
+
+					if (nextcbValue == null)
+						break;
+
+					if (nextcbValue.frequency == 0)
+						dSizeCb += this.BIT_FOR_C - compressLevel;
+					else
+						dSizeCb += this.BIT_FOR_C - compressLevel + this.BIT_FOR_LENGTH;
+				}
+
+				node nextcrValue = new node();
+				while (nextcrValue != null) {
+					nextcrValue = crQueue.poll();
+
+					if (nextcrValue == null)
+						break;
+
+					if (nextcrValue.frequency == 0)
+						dSizeCr += this.BIT_FOR_C - compressLevel;
+					else
+						dSizeCr += this.BIT_FOR_C - compressLevel + this.BIT_FOR_LENGTH;
+				}
+			}
+		}
+	}
+
+	public LinkedList<node> zipZag(Map<xyAxis, Double> block) {
+		LinkedList<node> result = new LinkedList<node>();
+
+		result.addFirst(new node(block.get(new xyAxis(0, 0)), 0));
+
+		for (int sum = 1; sum < 14; sum ++) {
+			if (sum < 8) {
+				if (sum % 2 == 1) {
+					for (int i = 0; i <= sum; i ++) {
+						for (int j = sum; j >= 0; j --) {
+							if (i + j == sum && i == 1) {
+								double nextValue = block.get(new xyAxis(i, j));
+								if (sum == 1) {
+									result.addFirst(new node(nextValue, 1));
+								} else if (nextValue == result.peek().word) {
+									result.peek().frequency += 1;
+								} else {
+									result.addFirst(new node(nextValue, 1));
+								}
+							}
+						}
+					}
+				} else if (sum % 2 == 0) {
+					for (int i = sum; i >= 0; i --) {
+						for (int j = 0; j <= sum; j ++) {
+							if (i + j == sum) {
+								double nextValue = block.get(new xyAxis(i, j));
+								if (nextValue == result.peek().word) {
+									result.peek().frequency += 1;
+								} else {
+									result.addFirst(new node(nextValue, 1));
+								}
+							}
+						}
+					}
+				}
+			} else {
+				if (sum % 2 == 1) {
+					for (int i = sum-7; i <= 7; i ++) {
+						for (int j = 7; j >= sum-7; j --) {
+							if (i + j == sum) {
+								double nextValue = block.get(new xyAxis(i, j));
+								if (nextValue == result.peek().word) {
+									result.peek().frequency += 1;
+								} else {
+									result.addFirst(new node(nextValue, 1));
+								}
+							}
+						}
+					}
+				} else if (sum % 2 == 0) {
+					for (int i = 7; i >= sum-7; i --) {
+						for (int j = sum-7; j <= 7; j ++) {
+							if (i + j == sum) {
+								double nextValue = block.get(new xyAxis(i, j));
+								if (nextValue == result.peek().word) {
+									result.peek().frequency += 1;
+								} else {
+									result.addFirst(new node(nextValue, 1));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		double finalValue = block.get(new xyAxis(7, 7));
+		if (finalValue == result.peek().word)
+			result.peek().frequency += 1;
+		else
+			result.addFirst(new node(finalValue, 1));
+
+		return result;
+	}
+
+	public class node {
+		Double word;
+		Integer frequency;
+
+		public node() {
+
+		}
+
+		public node (double word, Integer frequency) {
+			this.word = word;
+			this.frequency = frequency;
 		}
 	}
 }
