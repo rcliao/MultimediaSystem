@@ -188,7 +188,7 @@ public class JPEGImageTest {
       double cb = 0.0;
       double cr = 0.0;
 
-      y = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+      y = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2] - 128;
       cb = -0.1687 * rgb[0] - 0.3313 * rgb[1] + 0.5 * rgb[2] - 0.5;
       cr = 0.5 * rgb[0] - 0.4187 * rgb[1] - 0.0813 * rgb[2] - 0.5;
 
@@ -217,10 +217,5 @@ public class JPEGImageTest {
       assertEquals(16*18, jpegImage.getCbBlocks().size());
       assertEquals(16*18, jpegImage.getCrBlocks().size());
       assertEquals(8*8, jpegImage.getCrBlock(15, 17).size());
-   }
-
-   @Test
-   public void testDCTTransform() {
-
    }
 }

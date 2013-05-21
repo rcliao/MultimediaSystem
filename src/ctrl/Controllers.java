@@ -57,6 +57,7 @@ public class Controllers {
 		m_view.addDeResizeListener(new DeResizeLisetner());
 		m_view.addColorTransformListener(new ColorTransformListener());
 		m_view.addDCTListener(new DCTListener());
+		m_view.addQuantizationListener(new QuantizationListener());
 	}
 
 	/**
@@ -766,6 +767,45 @@ public class Controllers {
 			m_view.getOutputLabel().setIcon(new ImageIcon(jpegImage.getImg()));
 
 			m_view.getMainPanel().setTitleAt(1, "Color Transform and De-Color-Transform");
+		}
+	}
+
+	class QuantizationListener implements ActionListener {
+		public Integer inputDialog(String message, Integer defaultValue) {
+			String mString = "";
+
+			while (mString.isEmpty() || !mString.matches("[0-9]+")) {
+				mString = JOptionPane.showInputDialog(message);
+			}
+
+			// if user doesnt input value, default is 1
+			Integer m = defaultValue;
+
+			if (mString != null)
+				m = Integer.valueOf(mString);
+
+			return m;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
+			jpegImage = new JPEGImage(m_model.getFile());
+
+			int n = inputDialog("Please input N(Compress Level) 0 is the lowest", 0);
+
+			jpegImage.resize();
+			jpegImage.colorTransAndSubsample();
+			jpegImage.dctEncoding();
+			jpegImage.quantization(n);
+			jpegImage.deQuantization();
+			jpegImage.dctDecoding();
+			jpegImage.invColorTransAndSuperSample();
+			jpegImage.deResize();
+
+			m_view.getOutputLabel().setIcon(new ImageIcon(jpegImage.getImg()));
+
+			m_view.getMainPanel().setTitleAt(1, "Quantizatioin");
 		}
 	}
 }

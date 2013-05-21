@@ -22,6 +22,11 @@ public class JPEGImage extends ImageModel {
 	private Map<xyAxis, Map<xyAxis, Double>> cbblocks = new HashMap<xyAxis, Map<xyAxis, Double>>();
 	private Map<xyAxis, Map<xyAxis, Double>> crblocks = new HashMap<xyAxis, Map<xyAxis, Double>>();
 
+	private double[][] quantizeTableY;
+	private double[][] quantizeTableC;
+
+	private int compressLevel;
+
 	/**
 	 * Default constructor
 	 */
@@ -232,7 +237,7 @@ public class JPEGImage extends ImageModel {
 
 				double[] yCbCr = new double[3];
 
-				yCbCr[0] = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+				yCbCr[0] = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2] - 128;
 				yCbCr[1] = -0.1687 * rgb[0] - 0.3313 * rgb[1] + 0.5 * rgb[2] - 0.5;
 				yCbCr[2] = 0.5 * rgb[0] - 0.4187 * rgb[1] - 0.0813 * rgb[2] - 0.5;
 
@@ -350,7 +355,7 @@ public class JPEGImage extends ImageModel {
 		// add 128 to y value and 0.5 to cr, cb value
 		for (int i = 0; i < width; i ++) {
 			for (int j = 0; j < height; j ++) {
-				double y = yValues.get(new xyAxis(i, j));
+				double y = yValues.get(new xyAxis(i, j)) + 128;
 				double cr = crValues.get(new xyAxis(i, j)) + 0.5;
 				double cb = cbValues.get(new xyAxis(i, j)) + 0.5;
 
@@ -648,6 +653,142 @@ public class JPEGImage extends ImageModel {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Homework 3 step f-4: Quantization
+	 */
+	public void quantization(int n) {
+		buildQuantizationTable();
+
+		compressLevel = n;
+
+		// calculating DCT transformation for y value
+		for (int y = 0; y < height; y += 8) {
+			for (int x = 0; x < width; x += 8) {
+				Map<xyAxis, Double> yblock = yblocks.get(new xyAxis(x/8, y/8));
+
+				Map<xyAxis, Double> newyBlock = new HashMap<xyAxis, Double>();
+
+				for (int xi = 0; xi < 8; xi ++) {
+					for (int yi = 0; yi < 8; yi ++) {
+						double yValue = yblock.get(new xyAxis(xi, yi));
+
+						double newy = Math.round(yValue / (quantizeTableY[xi][yi] * Math.pow(2, n)));
+
+						newyBlock.put(new xyAxis(xi, yi), newy);
+					}
+				}
+
+				yblocks.put(new xyAxis(x/8, y/8), newyBlock);
+			}
+		}
+
+		// calculating cb,cr value for each block
+		for (int y = 0; y < height/2 + height/2%8; y += 8) {
+			for (int x = 0; x < width/2 + width/2%8; x += 8) {
+				Map<xyAxis, Double> cbblock = cbblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> crblock = crblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
+				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
+
+				for (int xi = 0; xi < 8; xi ++) {
+					for (int yi = 0; yi < 8; yi ++) {
+						double cbValue = cbblock.get(new xyAxis(xi, yi));
+						double crValue = crblock.get(new xyAxis(xi, yi));
+
+						double newcb = Math.round(cbValue / (quantizeTableY[xi][yi] * Math.pow(2, n)));
+						double newcr = Math.round(crValue / (quantizeTableY[xi][yi] * Math.pow(2, n)));
+
+						newcbBlock.put(new xyAxis(xi, yi), newcb);
+						newcrBlock.put(new xyAxis(xi, yi), newcr);
+					}
+				}
+
+				cbblocks.put(new xyAxis(x/8, y/8), newcbBlock);
+				crblocks.put(new xyAxis(x/8, y/8), newcrBlock);
+			}
+		}
+	}
+
+	/**
+	 * Build Quantization Table
+	 */
+	public void buildQuantizationTable() {
+		quantizeTableY = new double[8][8];
+		quantizeTableC = new double[8][8];
+
+		quantizeTableY[0] = new double[]{4, 4, 4, 8, 8, 16, 16, 32};
+		quantizeTableY[1] = new double[]{4, 4, 4, 8, 8, 16, 16, 32};
+		quantizeTableY[2] = new double[]{4, 4, 8, 8, 16, 16, 32, 32};
+		quantizeTableY[3] = new double[]{8, 8, 8, 16, 16, 32, 32, 32};
+		quantizeTableY[4] = new double[]{8, 8, 16, 16, 32, 32, 32, 32};
+		quantizeTableY[5] = new double[]{16, 16, 16, 32, 32, 32, 32, 32};
+		quantizeTableY[6] = new double[]{16, 16, 32, 32, 32, 32, 32, 32};
+		quantizeTableY[7] = new double[]{32, 32, 32, 32, 32, 32, 32, 32};
+
+		quantizeTableC[0] = new double[]{8, 8, 8, 16, 32, 32, 32, 32};
+		quantizeTableC[1] = new double[]{8, 8, 8, 16, 32, 32, 32, 32};
+		quantizeTableC[2] = new double[]{8, 8, 16, 32, 32, 32, 32, 32};
+		quantizeTableC[3] = new double[]{16, 16, 32, 32, 32, 32, 32, 32};
+		quantizeTableC[4] = new double[]{32, 32, 32, 32, 32, 32, 32, 32};
+		quantizeTableC[5] = new double[]{32, 32, 32, 32, 32, 32, 32, 32};
+		quantizeTableC[6] = new double[]{32, 32, 32, 32, 32, 32, 32, 32};
+		quantizeTableC[7] = new double[]{32, 32, 32, 32, 32, 32, 32, 32};
+	}
+
+	/**
+	 * Homewor 3 step I-1: Dequantization
+	 */
+	public void deQuantization() {
+		buildQuantizationTable();
+
+		// calculating DCT transformation for y value
+		for (int y = 0; y < height; y += 8) {
+			for (int x = 0; x < width; x += 8) {
+				Map<xyAxis, Double> yblock = yblocks.get(new xyAxis(x/8, y/8));
+
+				Map<xyAxis, Double> newyBlock = new HashMap<xyAxis, Double>();
+
+				for (int xi = 0; xi < 8; xi ++) {
+					for (int yi = 0; yi < 8; yi ++) {
+						double yValue = yblock.get(new xyAxis(xi, yi));
+
+						double newy = yValue * (quantizeTableY[xi][yi] * Math.pow(2, compressLevel));
+
+						newyBlock.put(new xyAxis(xi, yi), newy);
+					}
+				}
+
+				yblocks.put(new xyAxis(x/8, y/8), newyBlock);
+			}
+		}
+
+		// calculating cb,cr value for each block
+		for (int y = 0; y < height/2 + height/2%8; y += 8) {
+			for (int x = 0; x < width/2 + width/2%8; x += 8) {
+				Map<xyAxis, Double> cbblock = cbblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> crblock = crblocks.get(new xyAxis(x/8, y/8));
+				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
+				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
+
+				for (int xi = 0; xi < 8; xi ++) {
+					for (int yi = 0; yi < 8; yi ++) {
+						double cbValue = cbblock.get(new xyAxis(xi, yi));
+						double crValue = crblock.get(new xyAxis(xi, yi));
+
+						double newcb = cbValue * (quantizeTableY[xi][yi] * Math.pow(2, compressLevel));
+						double newcr = crValue * (quantizeTableY[xi][yi] * Math.pow(2, compressLevel));
+
+						newcbBlock.put(new xyAxis(xi, yi), newcb);
+						newcrBlock.put(new xyAxis(xi, yi), newcr);
+					}
+				}
+
+				cbblocks.put(new xyAxis(x/8, y/8), newcbBlock);
+				crblocks.put(new xyAxis(x/8, y/8), newcrBlock);
 			}
 		}
 	}

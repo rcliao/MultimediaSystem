@@ -33,7 +33,7 @@ public class Views extends JPanel implements ActionListener {
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
 				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle,
 				menuItemHuffman, menuItemResize, menuItemDeResize, menuItemColorTransform,
-				menuItemDCT;
+				menuItemDCT, menuItemQuantization;
 	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu,
 				imageTextMenu, jpegMenu;
 	private JLabel imageLabel, outputLabel;
@@ -198,6 +198,9 @@ public class Views extends JPanel implements ActionListener {
 
 		menuItemDCT = new JMenuItem("DCT Transform");
 		jpegMenu.add(menuItemDCT);
+
+		menuItemQuantization = new JMenuItem("Quantization");
+		jpegMenu.add(menuItemQuantization);
 
 		menuBar.add(jpegMenu);
 
@@ -411,6 +414,10 @@ public class Views extends JPanel implements ActionListener {
 
 	public void addDCTListener(ActionListener action) {
 		menuItemDCT.addActionListener(action);
+	}
+
+	public void addQuantizationListener(ActionListener action) {
+		menuItemQuantization.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {
