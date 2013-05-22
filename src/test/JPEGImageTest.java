@@ -7,6 +7,8 @@ import static org.junit.Assert.* ;
 import java.util.*;
 
 import models.*;
+import models.JPEGImage.*;
+import models.ImageModel.*;
 
 public class JPEGImageTest {
 
@@ -15,30 +17,30 @@ public class JPEGImageTest {
 
    @Before
    public void initImage() {
-   	duckyTestImage = new File("Ducky.ppm");
+   	duckyTestImage = new File("redblack.ppm");
    	jpegImage = new JPEGImage(duckyTestImage);
    }
 
    @Test
    public void initImageSetup() {
-   	assertEquals(250, jpegImage.getW());
-   	assertEquals(273, jpegImage.getH());
+   	assertEquals(64, jpegImage.getW());
+   	assertEquals(64, jpegImage.getH());
    }
 
    @Test
    public void testResize() {
    	jpegImage.resize();
 
-   	assertEquals(256, jpegImage.getW());
-   	assertEquals(280, jpegImage.getH());
+   	assertEquals(64, jpegImage.getW());
+   	assertEquals(64, jpegImage.getH());
    }
 
    @Test
    public void afterResize() {
    	jpegImage.resize();
 
-   	assertEquals(250, jpegImage.getOriginalWidth());
-   	assertEquals(273, jpegImage.getOriginalHeight());
+   	assertEquals(64, jpegImage.getOriginalWidth());
+   	assertEquals(64, jpegImage.getOriginalHeight());
    }
 
    @Test
@@ -178,23 +180,15 @@ public class JPEGImageTest {
    public void testColorTransform() {
       boolean isPredicted = true;
 
+      jpegImage.resize();
    	jpegImage.colorTransform();
 
-      int[] rgb = new int[3];
-
-      jpegImage.getPixel(30, 30, rgb);
-
-      double y = 0.0;
-      double cb = 0.0;
-      double cr = 0.0;
-
-      y = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2] - 128;
-      cb = -0.1687 * rgb[0] - 0.3313 * rgb[1] + 0.5 * rgb[2] - 0.5;
-      cr = 0.5 * rgb[0] - 0.4187 * rgb[1] - 0.0813 * rgb[2] - 0.5;
-
-      assertEquals(y, jpegImage.getY(30, 30), 0.01);
-      assertEquals(cb, jpegImage.getCb(30, 30), 0.01);
-      assertEquals(cr, jpegImage.getCr(30, 30), 0.01);
+      assertEquals(-51.755, jpegImage.getY(1, 0), 0.01);
+      assertEquals(-43.5185, jpegImage.getCb(1, 0), 0.01);
+      assertEquals(127, jpegImage.getCr(1, 0), 0.01);
+      assertEquals(-51.755, jpegImage.getY(0, 0), 0.01);
+      assertEquals(-43.5185, jpegImage.getCb(0, 0), 0.01);
+      assertEquals(127, jpegImage.getCr(0, 0), 0.01);
    }
 
    @Test
@@ -202,9 +196,9 @@ public class JPEGImageTest {
       jpegImage.resize();
       jpegImage.colorTransAndSubsample();
 
-      assertEquals(256*280, jpegImage.getYValues().size());
-      assertEquals(128*144, jpegImage.getCbValues().size());
-      assertEquals(128*144, jpegImage.getCrValues().size());
+      assertEquals(64*64, jpegImage.getYValues().size());
+      assertEquals(32*32, jpegImage.getCbValues().size());
+      assertEquals(32*32, jpegImage.getCrValues().size());
    }
 
    @Test
@@ -213,10 +207,10 @@ public class JPEGImageTest {
       jpegImage.colorTransAndSubsample();
       jpegImage.divideBlocks();
 
-      assertEquals(32*35, jpegImage.getYBlocks().size());
-      assertEquals(16*18, jpegImage.getCbBlocks().size());
-      assertEquals(16*18, jpegImage.getCrBlocks().size());
-      assertEquals(8*8, jpegImage.getCrBlock(15, 17).size());
+      assertEquals(8*8, jpegImage.getYBlocks().size());
+      assertEquals(4*4, jpegImage.getCbBlocks().size());
+      assertEquals(4*4, jpegImage.getCrBlocks().size());
+      assertEquals(8*8, jpegImage.getCrBlock(3, 3).size());
    }
 
    @Test
@@ -227,9 +221,9 @@ public class JPEGImageTest {
       jpegImage.quantization(0);
       jpegImage.calculateCompressionRatio();
 
-      assertEquals(1638000.0, jpegImage.getOriginalSize(), 0);
-      assertTrue(133140.0 >= jpegImage.getDSizeY());
-      assertEquals(21358.0, jpegImage.getDSizeCr(), 200);
-      assertTrue(30276.0 >= jpegImage.getDSizeCb());
+      assertEquals(98304.0, jpegImage.getOriginalSize(), 0);
+      assertEquals(9216.0, jpegImage.getDSizeY(), 0);
+      assertEquals(2144.0, jpegImage.getDSizeCr(), 0);
+      assertEquals(2144.0, jpegImage.getDSizeCb(), 0);
    }
 }

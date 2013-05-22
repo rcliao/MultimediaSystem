@@ -36,6 +36,10 @@ public class JPEGImage extends ImageModel {
 	private double dSizeCb;
 	private double dSizeCr;
 
+	private Queue<Node> yQueue;
+	private Queue<Node> cbQueue;
+	private Queue<Node> crQueue;
+
 	/**
 	 * Default constructor
 	 */
@@ -179,6 +183,30 @@ public class JPEGImage extends ImageModel {
 		this.dSizeCr = dSizeCr;
 	}
 
+	public Queue<Node> getYQueue() {
+		return yQueue;
+	}
+	 
+	public void setYQueue(Queue<Node> yQueue) {
+		this.yQueue = yQueue;
+	}
+
+	public Queue<Node> getCrQueue() {
+		return crQueue;
+	}
+	 
+	public void setCrQueue(Queue<Node> crQueue) {
+		this.crQueue = crQueue;
+	}
+
+	public Queue<Node> getCbQueue() {
+		return cbQueue;
+	}
+	 
+	public void setCbQueue(Queue<Node> cbQueue) {
+		this.cbQueue = cbQueue;
+	}
+
 	/**
 	 * Homework 3 Step f-1: Resize the image and fill the extra pixels with black values({0, 0, 0})
 	 */
@@ -190,8 +218,8 @@ public class JPEGImage extends ImageModel {
 
 		LinkedList<int[]> temp = new LinkedList<int[]>();
 
-		for (int i = 0; i < super.width; i ++) {
-			for (int j = 0; j < super.height; j ++) {
+		for (int j = 0; j < super.height; j ++) {
+			for (int i = 0; i < super.width; i ++) {
 				int[] rgb = new int[3];
 
 				super.getPixel(i, j, rgb);
@@ -212,16 +240,16 @@ public class JPEGImage extends ImageModel {
 
 		super.img = new BufferedImage(super.width, super.height, BufferedImage.TYPE_INT_RGB);
 
-		for (int i = 0; i < originalWidth; i ++) {
-			for (int j = 0; j < originalHeight; j ++) {
+		for (int j = 0; j < originalHeight; j ++) {
+			for (int i = 0; i < originalWidth; i ++) {
 				int[] rgb = temp.poll();
 
 				super.setPixel(i, j, rgb);
 			}
 		}
 
-		for (int i = 0; i < super.width - originalWidth; i ++) {
-			for (int j = 0; j < super.height - originalHeight; j ++) {
+		for (int j = 0; j < super.height - originalHeight; j ++) {
+			for (int i = 0; i < super.width - originalWidth; i ++) {
 				super.setPixel(originalWidth + i, originalHeight + j, black);
 			}
 		}
@@ -236,8 +264,8 @@ public class JPEGImage extends ImageModel {
 
 		ArrayDeque<int[]> temp = new ArrayDeque<int[]>();
 
-		for (int i = 0; i < super.width; i ++) {
-			for (int j = 0; j < super.height; j ++) {
+		for (int j = 0; j < super.height; j ++) {
+			for (int i = 0; i < super.width; i ++) {
 				int[] rgb = new int[3];
 
 				super.getPixel(i, j, rgb);
@@ -248,8 +276,8 @@ public class JPEGImage extends ImageModel {
 
 		super.img = new BufferedImage(super.width, super.height, BufferedImage.TYPE_INT_RGB);
 
-		for (int i = 0; i < super.width; i ++) {
-			for (int j = 0; j < super.height; j ++) {
+		for (int j = 0; j < super.height; j ++) {
+			for (int i = 0; i < super.width; i ++) {
 				int[] rgb = temp.poll();
 
 				super.setPixel(i, j, rgb);
@@ -270,8 +298,8 @@ public class JPEGImage extends ImageModel {
 	 */
 	public void colorTransform() {
 		/** Transform rgb into YCbCr */
-		for (int i = 0; i < super.getW(); i ++) {
-			for (int j = 0; j < super.getH(); j ++) {
+		for (int j = 0; j < super.getH(); j ++) {
+			for (int i = 0; i < super.getW(); i ++) {
 				int[] rgb = new int[3];
 				
 				super.getPixel(i, j, rgb);
@@ -296,13 +324,13 @@ public class JPEGImage extends ImageModel {
 		Map<xyAxis, Double> newCrValues = new HashMap<xyAxis, Double>();
 		Map<xyAxis, Double> newCbValues = new HashMap<xyAxis, Double>();
 
-		for (int x = 0; x < width; x += 2) {
-			for (int y = 0; y < height; y += 2) {
+		for (int y = 0; y < height; y += 2) {
+			for (int x = 0; x < width; x += 2) {
 				double averageCr = 0.0;
 				double averageCb = 0.0;
 
-				for (int xi = x; xi < (x + 2); xi ++) {
-					for (int yi = y; yi < (y + 2); yi ++) {
+				for (int yi = y; yi < (y + 2); yi ++) {
+					for (int xi = x; xi < (x + 2); xi ++) {
 						if (xi >= 0 && xi < width && yi >= 0 && yi < height) {
 							double cr = getCr(xi, yi);
 							double cb = getCb(xi, yi);
@@ -324,8 +352,8 @@ public class JPEGImage extends ImageModel {
 		// if Cr,Cb is not dividable by 8, pad it with black pixel
 
 		if ((width/2)%8 != 0) {
-			for (int i = width/2; i < width/2+4; i ++) {
-				for (int j = 0; j < height/2; j ++) {
+			for (int j = 0; j < height/2; j ++) {
+				for (int i = width/2; i < width/2+4; i ++) {
 					newCrValues.put(new xyAxis(i, j), 0.0);
 					newCbValues.put(new xyAxis(i, j), 0.0);
 				}
@@ -333,8 +361,8 @@ public class JPEGImage extends ImageModel {
 		}
 
 		if ((height/2)%8 != 0) {
-			for (int i = 0; i < width/2; i ++) {
-				for (int j = height/2; j < height/2+4; j ++) {
+			for (int j = height/2; j < height/2+4; j ++) {
+				for (int i = 0; i < width/2; i ++) {
 					newCrValues.put(new xyAxis(i, j), 0.0);
 					newCbValues.put(new xyAxis(i, j), 0.0);
 				}
@@ -342,8 +370,8 @@ public class JPEGImage extends ImageModel {
 		}
 
 		if ((height/2) %8 != 0 && (width/2)%8 != 0) {
-			for (int i = width/2; i < width/2+4; i ++) {
-				for (int j = height/2; j < height/2+4; j ++) {
+			for (int j = height/2; j < height/2+4; j ++) {
+				for (int i = width/2; i < width/2+4; i ++) {
 					newCrValues.put(new xyAxis(i, j), 0.0);
 					newCbValues.put(new xyAxis(i, j), 0.0);
 				}
@@ -369,8 +397,8 @@ public class JPEGImage extends ImageModel {
 		Map<xyAxis, Double> tempAverageCr = new TreeMap<xyAxis, Double>();
 		Map<xyAxis, Double> tempAverageCb = new TreeMap<xyAxis, Double>();
 
-		for (int x = 0; x < width; x += 2) {
-			for (int y = 0; y < height; y += 2) {
+		for (int y = 0; y < height; y += 2) {
+			for (int x = 0; x < width; x += 2) {
 				double averageCr = crValues.get(new xyAxis(x/2, y/2));
 				double averageCb = cbValues.get(new xyAxis(x/2, y/2));
 
@@ -394,8 +422,8 @@ public class JPEGImage extends ImageModel {
 	 */
 	public void invColorTransform() {
 		// add 128 to y value and 0.5 to cr, cb value
-		for (int i = 0; i < width; i ++) {
-			for (int j = 0; j < height; j ++) {
+		for (int j = 0; j < height; j ++) {
+			for (int i = 0; i < width; i ++) {
 				double y = yValues.get(new xyAxis(i, j)) + 128;
 				double cr = crValues.get(new xyAxis(i, j)) + 0.5;
 				double cb = cbValues.get(new xyAxis(i, j)) + 0.5;
@@ -502,8 +530,8 @@ public class JPEGImage extends ImageModel {
 
 						double sum = 0.0;
 
-						for (int xi = 0; xi < 8; xi ++) {
-							for (int yi = 0; yi < 8; yi ++) {
+						for (int yi = 0; yi < 8; yi ++) {
+							for (int xi = 0; xi < 8; xi ++) {
 								double yValue = yblock.get(new xyAxis(xi, yi));
 
 								double h1 = Math.cos((2 * xi + 1) * u * Math.PI / 16);
@@ -514,6 +542,12 @@ public class JPEGImage extends ImageModel {
 						}
 
 						sum = sum * cu * cv / 4;
+
+						if (sum > Math.pow(2, 10)) {
+							sum = Math.pow(2, 10);
+						} else if (sum < -Math.pow(2, 10)) {
+							sum = -Math.pow(2,10);
+						}
 
 						newyBlock.put(new xyAxis(u, v), sum);
 					}
@@ -544,8 +578,8 @@ public class JPEGImage extends ImageModel {
 						double sumcb = 0.0;
 						double sumcr = 0.0;
 
-						for (int xi = 0; xi < 8; xi ++) {
-							for (int yi = 0; yi < 8; yi ++) {
+						for (int yi = 0; yi < 8; yi ++) {
+							for (int xi = 0; xi < 8; xi ++) {
 								double cbValue = cbblock.get(new xyAxis(xi, yi));
 								double crValue = crblock.get(new xyAxis(xi, yi));
 
@@ -559,6 +593,17 @@ public class JPEGImage extends ImageModel {
 
 						sumcb = sumcb * cu * cv / 4;
 						sumcr = sumcr * cu * cv / 4;
+
+						if (sumcb > Math.pow(2, 10)) {
+							sumcb = Math.pow(2, 10);
+						} else if (sumcb < -Math.pow(2, 10)) {
+							sumcb = -Math.pow(2,10);
+						}
+						if (sumcr > Math.pow(2, 10)) {
+							sumcr = Math.pow(2, 10);
+						} else if (sumcr < -Math.pow(2, 10)) {
+							sumcr = -Math.pow(2,10);
+						}
 
 						newcbBlock.put(new xyAxis(u, v), sumcb);
 						newcrBlock.put(new xyAxis(u, v), sumcr);
@@ -713,8 +758,8 @@ public class JPEGImage extends ImageModel {
 
 				Map<xyAxis, Double> newyBlock = new HashMap<xyAxis, Double>();
 
-				for (int xi = 0; xi < 8; xi ++) {
-					for (int yi = 0; yi < 8; yi ++) {
+				for (int yi = 0; yi < 8; yi ++) {
+					for (int xi = 0; xi < 8; xi ++) {
 						double yValue = yblock.get(new xyAxis(xi, yi));
 
 						double newy = Math.round(yValue / (quantizeTableY[xi][yi] * Math.pow(2, n)));
@@ -735,8 +780,8 @@ public class JPEGImage extends ImageModel {
 				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
 				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
 
-				for (int xi = 0; xi < 8; xi ++) {
-					for (int yi = 0; yi < 8; yi ++) {
+				for (int yi = 0; yi < 8; yi ++) {
+					for (int xi = 0; xi < 8; xi ++) {
 						double cbValue = cbblock.get(new xyAxis(xi, yi));
 						double crValue = crblock.get(new xyAxis(xi, yi));
 
@@ -793,8 +838,8 @@ public class JPEGImage extends ImageModel {
 
 				Map<xyAxis, Double> newyBlock = new HashMap<xyAxis, Double>();
 
-				for (int xi = 0; xi < 8; xi ++) {
-					for (int yi = 0; yi < 8; yi ++) {
+				for (int yi = 0; yi < 8; yi ++) {
+					for (int xi = 0; xi < 8; xi ++) {
 						double yValue = yblock.get(new xyAxis(xi, yi));
 
 						double newy = yValue * (quantizeTableY[xi][yi] * Math.pow(2, compressLevel));
@@ -815,8 +860,8 @@ public class JPEGImage extends ImageModel {
 				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
 				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
 
-				for (int xi = 0; xi < 8; xi ++) {
-					for (int yi = 0; yi < 8; yi ++) {
+				for (int yi = 0; yi < 8; yi ++) {
+					for (int xi = 0; xi < 8; xi ++) {
 						double cbValue = cbblock.get(new xyAxis(xi, yi));
 						double crValue = crblock.get(new xyAxis(xi, yi));
 
@@ -848,9 +893,9 @@ public class JPEGImage extends ImageModel {
 			for (int x = 0; x < width; x += 8) {
 				Map<xyAxis, Double> yblock = yblocks.get(new xyAxis(x/8, y/8));
 
-				Queue<node> yQueue = zipZag(yblock);
+				yQueue = zipZag(yblock);
 
-				node nextValue = new node();
+				Node nextValue = new Node();
 				while (nextValue != null) {
 					nextValue = yQueue.poll();
 
@@ -873,10 +918,10 @@ public class JPEGImage extends ImageModel {
 				Map<xyAxis, Double> newcbBlock = new HashMap<xyAxis, Double>();
 				Map<xyAxis, Double> newcrBlock = new HashMap<xyAxis, Double>();
 
-				Queue<node> cbQueue = zipZag(cbblock);
-				Queue<node> crQueue = zipZag(crblock);
+				cbQueue = zipZag(cbblock);
+				crQueue = zipZag(crblock);
 
-				node nextcbValue = new node();
+				Node nextcbValue = new Node();
 				while (nextcbValue != null) {
 					nextcbValue = cbQueue.poll();
 
@@ -889,7 +934,7 @@ public class JPEGImage extends ImageModel {
 						dSizeCb += this.BIT_FOR_C - compressLevel + this.BIT_FOR_LENGTH;
 				}
 
-				node nextcrValue = new node();
+				Node nextcrValue = new Node();
 				while (nextcrValue != null) {
 					nextcrValue = crQueue.poll();
 
@@ -905,67 +950,51 @@ public class JPEGImage extends ImageModel {
 		}
 	}
 
-	public LinkedList<node> zipZag(Map<xyAxis, Double> block) {
-		LinkedList<node> result = new LinkedList<node>();
+	public LinkedList<Node> zipZag(Map<xyAxis, Double> block) {
+		LinkedList<Node> result = new LinkedList<Node>();
 
-		result.addFirst(new node(block.get(new xyAxis(0, 0)), 0));
+		result.add(new Node(block.get(new xyAxis(0, 0)), 0));
 
 		for (int sum = 1; sum < 14; sum ++) {
 			if (sum < 8) {
 				if (sum % 2 == 1) {
 					for (int i = 0; i <= sum; i ++) {
-						for (int j = sum; j >= 0; j --) {
-							if (i + j == sum && i == 1) {
-								double nextValue = block.get(new xyAxis(i, j));
-								if (sum == 1) {
-									result.addFirst(new node(nextValue, 1));
-								} else if (nextValue == result.peek().word) {
-									result.peek().frequency += 1;
-								} else {
-									result.addFirst(new node(nextValue, 1));
-								}
-							}
+						double nextValue = block.get(new xyAxis(i, sum-i));
+						if (sum == 1 && i == 0) {
+							result.add(new Node(nextValue, 1));
+						} else if (nextValue == result.peekLast().word) {
+							result.peekLast().frequency += 1;
+						} else {
+							result.add(new Node(nextValue, 1));
 						}
 					}
 				} else if (sum % 2 == 0) {
-					for (int i = sum; i >= 0; i --) {
-						for (int j = 0; j <= sum; j ++) {
-							if (i + j == sum) {
-								double nextValue = block.get(new xyAxis(i, j));
-								if (nextValue == result.peek().word) {
-									result.peek().frequency += 1;
-								} else {
-									result.addFirst(new node(nextValue, 1));
-								}
-							}
+					for (int i = 0; i <= sum; i ++) {
+						double nextValue = block.get(new xyAxis(sum-i, i));
+						if (nextValue == result.peekLast().word) {
+							result.peekLast().frequency += 1;
+						} else {
+							result.add(new Node(nextValue, 1));
 						}
 					}
 				}
 			} else {
 				if (sum % 2 == 1) {
 					for (int i = sum-7; i <= 7; i ++) {
-						for (int j = 7; j >= sum-7; j --) {
-							if (i + j == sum) {
-								double nextValue = block.get(new xyAxis(i, j));
-								if (nextValue == result.peek().word) {
-									result.peek().frequency += 1;
-								} else {
-									result.addFirst(new node(nextValue, 1));
-								}
-							}
+						double nextValue = block.get(new xyAxis(i, sum-i));
+						if (nextValue == result.peekLast().word) {
+							result.peekLast().frequency += 1;
+						} else {
+							result.add(new Node(nextValue, 1));
 						}
 					}
 				} else if (sum % 2 == 0) {
-					for (int i = 7; i >= sum-7; i --) {
-						for (int j = sum-7; j <= 7; j ++) {
-							if (i + j == sum) {
-								double nextValue = block.get(new xyAxis(i, j));
-								if (nextValue == result.peek().word) {
-									result.peek().frequency += 1;
-								} else {
-									result.addFirst(new node(nextValue, 1));
-								}
-							}
+					for (int i = sum-7; i <= 7; i ++) {
+						double nextValue = block.get(new xyAxis(sum-i, i));
+						if (nextValue == result.peekLast().word) {
+							result.peekLast().frequency += 1;
+						} else {
+							result.add(new Node(nextValue, 1));
 						}
 					}
 				}
@@ -973,25 +1002,29 @@ public class JPEGImage extends ImageModel {
 		}
 
 		double finalValue = block.get(new xyAxis(7, 7));
-		if (finalValue == result.peek().word)
-			result.peek().frequency += 1;
+		if (finalValue == result.peekLast().word)
+			result.peekLast().frequency += 1;
 		else
-			result.addFirst(new node(finalValue, 1));
+			result.add(new Node(finalValue, 1));
 
 		return result;
 	}
 
-	public class node {
+	public class Node {
 		Double word;
 		Integer frequency;
 
-		public node() {
+		public Node() {
 
 		}
 
-		public node (double word, Integer frequency) {
+		public Node (double word, Integer frequency) {
 			this.word = word;
 			this.frequency = frequency;
+		}
+
+		public String toString() {
+			return "[" + word + ", " + frequency + "]"; 
 		}
 	}
 }
