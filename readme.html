@@ -7,14 +7,26 @@
 
 <h2 id="current-schedule">Current Schedule:</h2>
 
-<p>Homework 2: <br />
-Homework 2 will perform the following methods: 1. Aliasing and 2. LZW Encoding</p>
+<h3 id="homework-3">Homework 3:</h3>
+
+<p>Homework 3 will perform the following methods: Modified JPEG Compression as steps</p>
+
+<ol>
+<li>Resize and De-resize</li>
+<li>Color Transform and Sub-Sampling, inverse color transform and super-sampling</li>
+<li>DCT and inverse DCT</li>
+<li>Quantization and De-Quantization</li>
+<li>Calculate Compression Ratio</li>
+</ol>
 
 <h2 id="how-to-run-this-program">How to run this program</h2>
 
 <h3 id="using-exectubable-jar-file">Using exectubable jar file</h3>
 
-<p>Double click on dist\CS451_Liao.jar</p>
+<p>Double click on dist\CS451_Liao.jar <br />
+or <br />
+in command promt type in <br />
+<code>java -jar dist/CS451_Liao.jar</code></p>
 
 <h3 id="using-command-prompt">Using command prompt</h3>
 
@@ -27,75 +39,70 @@ cd src\
 <code>
 javac CS451_Liao.java
 </code></li>
-<li>Run the main class(CS451<em>Liao), which will lead user to the GUI program by <br />
-```
-java CS451</em>Liao</li>
+<li>Run the main class(CS451_Liao), which will lead user to the GUI program by <br />
+<code>
+java CS451_Liao
+</code></li>
 </ol>
 
 <h3 id="for-professor">For professor</h3>
 
-<p>Homework 2 requirements can be performed as following flow:</p>
+<p>Homework 3 requirements can be performed as following flow:</p>
 
-<h5 id="part-1-aliasing">Part 1 Aliasing:</h5>
-
-<ol>
-<li>Creating the circle using input M and N <br />
-<code>Click on ImageTest -&gt; Create Ciccle</code> <br />
-System will pop out a <strong>dialog</strong> to ask for input of M and N</li>
-<li>Applying Aliasing <br />
-<code>Click on ImageTest -&gt; Aliasing</code> <br />
-System will pop out a <strong>dialog</strong> to ask for input of K</li>
-<li>Clicking on <strong>tabs</strong>(Circle<em>M</em>N, No Filter, Average, Filter1, Filter2) to see each output(s)</li>
-</ol>
-
-<h6 id="finding-from-part-1-aliasing">Finding from part 1 Aliasing</h6>
-
-<ul>
-<li>As result, average &gt; filter2 &gt; filter1 &gt; no filter for K = 2.</li>
-<li>For K = 4, average &gt; filter2 &gt;= filter1 &gt; no filter.</li>
-<li>As width of circle line grows, it becomes harder and harder to tell the artifact just from the resized image.</li>
-<li>Although average always performs the best result, the image still turns out to be blury after zoom back to 512*512 size.</li>
-</ul>
-
-<h5 id="part-2-lzw-encoding">Part 2 LZW Encoding:</h5>
+<h4 id="jpeg-compression-ratio">JPEG Compression Ratio</h4>
 
 <ol>
-<li>Load the text file <br />
-<code>Click on the File -&gt; Load File</code> -> Choose a <code>.txt</code> extension file <br />
-After loading the <code>.txt</code> file, the system will display the input text on both input and output panel and enable the text menu  </li>
-<li>Applying LZW Encoding and Decoding
-<code>Click on the Text -&gt; LZW Encoding</code> <br />
-The system will ask for input of max size of the dictionary <br />
-After applying the LZW Encoding, the central panel will have 5 tabs(Input Text, LZW Encoding, LZW Table, Compression Ratio, Decoded Message) <br />
-Please click on each panel to see the output</li>
+<li>Test resize and de-resize by using De-Resize by <code>JPEG Compression -&gt; De Resize</code> <br />
+<code>
+Explanation: This step will create identical image after de-resize
+</code></li>
+<li>Color Transform and sub-sampling with inverse color transform and super-sampling by <code>JPEG Compression -&gt; Color Transform</code> <br />
+<code>
+Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
+</code></li>
+<li>DCT and inverse DCT by <code>JPEG Compression -&gt; DCT Transform</code> <br />
+<code>
+Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
+</code></li>
+<li>Quantization and De-Quantization by <code>JPEG Compression -&gt; Quantization</code> <br />
+<code>
+Explanation: This step will do all the jpeg compression without calculating the compression ratio
+</code></li>
+<li>JPEG Compression all in one by <code>JPEG Compression -&gt; JPEG Compression</code> <br />
+<code>
+By the end of compression, it will also calculate the compression ratio
+</code></li>
 </ol>
 
-<pre><code>
-## GUI Logic Flow
+<h2 id="gui-logic-flow">GUI Logic Flow</h2>
 
-The gui will provide the menu bar for user to test the function. Here is the control flow to each function
+<p>The gui will provide the menu bar for user to test the function. Here is the control flow to each function</p>
 
+<pre><code>File    -&gt;  Load
+        -&gt;  Save
+        -&gt;  Quit
+
+Image   -&gt;  Gray Scale
+        -&gt;  Bi-Scale(Black and White)   -&gt;  Directly
+                                        -&gt;  Error-Diffusion(Floyd)
+                                        -&gt;  Error-Diffusion(Bell)
+                                        -&gt;  Error-Diffusion(Stucki)
+        -&gt; Quad-Level
+        -&gt; 8-Bits   -&gt;  Uniform Color Quantization
+                    -&gt;  Median Cut Color Quantization
+                    -&gt;  Median Cut Color Quantization(Error-Diffusion(Floyd))
+                    -&gt;  Median Cut Color Quantization(Error-Diffusion(Bell))
+                    -&gt;  Median Cut Color Quantization(Error-Diffusion(Stucki))
+Text    -&gt;  LZW Encoding
+ImageTest   -&gt;  Create Circle
+            -&gt;  Aliasing
+JPEG Compression    -&gt;  Resize Image
+                    -&gt;  De Resize Image
+                    -&gt;  Color Transform
+                    -&gt;  DCT Transform
+                    -&gt;  Quantization
+                    -&gt;  JPEG Compression
 </code></pre>
-
-<p>File    ->  Load
-        ->  Save
-        ->  Quit</p>
-
-<p>Image   ->  Gray Scale
-        ->  Bi-Scale(Black and White)   ->  Directly
-                                        ->  Error-Diffusion(Floyd)
-                                        ->  Error-Diffusion(Bell)
-                                        ->  Error-Diffusion(Stucki)
-        -> Quad-Level
-        -> 8-Bits   ->  Uniform Color Quantization
-                    ->  Median Cut Color Quantization
-                    ->  Median Cut Color Quantization(Error-Diffusion(Floyd))
-                    ->  Median Cut Color Quantization(Error-Diffusion(Bell))
-                    ->  Median Cut Color Quantization(Error-Diffusion(Stucki))
-Text    ->  LZW Encoding
-ImageTest   ->  Create Circle
-            ->  Aliasing
-```</p>
 
 <h2 id="dependencies">Dependencies</h2>
 
@@ -116,9 +123,14 @@ ImageTest   ->  Create Circle
             ImagePreview.java   --&gt; Used to display the preview image from file chooser
             Utils.java          --&gt; Methods being used from ImageFilter.java and ImagePreview.java
         /models/
+            Heap.java           --&gt; Used for Huffman Coding
             ImageModel.java     --&gt; Image model class (image convertions, methods)
+            JPEGImage.java      --&gt; JPEG Compression methods
             TextModel.java      --&gt; Text model class (Text compression)
+            Tree.java           --&gt; Used for Huffman coding
         /test/
+            ImageModelTest.java --&gt; Test Image methods
+            JPEGImageTest.java  --&gt; Test JPEG Image Compression
             ModelSuite.java     --&gt; Test models
             TextModelTest.java  --&gt; Test case for the text model
         /views/
@@ -136,3 +148,4 @@ ImageTest   ->  Create Circle
 
     README.md               --&gt; Read me file
 </code></pre>
+
