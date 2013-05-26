@@ -44,25 +44,25 @@ Homework 3 requirements can be performed as following flow:
 #### JPEG Compression Ratio
 
 1. Test resize and de-resize by using De-Resize by `JPEG Compression -> De Resize`  
-```
-Explanation: This step will create identical image after de-resize
-```
+
+		Explanation: This step will create identical image after de-resize
+
 2. Color Transform and sub-sampling with inverse color transform and super-sampling by `JPEG Compression -> Color Transform`  
-```
-Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
-```
+
+		Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
+
 3. DCT and inverse DCT by `JPEG Compression -> DCT Transform`  
-```
-Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
-```
+
+		Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
+
 4. Quantization and De-Quantization by `JPEG Compression -> Quantization`  
-```
-Explanation: This step will do all the jpeg compression without calculating the compression ratio
-```
+
+		Explanation: This step will do all the jpeg compression without calculating the compression ratio
+
 5. JPEG Compression all in one by `JPEG Compression -> JPEG Compression`  
-```
-By the end of compression, it will also calculate the compression ratio
-```
+
+		By the end of compression, it will also calculate the compression ratio
+
 
 
 ## GUI Logic Flow

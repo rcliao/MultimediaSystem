@@ -1,6 +1,9 @@
 <head><meta charset="utf-8">
 	<title>CS 451 Read Me</title>
-	<link rel="stylesheet" type="text/css" href="style.css" />
+	
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-responsive.min.css" />
+    <script type="text/javascript" src='js/bootstrap.min.js'></script>
 </head>
 
 <h1 id="cs-451-multimediasystem">CS 451 MultimediaSystem</h1>
@@ -52,26 +55,26 @@ java CS451_Liao
 <h4 id="jpeg-compression-ratio">JPEG Compression Ratio</h4>
 
 <ol>
-<li>Test resize and de-resize by using De-Resize by <code>JPEG Compression -&gt; De Resize</code> <br />
-<code>
-Explanation: This step will create identical image after de-resize
-</code></li>
-<li>Color Transform and sub-sampling with inverse color transform and super-sampling by <code>JPEG Compression -&gt; Color Transform</code> <br />
-<code>
-Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
-</code></li>
-<li>DCT and inverse DCT by <code>JPEG Compression -&gt; DCT Transform</code> <br />
-<code>
-Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
-</code></li>
-<li>Quantization and De-Quantization by <code>JPEG Compression -&gt; Quantization</code> <br />
-<code>
-Explanation: This step will do all the jpeg compression without calculating the compression ratio
-</code></li>
-<li>JPEG Compression all in one by <code>JPEG Compression -&gt; JPEG Compression</code> <br />
-<code>
-By the end of compression, it will also calculate the compression ratio
-</code></li>
+<li><p>Test resize and de-resize by using De-Resize by <code>JPEG Compression -&gt; De Resize</code>  </p>
+
+<pre><code>Explanation: This step will create identical image after de-resize
+</code></pre></li>
+<li><p>Color Transform and sub-sampling with inverse color transform and super-sampling by <code>JPEG Compression -&gt; Color Transform</code>  </p>
+
+<pre><code>Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
+</code></pre></li>
+<li><p>DCT and inverse DCT by <code>JPEG Compression -&gt; DCT Transform</code>  </p>
+
+<pre><code>Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
+</code></pre></li>
+<li><p>Quantization and De-Quantization by <code>JPEG Compression -&gt; Quantization</code>  </p>
+
+<pre><code>Explanation: This step will do all the jpeg compression without calculating the compression ratio
+</code></pre></li>
+<li><p>JPEG Compression all in one by <code>JPEG Compression -&gt; JPEG Compression</code>  </p>
+
+<pre><code>By the end of compression, it will also calculate the compression ratio
+</code></pre></li>
 </ol>
 
 <h2 id="gui-logic-flow">GUI Logic Flow</h2>
