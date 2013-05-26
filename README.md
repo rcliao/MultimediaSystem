@@ -3,14 +3,24 @@ CS 451 MultimediaSystem
 
 ## Current Schedule:
 
-Homework 2:  
-Homework 2 will perform the following methods: 1. Aliasing and 2. LZW Encoding
+### Homework 3:  
+Homework 3 will perform the following methods: Modified JPEG Compression as steps
+
+1. Resize and De-resize
+2. Color Transform and Sub-Sampling, inverse color transform and super-sampling
+3. DCT and inverse DCT
+4. Quantization and De-Quantization
+5. Calculate Compression Ratio
+
 
 ## How to run this program
 
 ### Using exectubable jar file
 
-Double click on dist\CS451_Liao.jar
+Double click on dist\CS451_Liao.jar  
+or  
+in command promt type in  
+`java -jar dist/CS451_Liao.jar`
 
 ### Using command prompt
 
@@ -25,41 +35,35 @@ javac CS451_Liao.java
 3. Run the main class(CS451_Liao), which will lead user to the GUI program by  
 ```
 java CS451_Liao
+```
 
 ### For professor
 
-Homework 2 requirements can be performed as following flow:
+Homework 3 requirements can be performed as following flow:
 
-##### Part 1 Aliasing:
+#### JPEG Compression Ratio
 
-1. Creating the circle using input M and N  
-`Click on ImageTest -> Create Ciccle`  
-System will pop out a __dialog__ to ask for input of M and N
-2. Applying Aliasing  
-`Click on ImageTest -> Aliasing`  
-System will pop out a __dialog__ to ask for input of K
-3. Clicking on __tabs__(Circle_M_N, No Filter, Average, Filter1, Filter2) to see each output(s)
-
-###### Finding from part 1 Aliasing
-
-* As result, average > filter2 > filter1 > no filter for K = 2.
-* For K = 4, average > filter2 >= filter1 > no filter.
-* As width of circle line grows, it becomes harder and harder to tell the artifact just from the resized image.
-* Although average always performs the best result, the image still turns out to be blury after zoom back to 512*512 size.
-
-##### Part 2 LZW Encoding:
-
-1. Load the text file  
-`Click on the File -> Load File` -> Choose a `.txt` extension file  
-After loading the `.txt` file, the system will display the input text on both input and output panel and enable the text menu  
-2. Applying LZW Encoding and Decoding
-`Click on the Text -> LZW Encoding`  
-The system will ask for input of max size of the dictionary  
-After applying the LZW Encoding, the central panel will have 5 tabs(Input Text, LZW Encoding, LZW Table, Compression Ratio, Decoded Message)  
-Please click on each panel to see the output
-
-
+1. Test resize and de-resize by using De-Resize by `JPEG Compression -> De Resize`  
 ```
+Explanation: This step will create identical image after de-resize
+```
+2. Color Transform and sub-sampling with inverse color transform and super-sampling by `JPEG Compression -> Color Transform`  
+```
+Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
+```
+3. DCT and inverse DCT by `JPEG Compression -> DCT Transform`  
+```
+Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
+```
+4. Quantization and De-Quantization by `JPEG Compression -> Quantization`  
+```
+Explanation: This step will do all the jpeg compression without calculating the compression ratio
+```
+5. JPEG Compression all in one by `JPEG Compression -> JPEG Compression`  
+```
+By the end of compression, it will also calculate the compression ratio
+```
+
 
 ## GUI Logic Flow
 
@@ -84,6 +88,12 @@ Image 	->	Gray Scale
 Text 	->	LZW Encoding
 ImageTest	->	Create Circle
 			->	Aliasing
+JPEG Compression	-> 	Resize Image
+					-> 	De Resize Image
+					-> 	Color Transform
+					-> 	DCT Transform
+					-> 	Quantization
+					-> 	JPEG Compression
 ```
 
 ## Dependencies
@@ -103,9 +113,14 @@ ImageTest	->	Create Circle
 				ImagePreview.java 	--> Used to display the preview image from file chooser
 				Utils.java 			--> Methods being used from ImageFilter.java and ImagePreview.java
 			/models/
+				Heap.java 			--> Used for Huffman Coding
 				ImageModel.java 	--> Image model class (image convertions, methods)
+				JPEGImage.java 		--> JPEG Compression methods
 				TextModel.java 		--> Text model class (Text compression)
+				Tree.java 			--> Used for Huffman coding
 			/test/
+				ImageModelTest.java --> Test Image methods
+				JPEGImageTest.java 	--> Test JPEG Image Compression
 				ModelSuite.java		--> Test models
 				TextModelTest.java 	--> Test case for the text model
 			/views/

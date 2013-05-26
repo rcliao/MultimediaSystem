@@ -470,7 +470,7 @@ public class Views extends JPanel implements ActionListener {
 	 */
 	private void createAndShowGUI() {
 		//Create and set up the window.
-		frame = new JFrame("CS 451 Multi-Media System - Homework2");
+		frame = new JFrame("CS 451 Multi-Media System - Homework3");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
 		//Create and set up the content pane.
