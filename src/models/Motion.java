@@ -22,6 +22,11 @@ public class Motion {
 
 	private JPEGImage errorFrame;
 
+	private int max;
+	private int min;
+
+	private double step;
+
 	public Motion() {
 
 	}
@@ -79,10 +84,15 @@ public class Motion {
 	public void findRoutine() {
 		divideMacroBlocks();
 
+		min = 255;
+		max = -255;
+
 		for (MacroBlock block : blocks) {
 			findMatchBlock(block);
 			calculateResidual(block);
 		}
+
+		calculateError();
 		
 		displayErrorImage();
 	}
@@ -205,13 +215,23 @@ public class Motion {
 		for (int y = 0; y < 16; y ++) {
 			for (int x = 0; x < 16; x ++) {
 				block.residuals[x][y] = block.greyValues[x][y] - block.bestMatchB.greyValues[x][y];
-				if (block.residuals[x][y] < 0) {
-					block.residuals[x][y] = 0;
-				} else if (block.residuals[x][y] > 255) {
-					block.residuals[x][y] = 255;
-				}
+				if (block.residuals[x][y] > max)
+					max = block.residuals[x][y];
+				if (block.residuals[x][y] < min)
+					min = block.residuals[x][y];
 			}
 		}
+	}
+
+	/**
+	 * Given the max and min, calculate the error range
+	 */
+	public void calculateError() {
+		int range = max - min + 1;
+		step = 256.0 / range;
+
+		System.out.println(range);
+		System.out.println(step);
 	}
 
 	/**
@@ -234,11 +254,31 @@ public class Motion {
 					for (int i = 0; i < 16; i ++) {
 						int[] rgb = new int[3];
 
-						rgb = new int[]{block.residuals[i][j], block.residuals[i][j], block.residuals[i][j]};
+						int afterShift = (int) ( ( block.residuals[i][j] - min ) * step );
+
+						rgb = new int[]{afterShift, afterShift, afterShift};
 
 						errorFrame.setPixel(x+i, y+j, rgb);
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Homework 4 Task 2 - Application - Removing Moving Objects
+	 */
+	public void removingMovingObj() {
+		divideMacroBlocks();
+
+		for (MacroBlock block : blocks) {
+			findMatchBlock(block);
+			calculateResidual(block);
+		}
+
+		for (MacroBlock block : blocks) {
+			if (block.dx != 0 && block.dy != 0) {
+
 			}
 		}
 	}
