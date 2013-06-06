@@ -15,12 +15,18 @@ public class Motion {
 
 	private JPEGImage sourceImage;
 	private JPEGImage targetImage;
+	private JPEGImage image5th;
 
 	private LinkedList<MacroBlock> blocks = new LinkedList<MacroBlock>();
+
+	private LinkedList<MacroBlock> option1Blocks = new LinkedList<MacroBlock>();
+	private LinkedList<MacroBlock> option2Blocks = new LinkedList<MacroBlock>();
 
 	private LinkedList<int[]> mvs = new LinkedList<int[]>();
 
 	private JPEGImage errorFrame;
+	private JPEGImage option1Frame;
+	private JPEGImage option2Frame;
 
 	private int max;
 	private int min;
@@ -53,7 +59,6 @@ public class Motion {
 		this.targetImage = targetImage;
 	}
 
-
 	public LinkedList<MacroBlock> getBlocks() {
 		return blocks;
 	}
@@ -76,6 +81,22 @@ public class Motion {
 	 
 	public void setMVs(LinkedList<int[]> mvs) {
 		this.mvs = mvs;
+	}
+
+	public JPEGImage getOption1Frame() {
+		return option1Frame;
+	}
+	 
+	public void setOption1Frame(JPEGImage option1Frame) {
+		this.option1Frame = option1Frame;
+	}
+
+	public JPEGImage getOption2Frame() {
+		return option2Frame;
+	}
+	 
+	public void setOption2Frame(JPEGImage option2Frame) {
+		this.option2Frame = option2Frame;
 	}
 
 	/**
@@ -133,6 +154,8 @@ public class Motion {
 						targetImage.getPixel(x+i, y+j, rgb);
 					else if (source == "reference")
 						sourceImage.getPixel(x+i, y+j, rgb);
+					else if (source == "5th")
+						image5th.getPixel(x+i, y+j, rgb);
 
 					int grey = (int) Math.round(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
 
@@ -229,9 +252,6 @@ public class Motion {
 	public void calculateError() {
 		int range = max - min + 1;
 		step = 256.0 / range;
-
-		System.out.println(range);
-		System.out.println(step);
 	}
 
 	/**
@@ -276,9 +296,61 @@ public class Motion {
 			calculateResidual(block);
 		}
 
+		// replace the dynamic blocks
 		for (MacroBlock block : blocks) {
-			if (block.dx != 0 && block.dy != 0) {
+			if (block.dx != 0 || block.dy != 0) {
+				int minDist = 25565;
 
+				MacroBlock closestB1 = new MacroBlock();
+				MacroBlock closestB2 = new MacroBlock();
+
+				for (MacroBlock staticBlock : blocks) {
+					if (staticBlock.dx == 0 && staticBlock.dy == 0) {
+						if (Math.abs(staticBlock.x - block.x) + Math.abs(staticBlock.y - block.y) < minDist) {
+							minDist = Math.abs(staticBlock.x - block.x) + Math.abs(staticBlock.y - block.y);
+							closestB1 = staticBlock;
+						}
+					}
+				}
+
+				File image5thFile = new File("IDB//Walk_005.ppm");
+
+				image5th = new JPEGImage(image5thFile);
+
+				closestB2 = buildBlock(block.x, block.y, "5th");
+
+				option1Blocks.add(closestB1);
+				option2Blocks.add(closestB2);
+			} else {
+				option1Blocks.add(block);
+				option2Blocks.add(block);
+			}
+		}
+
+		displayRemovedImages();
+	}
+
+	/**
+	 * create the two images which removed the moving object(human)
+	 */
+	public void displayRemovedImages() {
+		option1Frame = new JPEGImage(target);
+		option2Frame = new JPEGImage(target);
+
+		for (int y = 0; y < targetImage.getH(); y += 16) {
+			for (int x = 0; x < targetImage.getW(); x += 16) {
+				MacroBlock block1 = option1Blocks.poll();
+				MacroBlock block2 = option2Blocks.poll();
+
+				for (int j = 0; j < 16; j ++) {
+					for (int i = 0; i < 16; i ++) {
+						int[] rgb1 = block1.values.get(new xyAxis(i, j));
+						int[] rgb2 = block2.values.get(new xyAxis(i, j));
+
+						option1Frame.setPixel(x+i, y+j, rgb1);
+						option2Frame.setPixel(x+i, y+j, rgb2);
+					}
+				}
 			}
 		}
 	}
@@ -299,6 +371,10 @@ public class Motion {
 		Map<xyAxis, int[]> values = new HashMap<xyAxis, int[]>();
 
 		int[][] residuals = new int[16][16];
+
+		public MacroBlock() {
+
+		}
 
 		public MacroBlock(int x, int y) {
 			this.x = x;

@@ -62,6 +62,7 @@ public class Controllers {
 		m_view.addJPEGListener(new JPEGListener());
 		m_view.addBlockMotionListener(new BlockMotionListener());
 		m_view.addMotionReadListener(new MotionReadListener());
+		m_view.addRemoveListener(new RemoveListener());
 	}
 
 	/**
@@ -933,7 +934,7 @@ public class Controllers {
 	 
 			//Show it.
 			int returnVal = m_view.getFC().showDialog(m_view,
-										  "Attach");
+										  "Reference Image File");
 	 
 			//Process the results.
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -949,7 +950,7 @@ public class Controllers {
 
 			//Show it.
 			returnVal = m_view.getFC().showDialog(m_view,
-										  "Attach");
+										  "Target Image File");
 	 
 			//Process the results.
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -980,6 +981,79 @@ public class Controllers {
 			m_view.getFC().setSelectedFile(null);
 
 			m_view.updatePanel();
+		}
+	}
+
+	class RemoveListener implements ActionListener {
+		public Integer inputDialog(String message, Integer defaultValue) {
+			String mString = "";
+
+			while (mString.isEmpty() || !mString.matches("[0-9]+")) {
+				mString = JOptionPane.showInputDialog(message);
+			}
+
+			// if user doesnt input value, default is 1
+			Integer m = defaultValue;
+
+			if (mString != null)
+				m = Integer.valueOf(mString);
+
+			return m;
+		}
+
+		public void actionPerformed (ActionEvent e) {
+			File referenceImage = new File("IDB//Walk_060.ppm");
+			File targetImage = new File("IDB//Walk_060.ppm");
+
+			cleanTabs(2);
+
+			int n = inputDialog("Please input N for the target frame", 0);
+			String nStr = "";
+
+			int s = n - 2;
+			String sStr = "";
+
+			if (n < 10 && n >= 0) {
+				nStr = "00" + n;
+			} else if (n >= 10 && n < 100) {
+				nStr = "0" + n;
+			} else if (n >= 100 && n <= 200) {
+				nStr = "" + n;
+			}
+
+			if (s < 10 && s >= 0) {
+				sStr = "00" + s;
+			} else if (s >= 10 && s < 100) {
+				sStr = "0" + s;
+			} else if (s >= 100 && s <= 200) {
+				sStr = "" + s;
+			}
+
+			targetImage = new File("IDB//Walk_" + nStr + ".ppm");
+			referenceImage = new File("IDB//Walk_" + sStr + ".ppm");
+
+			motion = new Motion(referenceImage, targetImage);
+
+			m_view.getImageLabel().setIcon(new ImageIcon(motion.getSourceImage().getImg()));
+			m_view.getImageLabel().setText("");
+			m_view.getInput().setViewportView(new JScrollPane(m_view.getImageLabel()));
+			m_view.getInput().updateUI();
+			m_view.getOutputLabel().setIcon(new ImageIcon(motion.getTargetImage().getImg()));
+			m_view.getOutputLabel().setText("");
+			m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
+
+			m_view.getMainPanel().setTitleAt(0, "Reference Image - " + referenceImage.getName());
+			m_view.getMainPanel().setTitleAt(1, "Target Image - " + targetImage.getName());
+
+			m_view.updatePanel();
+
+			motion.removingMovingObj();
+
+			JLabel label2 = new JLabel(new ImageIcon(motion.getOption1Frame().getImg()));
+			m_view.getMainPanel().add(label2, "Remove - n-2 Frame");
+
+			JLabel label3 = new JLabel(new ImageIcon(motion.getOption2Frame().getImg()));
+			m_view.getMainPanel().add(label3, "Remove - 5th frame");
 		}
 	}
 }

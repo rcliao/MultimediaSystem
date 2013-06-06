@@ -33,7 +33,8 @@ public class Views extends JPanel implements ActionListener {
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
 				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle,
 				menuItemHuffman, menuItemResize, menuItemDeResize, menuItemColorTransform,
-				menuItemDCT, menuItemQuantization, menuItemJPEGComp, menuItemReadMotion, menuItemBlockMotion;
+				menuItemDCT, menuItemQuantization, menuItemJPEGComp, menuItemReadMotion, menuItemBlockMotion,
+				menuItemRemove;
 	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu,
 				imageTextMenu, jpegMenu, motionMenu;
 	private JLabel imageLabel, outputLabel;
@@ -214,6 +215,9 @@ public class Views extends JPanel implements ActionListener {
 
 		menuItemBlockMotion = new JMenuItem("Block-based Motion Compesation");
 		motionMenu.add(menuItemBlockMotion);
+
+		menuItemRemove = new JMenuItem("Remove moving objects");
+		motionMenu.add(menuItemRemove);
 
 		menuBar.add(motionMenu);
 
@@ -443,6 +447,10 @@ public class Views extends JPanel implements ActionListener {
 
 	public void addMotionReadListener(ActionListener action) {
 		menuItemReadMotion.addActionListener(action);
+	}
+
+	public void addRemoveListener(ActionListener action) {
+		menuItemRemove.addActionListener(action);
 	}
 
 	public void actionPerformed(ActionEvent e) {
