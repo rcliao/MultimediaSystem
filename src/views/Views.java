@@ -33,9 +33,9 @@ public class Views extends JPanel implements ActionListener {
 				menuItemBiErrorDiffStucki, menuItemMCQError, menuItemMCQBell,
 				menuItemMCQStucki, menuItemLZW, menuItemAliasing, menuItemCircle,
 				menuItemHuffman, menuItemResize, menuItemDeResize, menuItemColorTransform,
-				menuItemDCT, menuItemQuantization, menuItemJPEGComp;
+				menuItemDCT, menuItemQuantization, menuItemJPEGComp, menuItemReadMotion, menuItemBlockMotion;
 	private JMenu fileMenu, imageMenu, submenuBiScale, submenu8Bits, textMenu,
-				imageTextMenu, jpegMenu;
+				imageTextMenu, jpegMenu, motionMenu;
 	private JLabel imageLabel, outputLabel;
 	private JTabbedPane mainPanel;
 	private JPanel container, optionPanel;
@@ -206,6 +206,16 @@ public class Views extends JPanel implements ActionListener {
 		jpegMenu.add(menuItemJPEGComp);		
 
 		menuBar.add(jpegMenu);
+
+		motionMenu = new JMenu("Motion");
+
+		menuItemReadMotion = new JMenuItem("Read Motion Images");
+		motionMenu.add(menuItemReadMotion);
+
+		menuItemBlockMotion = new JMenuItem("Block-based Motion Compesation");
+		motionMenu.add(menuItemBlockMotion);
+
+		menuBar.add(motionMenu);
 
 		return menuBar;
 	}
@@ -427,6 +437,14 @@ public class Views extends JPanel implements ActionListener {
 		menuItemJPEGComp.addActionListener(action);
 	}
 
+	public void addBlockMotionListener(ActionListener action) {
+		menuItemBlockMotion.addActionListener(action);
+	}
+
+	public void addMotionReadListener(ActionListener action) {
+		menuItemReadMotion.addActionListener(action);
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		// refresh the panel everytime a button is clicked
 		updatePanel();
@@ -470,7 +488,7 @@ public class Views extends JPanel implements ActionListener {
 	 */
 	private void createAndShowGUI() {
 		//Create and set up the window.
-		frame = new JFrame("CS 451 Multi-Media System - Homework3");
+		frame = new JFrame("CS 451 Multi-Media System - Homework4");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
 		//Create and set up the content pane.

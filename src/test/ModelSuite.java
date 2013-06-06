@@ -12,7 +12,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
    TextModelTest.class,
    ImageModelTest.class,
-   JPEGImageTest.class
+   JPEGImageTest.class,
+   MotionTest.class
 })
 
 public class ModelSuite {   

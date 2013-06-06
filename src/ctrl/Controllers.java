@@ -26,6 +26,7 @@ public class Controllers {
 	private ImageModel output, output2, output3, output4;
 	private TextModel text_model;
 	private JPEGImage jpegImage;
+	private Motion motion;
 	
 	/** Constructor */
 	public Controllers(ImageModel model, Views view, TextModel text_model) {
@@ -59,6 +60,8 @@ public class Controllers {
 		m_view.addDCTListener(new DCTListener());
 		m_view.addQuantizationListener(new QuantizationListener());
 		m_view.addJPEGListener(new JPEGListener());
+		m_view.addBlockMotionListener(new BlockMotionListener());
+		m_view.addMotionReadListener(new MotionReadListener());
 	}
 
 	/**
@@ -869,6 +872,114 @@ public class Controllers {
 			JScrollPane logScrollPane = new JScrollPane(tableArea);
 
 			m_view.getMainPanel().add(logScrollPane, "Compression Ratio");
+		}
+	}
+
+	class BlockMotionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			cleanTabs(2);
+
+			motion.findRoutine();
+
+			JLabel label2 = new JLabel(new ImageIcon(motion.getErrorFrame().getImg()));
+			m_view.getMainPanel().add(label2, "Error Frame");
+
+			// Use a textarea to display the table
+			JTextArea tableArea = new JTextArea(30,40);
+
+			tableArea.append("# Name: Eric Liao\n");
+			tableArea.append("# Target Image Name: " + motion.getTargetImage().getFile().getName() + "\n");
+			tableArea.append("# Reference Image Name: " + motion.getSourceImage().getFile().getName() + "\n");
+			tableArea.append("# Number of target macro blocks: " + motion.getTargetImage().getW()/16 + " x " + motion.getTargetImage().getH()/16 + 
+				" image size is: " + motion.getTargetImage().getW() + " " + motion.getTargetImage().getH() + "\n");
+			
+			tableArea.append("--------------------------------------------------------------------------\n");
+
+			for (int y = 0; y < motion.getTargetImage().getH(); y += 16) {
+				for (int x = 0; x < motion.getTargetImage().getW(); x += 16) {
+					int[] mv = motion.getMVs().poll();
+					tableArea.append("[" + mv[0] + ", " + mv[1] + "]\t");
+				}
+				tableArea.append("\n");
+			}
+
+			JScrollPane logScrollPane = new JScrollPane(tableArea);
+
+			// display index image
+			
+			m_view.getMainPanel().add(logScrollPane, "mv.txt");
+		}	
+	}
+
+	class MotionReadListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			File referenceImage = new File("IDB//Walk_060.ppm");
+			File targetImage = new File("IDB//Walk_060.ppm");
+
+			cleanTabs(2);
+
+			//Set up the file chooser.
+			if (m_view.getFC() == null) {
+				m_view.setFC(new JFileChooser());
+	 
+				//Add a custom file filter and disable the default
+				//(Accept All) file filter.
+				m_view.getFC().addChoosableFileFilter(new ImageFilter());
+				m_view.getFC().setAcceptAllFileFilterUsed(false);
+	 
+				//Add the preview pane.
+				m_view.getFC().setAccessory(new ImagePreview(m_view.getFC()));
+			}
+	 
+			//Show it.
+			int returnVal = m_view.getFC().showDialog(m_view,
+										  "Attach");
+	 
+			//Process the results.
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File inputFile = m_view.getFC().getSelectedFile();
+				if (Utils.getExtension(inputFile).equals("ppm") || Utils.getExtension(inputFile).equals("png")
+					|| Utils.getExtension(inputFile).equals("jpg") || Utils.getExtension(inputFile).equals("jpeg")
+					|| Utils.getExtension(inputFile).equals("gif")) {
+					referenceImage = m_view.getFC().getSelectedFile();
+				}
+			} else {
+				// cancel case
+			}
+
+			//Show it.
+			returnVal = m_view.getFC().showDialog(m_view,
+										  "Attach");
+	 
+			//Process the results.
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File inputFile = m_view.getFC().getSelectedFile();
+				if (Utils.getExtension(inputFile).equals("ppm") || Utils.getExtension(inputFile).equals("png")
+					|| Utils.getExtension(inputFile).equals("jpg") || Utils.getExtension(inputFile).equals("jpeg")
+					|| Utils.getExtension(inputFile).equals("gif")) {
+					targetImage = m_view.getFC().getSelectedFile();
+				}
+			} else {
+				// cancel case
+			}
+
+			motion = new Motion(referenceImage, targetImage);
+
+			m_view.getImageLabel().setIcon(new ImageIcon(motion.getSourceImage().getImg()));
+			m_view.getImageLabel().setText("");
+			m_view.getInput().setViewportView(new JScrollPane(m_view.getImageLabel()));
+			m_view.getInput().updateUI();
+			m_view.getOutputLabel().setIcon(new ImageIcon(motion.getTargetImage().getImg()));
+			m_view.getOutputLabel().setText("");
+			m_view.getOutput().setViewportView(new JScrollPane(m_view.getOutputLabel()));
+
+			m_view.getMainPanel().setTitleAt(0, "Reference Image");
+			m_view.getMainPanel().setTitleAt(1, "Target Image");
+	 
+			//Reset the file chooser for the next time it's shown.
+			m_view.getFC().setSelectedFile(null);
+
+			m_view.updatePanel();
 		}
 	}
 }
