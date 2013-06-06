@@ -22,7 +22,7 @@ public class Motion {
 	private LinkedList<MacroBlock> option1Blocks = new LinkedList<MacroBlock>();
 	private LinkedList<MacroBlock> option2Blocks = new LinkedList<MacroBlock>();
 
-	private LinkedList<int[]> mvs = new LinkedList<int[]>();
+	private LinkedList<double[]> mvs = new LinkedList<double[]>();
 
 	private JPEGImage errorFrame;
 	private JPEGImage option1Frame;
@@ -75,11 +75,11 @@ public class Motion {
 		this.errorFrame = errorFrame;
 	}
 
-	public LinkedList<int[]> getMVs() {
+	public LinkedList<double[]> getMVs() {
 		return mvs;
 	}
 	 
-	public void setMVs(LinkedList<int[]> mvs) {
+	public void setMVs(LinkedList<double[]> mvs) {
 		this.mvs = mvs;
 	}
 
@@ -123,8 +123,8 @@ public class Motion {
 	 */
 	public void divideMacroBlocks() {
 		// for loop getting values
-		for (int y = 0; y < targetImage.getH(); y += 16) {
-			for (int x = 0; x < targetImage.getW(); x += 16) {
+		for (double y = 0; y < targetImage.getH(); y += 16) {
+			for (double x = 0; x < targetImage.getW(); x += 16) {
 				// divide the block and put it into a list
 				MacroBlock block = buildBlock(x, y, "target");
 
@@ -140,28 +140,256 @@ public class Motion {
 	 * @param  source which image to read
 	 * @return        block information
 	 */
-	public MacroBlock buildBlock(int x, int y, String source) {
+	public MacroBlock buildBlock(double x, double y, String source) {
 		// creating a new block
 		MacroBlock block = new MacroBlock(x, y);
 
-		for (int j = 0; j < 16; j ++) {
-			for (int i = 0; i < 16; i ++) {
-				// check x+i and y+j is within range
-				if (x+i < targetImage.getW() && y+j < targetImage.getH()) {
-					int[] rgb = new int[3];
+		if (x % 1 == 0 && y % 1 == 0) {
+			for (int j = 0; j < 16; j ++) {
+				for (int i = 0; i < 16; i ++) {
+					// check x+i and y+j is within range
+					if (x+i < targetImage.getW() && y+j < targetImage.getH()) {
+						int[] rgb = new int[3];
 
-					if (source == "target")
-						targetImage.getPixel(x+i, y+j, rgb);
-					else if (source == "reference")
-						sourceImage.getPixel(x+i, y+j, rgb);
-					else if (source == "5th")
-						image5th.getPixel(x+i, y+j, rgb);
+						if (source == "target")
+							targetImage.getPixel((int)x+i, (int)y+j, rgb);
+						else if (source == "reference")
+							sourceImage.getPixel((int)x+i, (int)y+j, rgb);
+						else if (source == "5th")
+							image5th.getPixel((int)x+i, (int)y+j, rgb);
 
-					int grey = (int) Math.round(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
+						int grey = (int) Math.round(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
 
-					block.greyValues[i][j] = grey;
+						block.greyValues[i][j] = grey;
 
-					block.values.put(new xyAxis(i, j), rgb);
+						block.values.put(new xyAxis(i, j), rgb);
+					}
+				}
+			}
+		} else {
+			if (x % 1 == 0 && y % 1 != 0) {
+				for (int j = 0; j < 16; j ++) {
+					for (int i = 0; i < 16; i ++) {
+						// check x+i and y+j is within range
+						if (x+i < targetImage.getW() && y+j+0.5 < targetImage.getH()) {
+							int[] rgb = new int[3];
+							int[] rgb2 = new int[3];
+
+							if (source == "target") {
+								targetImage.getPixel((int)x+i, (int) Math.round(y+j+0.5), rgb);
+								targetImage.getPixel((int)x+i, (int) Math.round(y+j-0.5), rgb2);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int)x+i, (int) Math.round(y+j+0.5), rgb);
+								sourceImage.getPixel((int)x+i, (int) Math.round(y+j-0.5), rgb2);
+							} else if (source == "5th") {
+								image5th.getPixel((int)x+i, (int) Math.round(y+j+0.5), rgb);
+								image5th.getPixel((int)x+i, (int) Math.round(y+j-0.5), rgb2);
+							}
+
+							int grey = (int) Math.round(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+
+							int greyAvg = (int) Math.round((grey + grey2) / 2);
+
+							int[] rgbAvg = new int[3];
+
+							rgbAvg[0] = (int) Math.round((rgb[0] + rgb2[0]) / 2);
+							rgbAvg[1] = (int) Math.round((rgb[1] + rgb2[1]) / 2);
+							rgbAvg[2] = (int) Math.round((rgb[2] + rgb2[2]) / 2);
+
+							block.greyValues[i][j] = greyAvg;
+
+							block.values.put(new xyAxis(i, j), rgbAvg);
+						} else if (x+i < targetImage.getW() && y+j-0.5 < targetImage.getH()) {
+							int[] rgb2 = new int[3];
+
+							if (source == "target") {
+								targetImage.getPixel((int)x+i, (int) Math.round(y+j-0.5), rgb2);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int)x+i, (int) Math.round(y+j-0.5), rgb2);
+							} else if (source == "5th") {
+								image5th.getPixel((int)x+i, (int) Math.round(y+j-0.5), rgb2);
+							}
+
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+
+							block.greyValues[i][j] = grey2;
+
+							block.values.put(new xyAxis(i, j), rgb2);
+						}
+					}
+				}
+			} else if (y % 1 == 0 && x % 1 != 0) {
+				for (int j = 0; j < 16; j ++) {
+					for (int i = 0; i < 16; i ++) {
+						// check x+i and y+j is within range
+						if (x+i+0.5 < targetImage.getW() && y+j < targetImage.getH()) {
+							int[] rgb = new int[3];
+							int[] rgb2 = new int[3];
+
+							if (source == "target") {
+								targetImage.getPixel((int) Math.round(x+i+0.5), (int)y+j, rgb);
+								targetImage.getPixel((int) Math.round(x+i-0.5), (int)y+j, rgb2);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int) Math.round(x+i+0.5), (int)y+j, rgb);
+								sourceImage.getPixel((int) Math.round(x+i-0.5), (int)y+j, rgb2);
+							} else if (source == "5th") {
+								image5th.getPixel((int) Math.round(x+i+0.5), (int)y+j, rgb);
+								image5th.getPixel((int) Math.round(x+i-0.5), (int)y+j, rgb2);
+							}
+
+							int grey = (int) Math.round(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+
+							int greyAvg = (int) Math.round((grey + grey2) / 2);
+
+							int[] rgbAvg = new int[3];
+
+							rgbAvg[0] = (int) Math.round((rgb[0] + rgb2[0]) / 2);
+							rgbAvg[1] = (int) Math.round((rgb[1] + rgb2[1]) / 2);
+							rgbAvg[2] = (int) Math.round((rgb[2] + rgb2[2]) / 2);
+
+							block.greyValues[i][j] = greyAvg;
+
+							block.values.put(new xyAxis(i, j), rgbAvg);
+						} else if (x+i-0.5 < targetImage.getW() && y+j < targetImage.getH()) {
+							int[] rgb2 = new int[3];
+
+							if (source == "target") {
+								targetImage.getPixel((int) Math.round(x+i-0.5), (int)y+j, rgb2);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int) Math.round(x+i-0.5), (int)y+j, rgb2);
+							} else if (source == "5th") {
+								image5th.getPixel((int) Math.round(x+i-0.5), (int)y+j, rgb2);
+							}
+
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+
+							block.greyValues[i][j] = grey2;
+
+							block.values.put(new xyAxis(i, j), rgb2);
+						}
+					}
+				}
+			} else {
+				for (int j = 0; j < 16; j ++) {
+					for (int i = 0; i < 16; i ++) {
+						// check x+i and y+j is within range
+						if (x+i+0.5 < targetImage.getW() && y+j+0.5 < targetImage.getH()) {
+							int[] rgb = new int[3];
+							int[] rgb2 = new int[3];
+							int[] rgb3 = new int[3];
+							int[] rgb4 = new int[4];
+
+							if (source == "target") {
+								targetImage.getPixel((int) Math.round(x+i+0.5), (int) Math.round(y+j+0.5), rgb);
+								targetImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j-0.5), rgb2);
+								targetImage.getPixel((int) Math.round(x+i+0.5), (int) Math.round(y+j-0.5), rgb3);
+								targetImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j+0.5), rgb4);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int) Math.round(x+i+0.5), (int) Math.round(y+j+0.5), rgb);
+								sourceImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j-0.5), rgb2);
+								sourceImage.getPixel((int) Math.round(x+i+0.5), (int) Math.round(y+j-0.5), rgb3);
+								sourceImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j+0.5), rgb4);
+							} else if (source == "5th") {
+								image5th.getPixel((int) Math.round(x+i+0.5), (int) Math.round(y+j+0.5), rgb);
+								image5th.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j-0.5), rgb2);
+								image5th.getPixel((int) Math.round(x+i+0.5), (int) Math.round(y+j-0.5), rgb3);
+								image5th.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j+0.5), rgb4);
+							}
+
+							int grey = (int) Math.round(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+							int grey3 = (int) Math.round(0.299 * rgb3[0] + 0.587 * rgb3[1] + 0.114 * rgb3[2]);
+							int grey4 = (int) Math.round(0.299 * rgb4[0] + 0.587 * rgb4[1] + 0.114 * rgb4[2]);
+
+							int greyAvg = (int) Math.round((grey + grey2 + grey3 + grey4) / 4);
+
+							int[] rgbAvg = new int[3];
+
+							rgbAvg[0] = (int) Math.round((rgb[0] + rgb2[0] + rgb3[0] + rgb4[0]) / 4);
+							rgbAvg[1] = (int) Math.round((rgb[1] + rgb2[1] + rgb3[1] + rgb4[1]) / 4);
+							rgbAvg[2] = (int) Math.round((rgb[2] + rgb2[2] + rgb3[2] + rgb4[2]) / 4);
+
+							block.greyValues[i][j] = greyAvg;
+
+							block.values.put(new xyAxis(i, j), rgbAvg);
+						} else if (x+i-0.5 < targetImage.getW() && y+j+0.5 < targetImage.getH()) {
+							int[] rgb2 = new int[3];
+							int[] rgb4 = new int[4];
+
+							if (source == "target") {
+								targetImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j-0.5), rgb2);
+								targetImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j+0.5), rgb4);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j-0.5), rgb2);
+								sourceImage.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j+0.5), rgb4);
+							} else if (source == "5th") {
+								image5th.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j-0.5), rgb2);
+								image5th.getPixel((int) Math.round(x+i-0.5), (int) Math.round(y+j+0.5), rgb4);
+							}
+
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+							int grey4 = (int) Math.round(0.299 * rgb4[0] + 0.587 * rgb4[1] + 0.114 * rgb4[2]);
+
+							int greyAvg = (int) Math.round((grey2 + grey4) / 4);
+
+							int[] rgbAvg = new int[3];
+
+							rgbAvg[0] = (int) Math.round((rgb2[0] +  rgb4[0]) / 4);
+							rgbAvg[1] = (int) Math.round((rgb2[1] +  rgb4[1]) / 4);
+							rgbAvg[2] = (int) Math.round((rgb2[2] +  rgb4[2]) / 4);
+
+							block.greyValues[i][j] = greyAvg;
+
+							block.values.put(new xyAxis(i, j), rgbAvg);
+						} else if (x+i+0.5 < targetImage.getW() && y+j-0.5 < targetImage.getH()) {
+							int[] rgb2 = new int[3];
+							int[] rgb3 = new int[3];
+
+							if (source == "target") {
+								targetImage.getPixel((int)Math.round(x+i-0.5), (int)Math.round(y+j-0.5), rgb2);
+								targetImage.getPixel((int)Math.round(x+i+0.5), (int)Math.round(y+j-0.5), rgb3);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int)Math.round(x+i-0.5), (int)Math.round(y+j-0.5), rgb2);
+								sourceImage.getPixel((int)Math.round(x+i+0.5), (int)Math.round(y+j-0.5), rgb3);
+							} else if (source == "5th") {
+								image5th.getPixel((int)Math.round(x+i-0.5), (int)Math.round(y+j-0.5), rgb2);
+								image5th.getPixel((int)Math.round(x+i+0.5), (int)Math.round(y+j-0.5), rgb3);
+							}
+
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+							int grey3 = (int) Math.round(0.299 * rgb3[0] + 0.587 * rgb3[1] + 0.114 * rgb3[2]);
+
+							int greyAvg = (int) Math.round((grey2 + grey3) / 4);
+
+							int[] rgbAvg = new int[3];
+
+							rgbAvg[0] = (int) Math.round((rgb2[0] + rgb3[0]) / 4);
+							rgbAvg[1] = (int) Math.round((rgb2[1] + rgb3[1]) / 4);
+							rgbAvg[2] = (int) Math.round((rgb2[2] + rgb3[2]) / 4);
+
+							block.greyValues[i][j] = greyAvg;
+
+							block.values.put(new xyAxis(i, j), rgbAvg);
+						} else if (x+i-0.5 < targetImage.getW() && y+j-0.5 < targetImage.getH()) {
+							int[] rgb2 = new int[3];
+
+							if (source == "target") {
+								targetImage.getPixel((int)Math.round(x+i-0.5), (int)Math.round(y+j-0.5), rgb2);
+							} else if (source == "reference") {
+								sourceImage.getPixel((int)Math.round(x+i-0.5), (int)Math.round(y+j-0.5), rgb2);
+							} else if (source == "5th") {
+								image5th.getPixel((int)Math.round(x+i-0.5), (int)Math.round(y+j-0.5), rgb2);
+							}
+
+							int grey2 = (int) Math.round(0.299 * rgb2[0] + 0.587 * rgb2[1] + 0.114 * rgb2[2]);
+
+							block.greyValues[i][j] = grey2;
+
+							block.values.put(new xyAxis(i, j), rgb2);
+						}
+					}
 				}
 			}
 		}
@@ -174,13 +402,13 @@ public class Motion {
 	 * @param block original target block
 	 */
 	public void findMatchBlock(MacroBlock block) {
-		int minDx = 0;
-		int minDy = 0;
+		double minDx = 0;
+		double minDy = 0;
 		double minMSD = 9999999;
 		MacroBlock best = new MacroBlock(block.x, block.y);
 
-		for (int p = -12; p <= 12; p ++) {
-			for (int q = -12; q <= 12; q ++) {
+		for (double p = -12; p <= 12; p += 0.5) {
+			for (double q = -12; q <= 12; q += 0.5) {
 				if (block.x + p < sourceImage.getW() && block.y + q < sourceImage.getH() && block.x + p >= 0 && block.y + q >= 0) {
 					// build block from the source image
 					MacroBlock sourceBlock = buildBlock(block.x + p, block.y + q, "reference");
@@ -192,10 +420,8 @@ public class Motion {
 						minDy = q;
 						minMSD = msd;
 						best = sourceBlock;
-					}
-
-					if (msd == minMSD) {
-						if (Math.abs(p) + Math.abs(q) < Math.abs(minDx) + Math.abs(minDy)) {
+					} else if (msd == minMSD) {
+						if (Math.abs(p) + Math.abs(q) <= Math.abs(minDx) + Math.abs(minDy)) {
 							minDx = p;
 							minDy = q;
 							best = sourceBlock;
@@ -264,7 +490,7 @@ public class Motion {
 			for (int x = 0; x < targetImage.getW(); x += 16) {
 				MacroBlock block = blocks.poll();
 
-				int[] mv = new int[2];
+				double[] mv = new double[2];
 				mv[0] = block.dx;
 				mv[1] = block.dy;
 
@@ -299,7 +525,7 @@ public class Motion {
 		// replace the dynamic blocks
 		for (MacroBlock block : blocks) {
 			if (block.dx != 0 || block.dy != 0) {
-				int minDist = 25565;
+				double minDist = 25565;
 
 				MacroBlock closestB1 = new MacroBlock();
 				MacroBlock closestB2 = new MacroBlock();
@@ -359,11 +585,11 @@ public class Motion {
 	 * Inner class to track each block
 	 */
 	class MacroBlock {
-		int x;
-		int y;
+		double x;
+		double y;
 
-		int dx;
-		int dy;
+		double dx;
+		double dy;
 
 		MacroBlock bestMatchB;
 
@@ -376,7 +602,7 @@ public class Motion {
 
 		}
 
-		public MacroBlock(int x, int y) {
+		public MacroBlock(double x, double y) {
 			this.x = x;
 			this.y = y;
 		}

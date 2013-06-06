@@ -898,8 +898,8 @@ public class Controllers {
 
 			for (int y = 0; y < motion.getTargetImage().getH(); y += 16) {
 				for (int x = 0; x < motion.getTargetImage().getW(); x += 16) {
-					int[] mv = motion.getMVs().poll();
-					tableArea.append("[" + mv[0] + ", " + mv[1] + "]\t");
+					double[] mv = motion.getMVs().poll();
+					tableArea.append("[" + String.format("%1$,.1f", mv[0]) + ", " + String.format("%1$,.1f", mv[1]) + "]\t");
 				}
 				tableArea.append("\n");
 			}
