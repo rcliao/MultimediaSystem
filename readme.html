@@ -10,16 +10,11 @@
 
 <h2 id="current-schedule">Current Schedule:</h2>
 
-<h3 id="homework-3">Homework 3:</h3>
-
-<p>Homework 3 will perform the following methods: Modified JPEG Compression as steps</p>
+<h3 id="homework-4-block-based-motion-compensation">Homework 4 - Block-based Motion Compensation</h3>
 
 <ol>
-<li>Resize and De-resize</li>
-<li>Color Transform and Sub-Sampling, inverse color transform and super-sampling</li>
-<li>DCT and inverse DCT</li>
-<li>Quantization and De-Quantization</li>
-<li>Calculate Compression Ratio</li>
+<li>Block-based Motion Compensation</li>
+<li>Removing Moving Objects</li>
 </ol>
 
 <h2 id="how-to-run-this-program">How to run this program</h2>
@@ -52,29 +47,30 @@ java CS451_Liao
 
 <p>Homework 3 requirements can be performed as following flow:</p>
 
-<h4 id="jpeg-compression-ratio">JPEG Compression Ratio</h4>
+<h4 id="motion-compensation">Motion Compensation</h4>
+
+<h5 id="block-based-motion-compensation">Block-Based motion Compensation</h5>
 
 <ol>
-<li><p>Test resize and de-resize by using De-Resize by <code>JPEG Compression -&gt; De Resize</code>  </p>
+<li><p>Read the two image file first (Reference image then target Image) by <code>Motion -&gt; Read Motion Image</code></p></li>
+<li><p>do block-based motion compensation by <code>Motion -&gt; Block-based Motion Compensation</code></p>
 
-<pre><code>Explanation: This step will create identical image after de-resize
+<pre><code>This will display the error frame and mv.txt in the tab
 </code></pre></li>
-<li><p>Color Transform and sub-sampling with inverse color transform and super-sampling by <code>JPEG Compression -&gt; Color Transform</code>  </p>
+</ol>
 
-<pre><code>Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
-</code></pre></li>
-<li><p>DCT and inverse DCT by <code>JPEG Compression -&gt; DCT Transform</code>  </p>
+<h6 id="i-complete-half-pixel-as-extra-credit-as-well-therefore-it-might-take-a-while-to-do-motion-compensation">I complete half pixel as extra credit as well, therefore, it might take a while to do motion compensation</h6>
 
-<pre><code>Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
-</code></pre></li>
-<li><p>Quantization and De-Quantization by <code>JPEG Compression -&gt; Quantization</code>  </p>
+<h5 id="remove-moving-objects">Remove Moving Objects</h5>
 
-<pre><code>Explanation: This step will do all the jpeg compression without calculating the compression ratio
-</code></pre></li>
-<li><p>JPEG Compression all in one by <code>JPEG Compression -&gt; JPEG Compression</code>  </p>
+<h6 id="dependencies-require-to-put-idb-foldercontaining-all-the-walk-frames-under-the-same-directory">Dependencies: Require to put IDB folder(containing all the Walk frames) under the same directory</h6>
 
-<pre><code>By the end of compression, it will also calculate the compression ratio
+<ol>
+<li><p>Read the input image frame number by <code>Motion -&gt; Removing moving object</code></p>
+
+<pre><code>This will ask for the input for the input frame number
 </code></pre></li>
+<li><p>Then the result will display all the required outputs(1 frame using n-2 as reference and another one using 5th frame as reference)</p></li>
 </ol>
 
 <h2 id="gui-logic-flow">GUI Logic Flow</h2>
@@ -105,6 +101,9 @@ JPEG Compression    -&gt;  Resize Image
                     -&gt;  DCT Transform
                     -&gt;  Quantization
                     -&gt;  JPEG Compression
+Motion  -&gt;  Read Motion Images
+        -&gt;  Block-based Motion Compensation
+        -&gt;  Removing moving objects
 </code></pre>
 
 <h2 id="dependencies">Dependencies</h2>
@@ -131,10 +130,12 @@ JPEG Compression    -&gt;  Resize Image
             JPEGImage.java      --&gt; JPEG Compression methods
             TextModel.java      --&gt; Text model class (Text compression)
             Tree.java           --&gt; Used for Huffman coding
+            Motion.java         --&gt; Motion detection class
         /test/
             ImageModelTest.java --&gt; Test Image methods
             JPEGImageTest.java  --&gt; Test JPEG Image Compression
             ModelSuite.java     --&gt; Test models
+            MotionTest.java     --&gt; Test Motion class
             TextModelTest.java  --&gt; Test case for the text model
         /views/
             Views.java          --&gt; View class (GUI related)

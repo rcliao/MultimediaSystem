@@ -3,23 +3,19 @@ CS 451 MultimediaSystem
 
 ## Current Schedule:
 
-### Homework 3:  
-Homework 3 will perform the following methods: Modified JPEG Compression as steps
+### Homework 4 - Block-based Motion Compensation 
 
-1. Resize and De-resize
-2. Color Transform and Sub-Sampling, inverse color transform and super-sampling
-3. DCT and inverse DCT
-4. Quantization and De-Quantization
-5. Calculate Compression Ratio
+1. Block-based Motion Compensation
+2. Removing Moving Objects
 
 
 ## How to run this program
 
-### Using exectubable jar file
+### Using executable jar file
 
 Double click on dist\CS451_Liao.jar  
 or  
-in command promt type in  
+in command prompt type in  
 `java -jar dist/CS451_Liao.jar`
 
 ### Using command prompt
@@ -41,29 +37,27 @@ java CS451_Liao
 
 Homework 3 requirements can be performed as following flow:
 
-#### JPEG Compression Ratio
+#### Motion Compensation
 
-1. Test resize and de-resize by using De-Resize by `JPEG Compression -> De Resize`  
+##### Block-Based motion Compensation
 
-		Explanation: This step will create identical image after de-resize
+1. Read the two image file first (Reference image then target Image) by `Motion -> Read Motion Image`
 
-2. Color Transform and sub-sampling with inverse color transform and super-sampling by `JPEG Compression -> Color Transform`  
+2. do block-based motion compensation by `Motion -> Block-based Motion Compensation`
 
-		Explanation: This inverse step also involve the resize and deresize, which at the end, it will return the identical image as well
+		This will display the error frame and mv.txt in the tab
 
-3. DCT and inverse DCT by `JPEG Compression -> DCT Transform`  
+###### I complete half pixel as extra credit as well, therefore, it might take a while to do motion compensation
 
-		Explanation: This step will perform step 1 and 2 with step 3 in sequence to perform the correct compress and inverse.
+##### Remove Moving Objects
 
-4. Quantization and De-Quantization by `JPEG Compression -> Quantization`  
+###### Dependencies: Require to put IDB folder(containing all the Walk frames) under the same directory
 
-		Explanation: This step will do all the jpeg compression without calculating the compression ratio
+1. Read the input image frame number by `Motion -> Removing moving object`
 
-5. JPEG Compression all in one by `JPEG Compression -> JPEG Compression`  
+		This will ask for the input for the input frame number
 
-		By the end of compression, it will also calculate the compression ratio
-
-
+2. Then the result will display all the required outputs(1 frame using n-2 as reference and another one using 5th frame as reference)
 
 ## GUI Logic Flow
 
@@ -94,6 +88,9 @@ JPEG Compression	-> 	Resize Image
 					-> 	DCT Transform
 					-> 	Quantization
 					-> 	JPEG Compression
+Motion	-> 	Read Motion Images
+		-> 	Block-based Motion Compensation
+		-> 	Removing moving objects
 ```
 
 ## Dependencies
@@ -118,10 +115,12 @@ JPEG Compression	-> 	Resize Image
 				JPEGImage.java 		--> JPEG Compression methods
 				TextModel.java 		--> Text model class (Text compression)
 				Tree.java 			--> Used for Huffman coding
+				Motion.java 		--> Motion detection class
 			/test/
 				ImageModelTest.java --> Test Image methods
 				JPEGImageTest.java 	--> Test JPEG Image Compression
 				ModelSuite.java		--> Test models
+				MotionTest.java 	--> Test Motion class
 				TextModelTest.java 	--> Test case for the text model
 			/views/
 				Views.java 			--> View class (GUI related)
